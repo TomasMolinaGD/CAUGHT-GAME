@@ -5,8 +5,8 @@ using UnityEngine.Rendering;
 public class AgentSteering : MonoBehaviour
 {
     [SerializeField] private Transform target;
-    [SerializeField] private float _speed = 5;
-    [SerializeField] private float _maxSteering = 5;
+    [SerializeField] private float _speed = 5f;
+    [SerializeField] private float _maxSteering = 5f;
     private Vector3 _velocity;
     void Start()
     {
