@@ -171,6 +171,10 @@ GameObject:
   - component: {fileID: 2912384999994512494}
   - component: {fileID: 8810138258832351360}
   - component: {fileID: 371122887719592098}
+  - component: {fileID: 7391268431059574210}
+  - component: {fileID: 4018736052214956836}
+  - component: {fileID: 3169472459381036827}
+  - component: {fileID: 8624351907348162045}
   m_Layer: 0
   m_Name: AstraNPC
   m_TagString: Untagged
@@ -244,6 +248,69 @@ CapsuleCollider:
   m_Height: 2.9339018
   m_Direction: 1
   m_Center: {x: 0, y: 1.4672928, z: 0}
+--- !u!114 &7391268431059574210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5b92a123a1d4ef786f4fd7b36b2a4c8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BoidAgent
+  maxSpeed: 3
+  maxAcceleration: 30
+  rotationSpeed: 8
+  enableTestMovement: 1
+  maximumTurnAngle: 35
+  directionChangeInterval: 1.5
+--- !u!114 &4018736052214956836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a712af315db4886b63a07bc82136791, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BoidSensor
+  perceptionRadius: 6
+  separationRadius: 1.5
+  boidLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &3169472459381036827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3eb0a61e532944f1a858fbffa29c9ae4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::SeparationBehaviour
+  weight: 1
+  strength: 100
+--- !u!114 &8624351907348162045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f02dac281b934694bf78a23963ce6051, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::AlignmentBehaviour
+  weight: 1
+  strength: 3
 --- !u!1 &852601092863448113
 GameObject:
   m_ObjectHideFlags: 0

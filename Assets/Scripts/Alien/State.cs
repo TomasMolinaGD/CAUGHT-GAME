@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// TEMPORAL: base de la FSM incompleta; restaurar junto con los demas estados.
+/*
 public abstract class State
 {
     protected StateMachine StateMachine;
@@ -20,3 +22,4 @@ public abstract class State
 
     }
 }
+*/

@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// TEMPORAL: estado incompleto desactivado junto con la FSM del alien.
+/*
 public class IdleState : State
 {
 
@@ -32,3 +34,4 @@ public StateIdle(StateMachine stateMachine) : base(stateMachine)
         Debug.Log ("Sali");
     }
 }
+*/

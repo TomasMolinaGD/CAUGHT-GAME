@@ -1,5 +1,9 @@
 using UnityEngine;
+using System.Collections.Generic;
 
+// TEMPORAL: patrulla incompleta desactivada junto con la FSM del alien.
+// PatrolData se mantiene activo para conservar los datos serializados.
+/*
 public class PatrolState : State
 {
     public patrolState(FSMAgent agent, PatrolData data, StateMachine stateMachine) : base(stateMachine)
@@ -33,6 +37,7 @@ public class PatrolState : State
         _data.transform.position += dir.normalized * _agent.speed * Time.deltaTime;
     }
 }
+*/
 [System.Serializable]
 public class PatrolData
 {

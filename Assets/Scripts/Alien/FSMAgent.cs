@@ -10,6 +10,9 @@ public class FSMAgent : MonoBehaviour
     private int direction = 1;
     [SerializeField] private PatrolData dataPatrol;
 
+    // TEMPORAL: FSM incompleta desactivada para permitir compilar y abrir Unity.
+    // Se conservan el componente y sus campos para no perder datos de la escena.
+    /*
     private StateMachine _stateMachine;
 
     private void Awake()
@@ -26,6 +29,8 @@ public class FSMAgent : MonoBehaviour
         PatrolLoop();
         _stateMachine.Updadate();
     }
+
+    */
 
     /*private void PatrolLoop()
     {

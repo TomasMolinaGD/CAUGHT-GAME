@@ -1,6 +1,8 @@
 using UnityEngine;
 //contiene idle y Partol
 
+// TEMPORAL: FSM incompleta desactivada para permitir compilar y abrir Unity.
+/*
 public enum PoliceState
 {
    idle,
@@ -31,3 +33,4 @@ public  class StateMachine
    }
 
 }
+*/
