@@ -186,7 +186,7 @@ GameObject:
   - component: {fileID: 7786410385194872936}
   - component: {fileID: 3096194319306985742}
   - component: {fileID: 6674964105994608718}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: AstraNPC
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -292,13 +292,13 @@ MonoBehaviour:
   interestDetectionRadius: 20
   boidLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 512
   threatLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1024
   interestLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 2048
 --- !u!114 &3169472459381036827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -393,7 +393,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::EvadeBehaviour
   weight: 1
-  priority: 100
+  priority: 200
   strength: 3
 --- !u!114 &4572592707828645730
 MonoBehaviour:
@@ -502,12 +502,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::BoidRespawn
   respawnDelay: 5
-  respawnRadius: 15
-  groundLayerMask:
-    serializedVersion: 2
-    m_Bits: 256
-  raycastHeight: 50
-  groundOffset: 0.05
+  respawnArea: {fileID: 0}
 --- !u!1 &852601092863448113
 GameObject:
   m_ObjectHideFlags: 0
