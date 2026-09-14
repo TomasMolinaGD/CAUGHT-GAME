@@ -41,6 +41,11 @@ public sealed class AlignmentBehaviour : SteeringBehaviour
         averageVelocity /= validNeighborCount;
         averageVelocity = Vector3.ProjectOnPlane(averageVelocity, Vector3.up);
 
+        if (averageVelocity.sqrMagnitude < 0.01f)
+        {
+            return Vector3.zero;
+        }
+
         return (averageVelocity - owner.Velocity) * strength;
     }
 

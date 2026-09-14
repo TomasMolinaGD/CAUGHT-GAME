@@ -8,21 +8,31 @@ public sealed class BoidSensor : MonoBehaviour
     private const int MaximumDetectedColliders = 64;
 
     [Header("Detection ranges")]
-    [SerializeField, Min(0.1f)] private float perceptionRadius = 6f;
-    [SerializeField, Min(0.1f)] private float separationRadius = 1.5f;
+    [SerializeField, Min(0.1f)] private float perceptionRadius = 10f;
+    [SerializeField, Min(0.1f)] private float separationRadius = 2.5f;
+    [SerializeField, Min(0.1f)] private float threatDetectionRadius = 12f;
+    [SerializeField, Min(0.1f)] private float interestDetectionRadius = 20f;
 
     [Header("Detection filter")]
     [SerializeField] private LayerMask boidLayerMask = ~0;
+    [SerializeField] private LayerMask threatLayerMask = ~0;
+    [SerializeField] private LayerMask interestLayerMask = ~0;
 
     private readonly Collider[] detectedColliders = new Collider[MaximumDetectedColliders];
     private readonly List<BoidAgent> neighbors = new List<BoidAgent>();
     private readonly List<BoidAgent> separationNeighbors = new List<BoidAgent>();
     private BoidAgent owner;
+    private BoidThreat currentThreat;
+    private BoidInterest currentInterest;
 
     public IReadOnlyList<BoidAgent> Neighbors => neighbors;
     public IReadOnlyList<BoidAgent> SeparationNeighbors => separationNeighbors;
+    public BoidThreat CurrentThreat => currentThreat;
+    public BoidInterest CurrentInterest => currentInterest;
     public float PerceptionRadius => perceptionRadius;
     public float SeparationRadius => separationRadius;
+    public float ThreatDetectionRadius => threatDetectionRadius;
+    public float InterestDetectionRadius => interestDetectionRadius;
 
     private void Awake()
     {
@@ -38,15 +48,30 @@ public sealed class BoidSensor : MonoBehaviour
     {
         neighbors.Clear();
         separationNeighbors.Clear();
+        currentThreat = null;
+        currentInterest = null;
+
+        float queryRadius = Mathf.Max(
+            perceptionRadius,
+            Mathf.Max(threatDetectionRadius, interestDetectionRadius));
+        int detectionMask =
+            boidLayerMask.value |
+            threatLayerMask.value |
+            interestLayerMask.value;
 
         int detectedCount = Physics.OverlapSphereNonAlloc(
             transform.position,
-            perceptionRadius,
+            queryRadius,
             detectedColliders,
-            boidLayerMask,
-            QueryTriggerInteraction.Ignore);
+            detectionMask,
+            QueryTriggerInteraction.Collide);
 
+        float perceptionRadiusSquared = perceptionRadius * perceptionRadius;
         float separationRadiusSquared = separationRadius * separationRadius;
+        float threatRadiusSquared = threatDetectionRadius * threatDetectionRadius;
+        float interestRadiusSquared = interestDetectionRadius * interestDetectionRadius;
+        float nearestThreatDistanceSquared = float.PositiveInfinity;
+        float nearestInterestDistanceSquared = float.PositiveInfinity;
 
         for (int i = 0; i < detectedCount; i++)
         {
@@ -56,20 +81,53 @@ public sealed class BoidSensor : MonoBehaviour
                 continue;
             }
 
+            BoidThreat detectedThreat = detectedCollider.GetComponentInParent<BoidThreat>();
+            if (detectedThreat != null)
+            {
+                Vector3 threatOffset = detectedThreat.transform.position - transform.position;
+                float threatDistanceSquared = threatOffset.sqrMagnitude;
+
+                if (
+                    threatDistanceSquared <= threatRadiusSquared &&
+                    threatDistanceSquared < nearestThreatDistanceSquared)
+                {
+                    currentThreat = detectedThreat;
+                    nearestThreatDistanceSquared = threatDistanceSquared;
+                }
+            }
+
+            BoidInterest detectedInterest = detectedCollider.GetComponentInParent<BoidInterest>();
+            if (detectedInterest != null)
+            {
+                Vector3 interestOffset = detectedInterest.transform.position - transform.position;
+                float interestDistanceSquared = interestOffset.sqrMagnitude;
+
+                if (
+                    interestDistanceSquared <= interestRadiusSquared &&
+                    interestDistanceSquared < nearestInterestDistanceSquared)
+                {
+                    currentInterest = detectedInterest;
+                    nearestInterestDistanceSquared = interestDistanceSquared;
+                }
+            }
+
             BoidAgent detectedBoid = detectedCollider.GetComponentInParent<BoidAgent>();
-            if (detectedBoid == null || detectedBoid == owner)
+            if (
+                detectedBoid == null ||
+                detectedBoid == owner ||
+                !detectedBoid.isActiveAndEnabled)
             {
                 continue;
             }
 
-            if (neighbors.Contains(detectedBoid))
+            Vector3 offset = detectedBoid.transform.position - transform.position;
+            if (offset.sqrMagnitude > perceptionRadiusSquared || neighbors.Contains(detectedBoid))
             {
                 continue;
             }
 
             neighbors.Add(detectedBoid);
 
-            Vector3 offset = detectedBoid.transform.position - transform.position;
             if (offset.sqrMagnitude <= separationRadiusSquared)
             {
                 separationNeighbors.Add(detectedBoid);
@@ -81,6 +139,8 @@ public sealed class BoidSensor : MonoBehaviour
     {
         perceptionRadius = Mathf.Max(0.2f, perceptionRadius);
         separationRadius = Mathf.Clamp(separationRadius, 0.1f, perceptionRadius - 0.1f);
+        threatDetectionRadius = Mathf.Max(0.1f, threatDetectionRadius);
+        interestDetectionRadius = Mathf.Max(0.1f, interestDetectionRadius);
     }
 
     private void OnDrawGizmosSelected()
@@ -91,6 +151,12 @@ public sealed class BoidSensor : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, separationRadius);
 
+        Gizmos.color = new Color(1f, 0.35f, 0f);
+        Gizmos.DrawWireSphere(transform.position, threatDetectionRadius);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, interestDetectionRadius);
+
         Gizmos.color = Color.cyan;
         for (int i = 0; i < neighbors.Count; i++)
         {
@@ -98,6 +164,18 @@ public sealed class BoidSensor : MonoBehaviour
             {
                 Gizmos.DrawLine(transform.position, neighbors[i].transform.position);
             }
+        }
+
+        if (currentThreat != null)
+        {
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawLine(transform.position, currentThreat.transform.position);
+        }
+
+        if (currentInterest != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, currentInterest.transform.position);
         }
     }
 }

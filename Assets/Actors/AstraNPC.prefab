@@ -175,6 +175,17 @@ GameObject:
   - component: {fileID: 4018736052214956836}
   - component: {fileID: 3169472459381036827}
   - component: {fileID: 8624351907348162045}
+  - component: {fileID: 7190586341274036921}
+  - component: {fileID: 5480162947638291052}
+  - component: {fileID: 6041932875604187329}
+  - component: {fileID: 3836482890985047117}
+  - component: {fileID: 4572592707828645730}
+  - component: {fileID: 5117501318096085764}
+  - component: {fileID: 6849329817682194705}
+  - component: {fileID: 2711690536423068491}
+  - component: {fileID: 7786410385194872936}
+  - component: {fileID: 3096194319306985742}
+  - component: {fileID: 6674964105994608718}
   m_Layer: 0
   m_Name: AstraNPC
   m_TagString: Untagged
@@ -222,7 +233,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 1
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 0
 --- !u!136 &371122887719592098
@@ -260,12 +271,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5b92a123a1d4ef786f4fd7b36b2a4c8, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::BoidAgent
-  maxSpeed: 3
-  maxAcceleration: 30
+  maxSpeed: 4
+  maxAcceleration: 10
   rotationSpeed: 8
-  enableTestMovement: 1
-  maximumTurnAngle: 35
-  directionChangeInterval: 1.5
 --- !u!114 &4018736052214956836
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -278,9 +286,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a712af315db4886b63a07bc82136791, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::BoidSensor
-  perceptionRadius: 6
-  separationRadius: 1.5
+  perceptionRadius: 10
+  separationRadius: 2.5
+  threatDetectionRadius: 12
+  interestDetectionRadius: 20
   boidLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  threatLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  interestLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
 --- !u!114 &3169472459381036827
@@ -296,7 +312,8 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::SeparationBehaviour
   weight: 1
-  strength: 100
+  priority: 100
+  strength: 10
 --- !u!114 &8624351907348162045
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -310,7 +327,187 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::AlignmentBehaviour
   weight: 1
+  priority: 10
+  strength: 1.5
+--- !u!114 &7190586341274036921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 640ad1e7c54e44dba97d8b63c72149c2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::CohesionBehaviour
+  weight: 1
+  priority: 10
+  strength: 2
+  comfortRadius: 2
+  slowingRadius: 5
+--- !u!114 &5480162947638291052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24702f36e15d46fcb387db54e254937a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BoidAnimation
+  speedParameter: Blend
+  damping: 0.15
+  idleSpeedThreshold: 0.05
+  fullWalkSpeed: 1
+  minimumWalkingPlaybackSpeed: 0.9
+  playbackSpeedAtMaximumMovement: 2.25
+--- !u!114 &6041932875604187329
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ac6c4e21a9d433da1bd432d8176e2a4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::WanderBehaviour
+  weight: 1
+  priority: 10
+  maximumTurnAngle: 15
+  directionChangeInterval: 1.5
+--- !u!114 &3836482890985047117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 16ad01995ebf487f9f1c97087780df5c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EvadeBehaviour
+  weight: 1
+  priority: 100
   strength: 3
+--- !u!114 &4572592707828645730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f78151846194607a997edb278883aa4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ArriveBehaviour
+  weight: 1
+  priority: 20
+  strength: 3
+  maximumApproachSpeed: 2.5
+  stoppingRadius: 3
+  slowingRadius: 7
+--- !u!114 &5117501318096085764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c69ad78967e41efa478d6d8bff3cd03, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BoidInteraction
+  interactionRadius: 3.5
+  damagePerInteraction: 1
+  interactionInterval: 1
+--- !u!114 &6849329817682194705
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce2b1741412a4a29a2f9a560c75b4944, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::InterestAvoidanceBehaviour
+  weight: 1
+  priority: 100
+  avoidanceRadius: 2
+  strength: 4
+--- !u!114 &2711690536423068491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac9428db3ec64927b761e51dac77504f, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::InterestSpacingBehaviour
+  weight: 1
+  priority: 100
+  distributionRadius: 5
+  activationDistance: 2.5
+  deactivationDistance: 2.8
+  strength: 6
+--- !u!114 &7786410385194872936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e77fd554f45942099894288d9ca101a7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BoidLife
+  maximumLife: 100
+  currentLife: 100
+  state: 0
+--- !u!114 &3096194319306985742
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6068f4b1de994c81bcbbd60fb312f153, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BoidActivity
+--- !u!114 &6674964105994608718
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2078a06304c4b7dbba8a2eac14073fa, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BoidRespawn
+  respawnDelay: 5
+  respawnRadius: 15
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  raycastHeight: 50
+  groundOffset: 0.05
 --- !u!1 &852601092863448113
 GameObject:
   m_ObjectHideFlags: 0
@@ -1192,11 +1389,11 @@ Animator:
   m_Avatar: {fileID: 9000000, guid: 9dbda5b5bd3a58345b0cf3d9f3ae71f5, type: 3}
   m_Controller: {fileID: 9100000, guid: f44f62a1f7175fa4880c96823fea69de, type: 2}
   m_CullingMode: 1
-  m_UpdateMode: 1
-  m_ApplyRootMotion: 1
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
-  m_AnimatePhysics: 1
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1

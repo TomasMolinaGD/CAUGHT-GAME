@@ -7,6 +7,9 @@ public sealed class SeparationBehaviour : SteeringBehaviour
 
     private BoidSensor sensor;
 
+    public override bool IsApplicable =>
+        sensor != null && sensor.SeparationNeighbors.Count > 0;
+
     private void Awake()
     {
         sensor = GetComponent<BoidSensor>();
@@ -14,7 +17,8 @@ public sealed class SeparationBehaviour : SteeringBehaviour
 
     public override Vector3 CalculateSteering()
     {
-        Vector3 separation = Vector3.zero;
+        BoidAgent closestNeighbor = null;
+        float closestDistanceSquared = float.MaxValue;
 
         foreach (BoidAgent neighbor in sensor.SeparationNeighbors)
         {
@@ -23,21 +27,31 @@ public sealed class SeparationBehaviour : SteeringBehaviour
                 continue;
             }
 
-            Vector3 awayFromNeighbor = transform.position - neighbor.transform.position;
-            awayFromNeighbor = Vector3.ProjectOnPlane(awayFromNeighbor, Vector3.up);
-
-            float distanceSquared = awayFromNeighbor.sqrMagnitude;
-            if (distanceSquared < 0.0001f)
+            Vector3 offset = transform.position - neighbor.transform.position;
+            float distanceSquared = Vector3.ProjectOnPlane(offset, Vector3.up).sqrMagnitude;
+            if (distanceSquared < closestDistanceSquared)
             {
-                float side = GetInstanceID() < neighbor.GetInstanceID() ? -1f : 1f;
-                awayFromNeighbor = transform.right * side;
-                distanceSquared = 0.01f;
+                closestNeighbor = neighbor;
+                closestDistanceSquared = distanceSquared;
             }
-
-            separation += awayFromNeighbor.normalized / distanceSquared;
         }
 
-        return separation * strength;
+        if (closestNeighbor == null)
+        {
+            return Vector3.zero;
+        }
+
+        Vector3 awayFromNeighbor = transform.position - closestNeighbor.transform.position;
+        awayFromNeighbor = Vector3.ProjectOnPlane(awayFromNeighbor, Vector3.up);
+
+        if (closestDistanceSquared < 0.0001f)
+        {
+            float side = GetInstanceID() < closestNeighbor.GetInstanceID() ? -1f : 1f;
+            awayFromNeighbor = transform.right * side;
+            closestDistanceSquared = 0.01f;
+        }
+
+        return awayFromNeighbor.normalized * (strength / closestDistanceSquared);
     }
 
     protected override void OnValidate()
