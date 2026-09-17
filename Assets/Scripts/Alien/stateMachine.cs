@@ -4,7 +4,6 @@ using UnityEngine;
 
 public enum PoliceState
 {
-    idle,
     Patrol,
     Pursuit,
     Attack,
@@ -41,11 +40,6 @@ public class StateMachine
         CurrentStateKey = key;
         CurrentState.Enter();
         return true;
-    }
-
-    public bool HasState(Enum key)
-    {
-        return states.ContainsKey(key);
     }
 
     public void Update()

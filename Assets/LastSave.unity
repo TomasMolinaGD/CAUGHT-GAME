@@ -373,7 +373,7 @@ MonoBehaviour:
   m_RenderShadows: 1
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
-  m_CameraType: 1
+  m_CameraType: 0
   m_Cameras: []
   m_RendererIndex: -1
   m_VolumeLayerMask:
@@ -419,7 +419,7 @@ Camera:
   m_GameObject: {fileID: 1797814366}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 4
+  m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -877,7 +877,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e60e355015a0a748aeedf8ec8842dc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FSMAgent
-  animator: {fileID: 7654678742243937229}
   waypoints:
   - {fileID: 1671591264}
   - {fileID: 1843561589}
@@ -885,11 +884,6 @@ MonoBehaviour:
   - {fileID: 401983805}
   speed: 3
   waypointCheckDistance: 0.5
-  direction: 1
-  dataPatrol:
-    wayPoints: []
-    transform: {fileID: 0}
-    wayPointCheckDistance: 0
 --- !u!95 &7654678742243937229
 Animator:
   serializedVersion: 7

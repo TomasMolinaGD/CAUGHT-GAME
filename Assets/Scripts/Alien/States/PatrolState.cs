@@ -13,7 +13,7 @@ public class PatrolState : State
     public override void Enter()
     {
         currentNode = FindClosestWaypointIndex();
-        agent.SetAttackAnimation(false);
+        agent.Animation.SetAttacking(false);
     }
 
     public override void Update()
@@ -30,14 +30,14 @@ public class PatrolState : State
             return;
         }
 
-        agent.SetMovingAnimation(PatrolLoop());
+        agent.Animation.SetMoving(PatrolLoop());
         agent.InterestSpawner.Tick(Time.deltaTime);
     }
 
     public override void Exit()
     {
         agent.Movement.Stop();
-        agent.SetMovingAnimation(false);
+        agent.Animation.SetMoving(false);
     }
 
     private bool PatrolLoop()

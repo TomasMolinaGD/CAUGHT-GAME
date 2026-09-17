@@ -15,6 +15,8 @@ public sealed class HunterPerception : MonoBehaviour
 
     public BoidLife ClosestLivingBoid { get; private set; }
     public BoidLife ClosestDeadBoid { get; private set; }
+    public int LivingBoidCount => livingBoids.Count;
+    public int DeadBoidCount => deadBoids.Count;
 
     public void RefreshDetections()
     {

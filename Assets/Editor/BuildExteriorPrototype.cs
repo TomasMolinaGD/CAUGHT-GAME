@@ -2,6 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 public static class BuildExteriorPrototype
@@ -265,6 +266,25 @@ public static class BuildExteriorPrototype
                 hunter.gameObject.AddComponent<HunterPerception>();
             }
 
+            if (hunter.GetComponent<HunterCombat>() == null)
+            {
+                hunter.gameObject.AddComponent<HunterCombat>();
+            }
+
+            if (hunter.GetComponent<HunterDebugFeedback>() == null)
+            {
+                hunter.gameObject.AddComponent<HunterDebugFeedback>();
+            }
+
+            HunterAnimationController animationController =
+                hunter.GetComponent<HunterAnimationController>();
+            if (animationController == null)
+            {
+                animationController = hunter.gameObject.AddComponent<HunterAnimationController>();
+            }
+
+            animationController.ConfigureAnimator(hunter.GetComponentInChildren<Animator>());
+
             if (hunter.GetComponent<AlienVisualGrounding>() == null)
             {
                 hunter.gameObject.AddComponent<AlienVisualGrounding>();
@@ -278,13 +298,13 @@ public static class BuildExteriorPrototype
             interestSpawner.Configure(interestPrefab, interestVisualPrefab);
             EditorUtility.SetDirty(interestSpawner);
 
-            if (hunter.Animator != null)
+            if (animationController.Animator != null)
             {
-                hunter.Animator.avatar = alienAvatar;
-                hunter.Animator.applyRootMotion = false;
-                hunter.Animator.updateMode = AnimatorUpdateMode.Normal;
-                hunter.Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-                EditorUtility.SetDirty(hunter.Animator);
+                animationController.Animator.avatar = alienAvatar;
+                animationController.Animator.applyRootMotion = false;
+                animationController.Animator.updateMode = AnimatorUpdateMode.Normal;
+                animationController.Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                EditorUtility.SetDirty(animationController.Animator);
             }
 
             int waypointCount = Mathf.Min(hunter.Waypoints.Count, patrolPositions.Length);
@@ -332,6 +352,13 @@ public static class BuildExteriorPrototype
         camera.transform.LookAt(LevelCenter + new Vector3(0f, 0f, 6f));
         camera.fieldOfView = 48f;
         camera.farClipPlane = 1000f;
+        camera.clearFlags = CameraClearFlags.Skybox;
+        camera.GetUniversalAdditionalCameraData().renderType = CameraRenderType.Base;
+
+        if (camera.GetComponent<HunterCameraFollow>() == null)
+        {
+            camera.gameObject.AddComponent<HunterCameraFollow>();
+        }
     }
 
     private static GameObject CreateGroup(string name, Transform parent)
@@ -490,41 +517,6 @@ public static class BuildExteriorPrototype
         boundary.transform.position = position;
         BoxCollider collider = boundary.AddComponent<BoxCollider>();
         collider.size = size;
-    }
-
-    private static GameObject CreateCube(string name, Vector3 localPosition, Vector3 scale, Material material, Transform parent)
-    {
-        return CreateCube(name, localPosition, scale, material, parent, Quaternion.identity, true);
-    }
-
-    private static GameObject CreateCube(string name, Vector3 position, Vector3 scale, Material material, Transform parent, Quaternion rotation)
-    {
-        return CreateCube(name, position, scale, material, parent, rotation, false);
-    }
-
-    private static GameObject CreateCube(string name, Vector3 position, Vector3 scale, Material material, Transform parent,
-        Quaternion rotation, bool useLocalPosition)
-    {
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.name = name;
-        cube.transform.SetParent(parent, false);
-        if (useLocalPosition)
-        {
-            cube.transform.localPosition = position;
-            cube.transform.localRotation = rotation;
-        }
-        else
-        {
-            cube.transform.SetPositionAndRotation(position, rotation);
-        }
-        cube.transform.localScale = scale;
-
-        if (material != null)
-        {
-            cube.GetComponent<Renderer>().sharedMaterial = material;
-        }
-
-        return cube;
     }
 
     private static void CreateMarker(string name, Vector3 position, Transform parent)

@@ -18,7 +18,7 @@ public sealed class GatherState : State
         agent.SetCurrentTarget(target);
         collectionTimer = 0f;
         isCollecting = false;
-        agent.SetAttackAnimation(false);
+        agent.Animation.SetAttacking(false);
     }
 
     public override void Update()
@@ -36,7 +36,7 @@ public sealed class GatherState : State
 
         if (!isCollecting && offset.magnitude > agent.CollectionDistance)
         {
-            agent.SetMovingAnimation(
+            agent.Animation.SetMoving(
                 agent.Movement.MoveTowards(
                     target.transform.position,
                     agent.CollectionDistance));
@@ -48,7 +48,7 @@ public sealed class GatherState : State
             isCollecting = true;
             collectionTimer = 0f;
             agent.Movement.Stop();
-            agent.SetMovingAnimation(false);
+            agent.Animation.SetMoving(false);
         }
 
         agent.Movement.FaceDirection(offset);
@@ -71,7 +71,7 @@ public sealed class GatherState : State
     public override void Exit()
     {
         agent.Movement.Stop();
-        agent.SetMovingAnimation(false);
+        agent.Animation.SetMoving(false);
         target = null;
         collectionTimer = 0f;
         isCollecting = false;

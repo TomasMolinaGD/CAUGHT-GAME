@@ -27,7 +27,7 @@ public class AttackState : State
         attackStarted = false;
         attackLanded = false;
         attackAnimationObserved = false;
-        agent.SetAttackAnimation(false);
+        agent.Animation.SetAttacking(false);
     }
 
     public override void Update()
@@ -35,7 +35,7 @@ public class AttackState : State
         if (attackLanded)
         {
             attackTimer += Time.deltaTime;
-            if (agent.IsAttackAnimationFinished(attackTimer, ref attackAnimationObserved))
+            if (agent.Animation.IsAttackFinished(attackTimer, ref attackAnimationObserved))
             {
                 if (target != null && target.IsAlive && agent.Perception.IsLivingBoidDetected(target))
                 {
@@ -71,39 +71,39 @@ public class AttackState : State
             Vector3.up);
         float distance = offset.magnitude;
 
-        if (!attackStarted && distance > agent.RangedAttackRadius)
+        if (!attackStarted && distance > agent.Combat.RangedAttackRadius)
         {
-            agent.SetAttackAnimation(false);
-            agent.SetMovingAnimation(
+            agent.Animation.SetAttacking(false);
+            agent.Animation.SetMoving(
                 agent.Movement.MoveTowards(
                     target.transform.position,
-                    agent.RangedAttackRadius * 0.85f,
+                    agent.Combat.RangedAttackRadius * 0.85f,
                     agent.PursuitSpeedMultiplier));
             return;
         }
 
-        if (!attackStarted && distance <= agent.MeleeRadius &&
-            distance > agent.MeleeRadius * 0.55f)
+        if (!attackStarted && distance <= agent.Combat.MeleeAttackRadius &&
+            distance > agent.Combat.MeleeAttackRadius * 0.55f)
         {
-            agent.SetAttackAnimation(false);
-            agent.SetMovingAnimation(
+            agent.Animation.SetAttacking(false);
+            agent.Animation.SetMoving(
                 agent.Movement.MoveTowards(
                     target.transform.position,
-                    agent.MeleeRadius * 0.45f,
+                    agent.Combat.MeleeAttackRadius * 0.45f,
                     agent.PursuitSpeedMultiplier));
             return;
         }
 
         if (!attackStarted)
         {
-            StartAttack(distance <= agent.MeleeRadius);
+            StartAttack(distance <= agent.Combat.MeleeAttackRadius);
         }
 
         attackTimer += Time.deltaTime;
         agent.Movement.FaceDirection(offset);
         float selectedWindup = useMeleeAttack
-            ? agent.AttackWindup
-            : agent.RangedAttackWindup;
+            ? agent.Combat.MeleeAttackWindup
+            : agent.Combat.RangedAttackWindup;
         if (attackTimer < selectedWindup)
         {
             return;
@@ -113,17 +113,17 @@ public class AttackState : State
             target.transform.position - agent.transform.position,
             Vector3.up);
         distance = offset.magnitude;
-        if (useMeleeAttack && distance > agent.MeleeRadius)
+        if (useMeleeAttack && distance > agent.Combat.MeleeAttackRadius)
         {
             attackStarted = false;
             attackTimer = 0f;
-            agent.SetAttackAnimation(false);
+            agent.Animation.SetAttacking(false);
             return;
         }
 
         bool attackPerformed = useMeleeAttack
-            ? agent.PerformAttack(target, true)
-            : agent.PerformRangedAttack(target);
+            ? agent.Combat.PerformMeleeAttack(target)
+            : agent.Combat.PerformRangedAttack(target);
         if (attackPerformed)
         {
             attackLanded = true;
@@ -139,8 +139,8 @@ public class AttackState : State
     public override void Exit()
     {
         agent.Movement.Stop();
-        agent.SetMovingAnimation(false);
-        agent.SetAttackAnimation(false);
+        agent.Animation.SetMoving(false);
+        agent.Animation.SetAttacking(false);
         target = null;
         attackStarted = false;
         attackLanded = false;
@@ -154,7 +154,7 @@ public class AttackState : State
         attackStarted = true;
         attackTimer = 0f;
         agent.Movement.Stop();
-        agent.SetMovingAnimation(false);
-        agent.SetAttackAnimation(true);
+        agent.Animation.SetMoving(false);
+        agent.Animation.SetAttacking(true);
     }
 }

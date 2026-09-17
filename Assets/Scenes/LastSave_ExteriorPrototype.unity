@@ -1330,7 +1330,7 @@ Transform:
   m_GameObject: {fileID: 285919941}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 534, y: 4.03, z: 658}
+  m_LocalPosition: {x: 545.38, y: 2.86, z: 622.89}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1691,7 +1691,7 @@ Transform:
   m_GameObject: {fileID: 340434022}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 498, y: 4.03, z: 658}
+  m_LocalPosition: {x: 425.39, y: 3.12, z: 622.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7127,6 +7127,7 @@ GameObject:
   - component: {fileID: 1797814369}
   - component: {fileID: 1797814368}
   - component: {fileID: 1797814367}
+  - component: {fileID: 1797814371}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -7149,7 +7150,7 @@ MonoBehaviour:
   m_RenderShadows: 1
   m_RequiresDepthTextureOption: 2
   m_RequiresOpaqueTextureOption: 2
-  m_CameraType: 1
+  m_CameraType: 0
   m_Cameras: []
   m_RendererIndex: -1
   m_VolumeLayerMask:
@@ -7195,7 +7196,7 @@ Camera:
   m_GameObject: {fileID: 1797814366}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 4
+  m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -7252,6 +7253,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 35.519, y: 0, z: 0}
+--- !u!114 &1797814371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1797814366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e77febfb4787473b9e7b696290503516, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HunterCameraFollow
+  target: {fileID: 0}
+  offset: {x: 0, y: 32, z: -28}
+  lookHeight: 1.4
+  smoothTime: 0.25
 --- !u!1001 &1820962161
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9203,6 +9220,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5155268316855032545, guid: 17aedbf2fd516284196fe775751152fa, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7654678742243937230}
+    - targetCorrespondingSourceObject: {fileID: 5155268316855032545, guid: 17aedbf2fd516284196fe775751152fa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7654678742243937234}
+    - targetCorrespondingSourceObject: {fileID: 5155268316855032545, guid: 17aedbf2fd516284196fe775751152fa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7654678742243937235}
+    - targetCorrespondingSourceObject: {fileID: 5155268316855032545, guid: 17aedbf2fd516284196fe775751152fa, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7654678742243937236}
   m_SourcePrefab: {fileID: 100100000, guid: 17aedbf2fd516284196fe775751152fa, type: 3}
 --- !u!1 &7654678742243937223 stripped
 GameObject:
@@ -9271,7 +9297,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e60e355015a0a748aeedf8ec8842dc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FSMAgent
-  animator: {fileID: 7654678742243937229}
   waypoints:
   - {fileID: 1671591264}
   - {fileID: 1843561589}
@@ -9280,24 +9305,9 @@ MonoBehaviour:
   speed: 3
   turnSpeed: 8
   waypointCheckDistance: 0.5
-  TBA: 4
-  RangeAttackRadius: 8
-  MeleeAttackRadius: 2.2
-  meleeDamage: 35
-  rangedDamage: 35
-  rangedProjectileSpeed: 30
-  rangedProjectileLifetime: 3
-  rangedProjectileSpawnHeight: 1.35
-  rangedAttackWindup: 0.12
-  attackWindup: 0.25
-  attackAnimationDuration: 0.85
   pursuitSpeedMultiplier: 2
   collectionDistance: 1.4
   collectionDuration: 2
-  dataPatrol:
-    wayPoints: []
-    transform: {fileID: 0}
-    wayPointCheckDistance: 0
 --- !u!95 &7654678742243937229
 Animator:
   serializedVersion: 7
@@ -9396,6 +9406,56 @@ MonoBehaviour:
   areaHalfExtents: {x: 50, y: 34}
   boundaryPadding: 1.5
   groundHeight: 0.05
+--- !u!114 &7654678742243937234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7654678742243937223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f5c1ca304304bfbbe4e713d9d82217e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HunterCombat
+  timeBetweenAttacks: 4
+  rangedAttackRadius: 8
+  meleeAttackRadius: 2.2
+  meleeDamage: 35
+  rangedDamage: 35
+  rangedProjectileSpeed: 30
+  rangedProjectileLifetime: 3
+  rangedProjectileSpawnHeight: 1.35
+  rangedAttackWindup: 0.12
+  meleeAttackWindup: 0.25
+--- !u!114 &7654678742243937235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7654678742243937223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 491247ef23a445a9af4c8bc1075bb2d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HunterAnimationController
+  animator: {fileID: 7654678742243937229}
+  attackAnimationDuration: 0.85
+--- !u!114 &7654678742243937236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7654678742243937223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 770eacb81d384088b6badbd2ef6c1135, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HunterDebugFeedback
+  visible: 1
+  panelWidth: 340
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class HunterMovement : MonoBehaviour, VelocityProvider
+public sealed class HunterMovement : MonoBehaviour
 {
     [Header("Playable Area")]
     [SerializeField] private Vector2 areaCenter = new Vector2(484f, 623f);

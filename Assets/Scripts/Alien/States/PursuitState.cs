@@ -24,7 +24,7 @@ public sealed class PursuitState : State
             agent.SetCurrentTarget(target);
         }
 
-        agent.SetAttackAnimation(false);
+        agent.Animation.SetAttacking(false);
         isMoving = false;
     }
 
@@ -41,34 +41,35 @@ public sealed class PursuitState : State
             target.transform.position - agent.transform.position,
             Vector3.up);
         bool closeEnoughForRequiredMelee =
-            !agent.RequiresMeleeFollowUp || offset.magnitude <= agent.MeleeRadius;
+            !agent.Combat.RequiresMeleeFollowUp ||
+            offset.magnitude <= agent.Combat.MeleeAttackRadius;
 
-        if (agent.IsAttackReady && closeEnoughForRequiredMelee)
+        if (agent.Combat.IsAttackReady && closeEnoughForRequiredMelee)
         {
             StateMachine.ChangeState(PoliceState.Attack);
             return;
         }
 
-        float startMovingDistance = agent.MeleeRadius * 0.75f;
+        float startMovingDistance = agent.Combat.MeleeAttackRadius * 0.75f;
         if (!isMoving && offset.magnitude <= startMovingDistance &&
-            !agent.RequiresMeleeFollowUp)
+            !agent.Combat.RequiresMeleeFollowUp)
         {
             agent.Movement.Stop();
-            agent.SetMovingAnimation(false);
+            agent.Animation.SetMoving(false);
             return;
         }
 
         isMoving = agent.Movement.MoveTowards(
             target.transform.position,
-            agent.MeleeRadius * 0.45f,
+            agent.Combat.MeleeAttackRadius * 0.45f,
             agent.PursuitSpeedMultiplier);
-        agent.SetMovingAnimation(isMoving);
+        agent.Animation.SetMoving(isMoving);
     }
 
     public override void Exit()
     {
         agent.Movement.Stop();
-        agent.SetMovingAnimation(false);
+        agent.Animation.SetMoving(false);
         target = null;
         isMoving = false;
     }
