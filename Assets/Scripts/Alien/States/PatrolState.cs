@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
+
 public class PatrolState : State
 {
     private FSMAgent _agent;
@@ -22,25 +22,52 @@ public class PatrolState : State
 
     public override void Update()
     {
-        Debug.Log("Estoy en Patrol");
+        if (!PatrolLoop())
+        {
+            return;
+        }
 
-        PatrolLoop();
-        _agent.Animator.Play("movement");
+        if (_agent.Animator != null)
+        {
+            _agent.Animator.Play("movement");
+        }
     }
 
     public override void Exit()
     {
         Debug.Log("no ma patrol");
     }
-    private void PatrolLoop()
+    private bool PatrolLoop()
     {
+        if (_dataPatrol == null ||
+            _dataPatrol.transform == null ||
+            _dataPatrol.wayPoints == null ||
+            _dataPatrol.wayPoints.Count == 0)
+        {
+            return false;
+        }
+
+        currentNode = Mathf.Clamp(currentNode, 0, _dataPatrol.wayPoints.Count - 1);
         var nextWayPoint = _dataPatrol.wayPoints[currentNode];
+        if (nextWayPoint == null)
+        {
+            currentNode = (currentNode + 1) % _dataPatrol.wayPoints.Count;
+            return false;
+        }
+
         if(Vector3.Distance(nextWayPoint.position, _dataPatrol.transform.position) <= _dataPatrol.wayPointCheckDistance)
         {
-            currentNode = currentNode + 1 < _dataPatrol.wayPoints.Count ? currentNode + 1 : 0;
+            currentNode = (currentNode + 1) % _dataPatrol.wayPoints.Count;
+            nextWayPoint = _dataPatrol.wayPoints[currentNode];
+            if (nextWayPoint == null)
+            {
+                return false;
+            }
         }
+
         var dir = nextWayPoint.position - _dataPatrol.transform.position;
         _dataPatrol.transform.position += dir.normalized * _agent.speed * Time.deltaTime;
+        return true;
     }
     /* private void PatrolPingPong()
     {
