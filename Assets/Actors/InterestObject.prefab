@@ -138,5 +138,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70910cc7d46f47e3a8c21243e64af032, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::InterestLife
-  maximumLife: 60
-  currentLife: 60
+  maximumLife: 30
+  currentLife: 30

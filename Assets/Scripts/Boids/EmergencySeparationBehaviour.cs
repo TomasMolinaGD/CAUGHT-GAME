@@ -1,14 +1,17 @@
 using UnityEngine;
 
-[RequireComponent(typeof(BoidSensor))]
-public sealed class SeparationBehaviour : SteeringBehaviour
+[RequireComponent(typeof(BoidAgent), typeof(BoidSensor))]
+public class EmergencySeparationBehaviour : SteeringBehaviour
 {
-    [SerializeField, Min(0.1f)] private float strength = 10f;
+    [SerializeField, Min(0.1f)] private float emergencyRadius = 1.1f;
+    [SerializeField, Min(0.1f)] private float strength = 4f;
 
     private BoidSensor sensor;
 
+    public float EmergencyRadius => emergencyRadius;
+
     public override bool IsApplicable =>
-        sensor != null && sensor.SeparationNeighbors.Count > 0;
+        CalculateRepulsion().sqrMagnitude > 0.0001f;
 
     private void Awake()
     {
@@ -17,9 +20,18 @@ public sealed class SeparationBehaviour : SteeringBehaviour
 
     public override Vector3 CalculateSteering()
     {
+        return CalculateRepulsion() * strength;
+    }
+
+    private Vector3 CalculateRepulsion()
+    {
+        if (sensor == null)
+        {
+            return Vector3.zero;
+        }
+
         Vector3 combinedRepulsion = Vector3.zero;
         int contributingNeighbors = 0;
-        float radius = sensor.SeparationRadius;
 
         foreach (BoidAgent neighbor in sensor.SeparationNeighbors)
         {
@@ -32,6 +44,11 @@ public sealed class SeparationBehaviour : SteeringBehaviour
             away = Vector3.ProjectOnPlane(away, Vector3.up);
             float distance = away.magnitude;
 
+            if (distance > emergencyRadius)
+            {
+                continue;
+            }
+
             if (distance < 0.001f)
             {
                 float side = GetInstanceID() < neighbor.GetInstanceID() ? -1f : 1f;
@@ -39,19 +56,21 @@ public sealed class SeparationBehaviour : SteeringBehaviour
                 distance = 0f;
             }
 
-            float proximity = 1f - Mathf.Clamp01(distance / radius);
+            float proximity = 1f - Mathf.Clamp01(distance / emergencyRadius);
             combinedRepulsion += away.normalized * proximity;
             contributingNeighbors++;
         }
 
         return contributingNeighbors > 0
-            ? combinedRepulsion / contributingNeighbors * strength
+            ? combinedRepulsion / contributingNeighbors
             : Vector3.zero;
     }
 
     protected override void OnValidate()
     {
         base.OnValidate();
+        emergencyRadius = Mathf.Max(0.1f, emergencyRadius);
         strength = Mathf.Max(0.1f, strength);
     }
+
 }

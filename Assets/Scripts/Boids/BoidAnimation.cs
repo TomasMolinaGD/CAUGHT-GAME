@@ -33,7 +33,7 @@ public sealed class BoidAnimation : MonoBehaviour
             return;
         }
 
-        float movementSpeed = owner.Velocity.magnitude;
+        float movementSpeed = owner.ActualVelocity.magnitude;
         float normalizedSpeed = Mathf.Clamp01(movementSpeed / owner.MaxSpeed);
         float walkBlend = Mathf.InverseLerp(
             idleSpeedThreshold,

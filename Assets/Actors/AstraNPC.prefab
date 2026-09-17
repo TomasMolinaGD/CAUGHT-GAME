@@ -173,6 +173,8 @@ GameObject:
   - component: {fileID: 371122887719592098}
   - component: {fileID: 7391268431059574210}
   - component: {fileID: 4018736052214956836}
+  - component: {fileID: 5907142368241953071}
+  - component: {fileID: 6024817391057264830}
   - component: {fileID: 3169472459381036827}
   - component: {fileID: 8624351907348162045}
   - component: {fileID: 7190586341274036921}
@@ -186,6 +188,8 @@ GameObject:
   - component: {fileID: 7786410385194872936}
   - component: {fileID: 3096194319306985742}
   - component: {fileID: 6674964105994608718}
+  - component: {fileID: 7342195086712345678}
+  - component: {fileID: 7453206197823456789}
   m_Layer: 9
   m_Name: AstraNPC
   m_TagString: Untagged
@@ -209,6 +213,47 @@ Transform:
   - {fileID: 5005968890157428755}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7342195086712345678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7c92e4fa81546b89fc75d20a31e7046, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayAreaContainmentBehaviour
+  weight: 1
+  priority: 1000
+  center: {x: 484, y: 623}
+  halfExtents: {x: 68, y: 52}
+  turningMargin: 12
+  strength: 4
+--- !u!114 &7453206197823456789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c84d17a63b274fa18e652c3079b40ed1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ObstacleAvoidanceBehaviour
+  weight: 1
+  priority: 500
+  obstacleLayers:
+    serializedVersion: 2
+    m_Bits: 4096
+  lookAheadDistance: 4
+  probeRadius: 0.5
+  probeHeight: 1
+  strength: 7
+  directionHoldTime: 0.3
+  stuckDetectionTime: 0.45
 --- !u!54 &8810138258832351360
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -274,6 +319,12 @@ MonoBehaviour:
   maxSpeed: 4
   maxAcceleration: 10
   rotationSpeed: 8
+  minimumSafetySpeed: 1.5
+  environmentLayers:
+    serializedVersion: 2
+    m_Bits: 4096
+  collisionSkin: 0.04
+  maximumSlideIterations: 3
 --- !u!114 &4018736052214956836
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,7 +338,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::BoidSensor
   perceptionRadius: 10
-  separationRadius: 2.5
+  separationRadius: 2.2
   threatDetectionRadius: 12
   interestDetectionRadius: 20
   boidLayerMask:
@@ -312,8 +363,38 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::SeparationBehaviour
   weight: 1
-  priority: 100
-  strength: 10
+  priority: 10
+  strength: 5
+--- !u!114 &5907142368241953071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e14c6a93d8f4b62a1059c7e283fd041, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EmergencySeparationBehaviour
+  weight: 1
+  priority: 500
+  emergencyRadius: 1.1
+  strength: 4
+--- !u!114 &6024817391057264830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b83a1d750ce4a68bd29473f906e12ac, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BoidGizmos
+  drawDetectionRadii: 1
+  drawDetectedTargets: 1
 --- !u!114 &8624351907348162045
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -328,7 +409,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AlignmentBehaviour
   weight: 1
   priority: 10
-  strength: 1.5
+  strength: 0.8
+  directionResponse: 4
 --- !u!114 &7190586341274036921
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -344,8 +426,8 @@ MonoBehaviour:
   weight: 1
   priority: 10
   strength: 2
-  comfortRadius: 2
-  slowingRadius: 5
+  comfortRadius: 3
+  slowingRadius: 8
 --- !u!114 &5480162947638291052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -378,8 +460,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WanderBehaviour
   weight: 1
   priority: 10
-  maximumTurnAngle: 15
-  directionChangeInterval: 1.5
+  areaCenter: {x: 484, y: 623}
+  areaHalfExtents: {x: 50, y: 34}
+  formationRadius: 3
+  directionChangeInterval: 10
+  turnSpeed: 90
 --- !u!114 &3836482890985047117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -441,7 +526,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::InterestAvoidanceBehaviour
   weight: 1
-  priority: 100
+  priority: 300
   avoidanceRadius: 2
   strength: 4
 --- !u!114 &2711690536423068491

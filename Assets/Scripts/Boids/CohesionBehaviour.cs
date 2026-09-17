@@ -7,12 +7,10 @@ public sealed class CohesionBehaviour : SteeringBehaviour
     [SerializeField, Min(0f)] private float comfortRadius = 2f;
     [SerializeField, Min(0.1f)] private float slowingRadius = 5f;
 
-    private BoidAgent owner;
     private BoidSensor sensor;
 
     private void Awake()
     {
-        owner = GetComponent<BoidAgent>();
         sensor = GetComponent<BoidSensor>();
     }
 
@@ -52,8 +50,7 @@ public sealed class CohesionBehaviour : SteeringBehaviour
         }
 
         float speedFactor = Mathf.InverseLerp(comfortRadius, slowingRadius, distanceToCenter);
-        Vector3 desiredVelocity = directionToCenter.normalized * owner.MaxSpeed * speedFactor;
-        return (desiredVelocity - owner.Velocity) * strength;
+        return directionToCenter.normalized * strength * speedFactor;
     }
 
     protected override void OnValidate()

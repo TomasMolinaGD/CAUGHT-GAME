@@ -143,39 +143,4 @@ public sealed class BoidSensor : MonoBehaviour
         interestDetectionRadius = Mathf.Max(0.1f, interestDetectionRadius);
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, perceptionRadius);
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, separationRadius);
-
-        Gizmos.color = new Color(1f, 0.35f, 0f);
-        Gizmos.DrawWireSphere(transform.position, threatDetectionRadius);
-
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, interestDetectionRadius);
-
-        Gizmos.color = Color.cyan;
-        for (int i = 0; i < neighbors.Count; i++)
-        {
-            if (neighbors[i] != null)
-            {
-                Gizmos.DrawLine(transform.position, neighbors[i].transform.position);
-            }
-        }
-
-        if (currentThreat != null)
-        {
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawLine(transform.position, currentThreat.transform.position);
-        }
-
-        if (currentInterest != null)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(transform.position, currentInterest.transform.position);
-        }
-    }
 }
