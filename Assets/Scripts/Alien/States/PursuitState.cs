@@ -37,17 +37,21 @@ public sealed class PursuitState : State
             return;
         }
 
-        if (agent.IsAttackReady)
+        Vector3 offset = Vector3.ProjectOnPlane(
+            target.transform.position - agent.transform.position,
+            Vector3.up);
+        bool closeEnoughForRequiredMelee =
+            !agent.RequiresMeleeFollowUp || offset.magnitude <= agent.MeleeRadius;
+
+        if (agent.IsAttackReady && closeEnoughForRequiredMelee)
         {
             StateMachine.ChangeState(PoliceState.Attack);
             return;
         }
 
-        Vector3 offset = Vector3.ProjectOnPlane(
-            target.transform.position - agent.transform.position,
-            Vector3.up);
         float startMovingDistance = agent.MeleeRadius * 0.75f;
-        if (!isMoving && offset.magnitude <= startMovingDistance)
+        if (!isMoving && offset.magnitude <= startMovingDistance &&
+            !agent.RequiresMeleeFollowUp)
         {
             agent.Movement.Stop();
             agent.SetMovingAnimation(false);

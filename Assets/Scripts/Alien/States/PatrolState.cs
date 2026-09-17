@@ -18,6 +18,12 @@ public class PatrolState : State
 
     public override void Update()
     {
+        if (agent.CanStartGather())
+        {
+            StateMachine.ChangeState(PoliceState.Gather);
+            return;
+        }
+
         if (agent.CanStartAttack())
         {
             StateMachine.ChangeState(PoliceState.Attack);

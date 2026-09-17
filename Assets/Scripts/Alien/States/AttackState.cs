@@ -8,6 +8,7 @@ public class AttackState : State
     private bool attackStarted;
     private bool attackLanded;
     private bool attackAnimationObserved;
+    private bool useMeleeAttack;
 
     public AttackState(FSMAgent agent, StateMachine stateMachine) : base(stateMachine)
     {
@@ -49,9 +50,17 @@ public class AttackState : State
             return;
         }
 
-        if (target == null || !target.IsAlive || !agent.Perception.IsLivingBoidDetected(target))
+        if (target == null || !target.IsAlive)
         {
-            // Losing the target before contact does not consume or reset TBA.
+            agent.SetCurrentTarget(null);
+            StateMachine.ChangeState(PoliceState.Patrol);
+            return;
+        }
+
+        if (!attackStarted && !agent.Perception.IsLivingBoidDetected(target))
+        {
+            // Losing the target before committing to an attack does not
+            // consume or reset TBA.
             agent.SetCurrentTarget(null);
             StateMachine.ChangeState(PoliceState.Patrol);
             return;
@@ -62,7 +71,19 @@ public class AttackState : State
             Vector3.up);
         float distance = offset.magnitude;
 
-        if (!attackStarted && distance > agent.MeleeRadius * 0.55f)
+        if (!attackStarted && distance > agent.RangedAttackRadius)
+        {
+            agent.SetAttackAnimation(false);
+            agent.SetMovingAnimation(
+                agent.Movement.MoveTowards(
+                    target.transform.position,
+                    agent.RangedAttackRadius * 0.85f,
+                    agent.PursuitSpeedMultiplier));
+            return;
+        }
+
+        if (!attackStarted && distance <= agent.MeleeRadius &&
+            distance > agent.MeleeRadius * 0.55f)
         {
             agent.SetAttackAnimation(false);
             agent.SetMovingAnimation(
@@ -75,16 +96,15 @@ public class AttackState : State
 
         if (!attackStarted)
         {
-            attackStarted = true;
-            attackTimer = 0f;
-            agent.Movement.Stop();
-            agent.SetMovingAnimation(false);
-            agent.SetAttackAnimation(true);
+            StartAttack(distance <= agent.MeleeRadius);
         }
 
         attackTimer += Time.deltaTime;
         agent.Movement.FaceDirection(offset);
-        if (attackTimer < agent.AttackWindup)
+        float selectedWindup = useMeleeAttack
+            ? agent.AttackWindup
+            : agent.RangedAttackWindup;
+        if (attackTimer < selectedWindup)
         {
             return;
         }
@@ -93,7 +113,7 @@ public class AttackState : State
             target.transform.position - agent.transform.position,
             Vector3.up);
         distance = offset.magnitude;
-        if (distance > agent.MeleeRadius)
+        if (useMeleeAttack && distance > agent.MeleeRadius)
         {
             attackStarted = false;
             attackTimer = 0f;
@@ -101,7 +121,10 @@ public class AttackState : State
             return;
         }
 
-        if (agent.PerformAttack(target, true))
+        bool attackPerformed = useMeleeAttack
+            ? agent.PerformAttack(target, true)
+            : agent.PerformRangedAttack(target);
+        if (attackPerformed)
         {
             attackLanded = true;
             if (!target.IsAlive)
@@ -122,5 +145,16 @@ public class AttackState : State
         attackStarted = false;
         attackLanded = false;
         attackAnimationObserved = false;
+        useMeleeAttack = false;
+    }
+
+    private void StartAttack(bool meleeAttack)
+    {
+        useMeleeAttack = meleeAttack;
+        attackStarted = true;
+        attackTimer = 0f;
+        agent.Movement.Stop();
+        agent.SetMovingAnimation(false);
+        agent.SetAttackAnimation(true);
     }
 }

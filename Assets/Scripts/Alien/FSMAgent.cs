@@ -16,10 +16,18 @@ public class FSMAgent : MonoBehaviour
     [SerializeField, Min(0.1f)] private float RangeAttackRadius = 8f;
     [SerializeField, Min(0.1f)] private float MeleeAttackRadius = 2.2f;
     [SerializeField, Min(0.01f)] private float meleeDamage = 35f;
-    [SerializeField, Min(0.01f)] private float rangedDamage = 20f;
+    [SerializeField, Min(0.01f)] private float rangedDamage = 35f;
+    [SerializeField, Min(0.1f)] private float rangedProjectileSpeed = 30f;
+    [SerializeField, Min(0.1f)] private float rangedProjectileLifetime = 3f;
+    [SerializeField] private float rangedProjectileSpawnHeight = 1.35f;
+    [SerializeField, Min(0f)] private float rangedAttackWindup = 0.12f;
     [SerializeField, Min(0f)] private float attackWindup = 0.25f;
     [SerializeField, Min(0.1f)] private float attackAnimationDuration = 0.85f;
     [SerializeField, Min(1f)] private float pursuitSpeedMultiplier = 2f;
+
+    [Header("Gather")]
+    [SerializeField, Min(0.1f)] private float collectionDistance = 1.4f;
+    [SerializeField, Min(0.1f)] private float collectionDuration = 2f;
 
     // Kept only to migrate the data serialized by the original implementation.
     [SerializeField] private PatrolData dataPatrol;
@@ -31,6 +39,7 @@ public class FSMAgent : MonoBehaviour
     private bool hasRunParameter;
     private bool hasAttackParameter;
     private float attackCooldownRemaining;
+    private bool requiresMeleeFollowUp;
 
     public Animator Animator => animator;
     public IReadOnlyList<Transform> Waypoints => waypoints;
@@ -42,10 +51,14 @@ public class FSMAgent : MonoBehaviour
     public float RangedAttackRadius => RangeAttackRadius;
     public float MeleeRadius => MeleeAttackRadius;
     public float AttackWindup => attackWindup;
+    public float RangedAttackWindup => rangedAttackWindup;
     public float AttackAnimationDuration => attackAnimationDuration;
     public float PursuitSpeedMultiplier => pursuitSpeedMultiplier;
+    public float CollectionDistance => collectionDistance;
+    public float CollectionDuration => collectionDuration;
     public float AttackCooldownRemaining => attackCooldownRemaining;
     public bool IsAttackReady => attackCooldownRemaining <= 0f;
+    public bool RequiresMeleeFollowUp => requiresMeleeFollowUp;
     public BoidLife CurrentTarget { get; private set; }
     public PoliceState CurrentState => stateMachine?.CurrentStateKey is PoliceState state
         ? state
@@ -88,6 +101,7 @@ public class FSMAgent : MonoBehaviour
         stateMachine.RegisterState(PoliceState.Patrol, new PatrolState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Pursuit, new PursuitState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Attack, new AttackState(this, stateMachine));
+        stateMachine.RegisterState(PoliceState.Gather, new GatherState(this, stateMachine));
         stateMachine.ChangeState(PoliceState.Patrol);
     }
 
@@ -152,9 +166,18 @@ public class FSMAgent : MonoBehaviour
         return IsAttackReady && perception != null && perception.ClosestLivingBoid != null;
     }
 
+    public bool CanStartGather()
+    {
+        return perception != null && perception.ClosestDeadBoid != null;
+    }
+
     public void SetCurrentTarget(BoidLife target)
     {
         CurrentTarget = target;
+        if (target == null)
+        {
+            requiresMeleeFollowUp = false;
+        }
     }
 
     public bool PerformAttack(BoidLife target, bool useMeleeAttack)
@@ -166,6 +189,31 @@ public class FSMAgent : MonoBehaviour
 
         target.TakeDamage(useMeleeAttack ? meleeDamage : rangedDamage);
         attackCooldownRemaining = TBA;
+        if (useMeleeAttack)
+        {
+            requiresMeleeFollowUp = false;
+        }
+        return true;
+    }
+
+    public bool PerformRangedAttack(BoidLife target)
+    {
+        if (!IsAttackReady || target == null || !target.IsAlive)
+        {
+            return false;
+        }
+
+        Vector3 spawnPosition = transform.position +
+            transform.forward * 0.65f +
+            Vector3.up * rangedProjectileSpawnHeight;
+        HunterProjectile.Create(
+            spawnPosition,
+            target,
+            rangedDamage,
+            rangedProjectileSpeed,
+            rangedProjectileLifetime);
+        attackCooldownRemaining = TBA;
+        requiresMeleeFollowUp = true;
         return true;
     }
 
@@ -224,9 +272,14 @@ public class FSMAgent : MonoBehaviour
         RangeAttackRadius = Mathf.Max(MeleeAttackRadius, RangeAttackRadius);
         meleeDamage = Mathf.Max(0.01f, meleeDamage);
         rangedDamage = Mathf.Max(0.01f, rangedDamage);
+        rangedProjectileSpeed = Mathf.Max(0.1f, rangedProjectileSpeed);
+        rangedProjectileLifetime = Mathf.Max(0.1f, rangedProjectileLifetime);
+        rangedAttackWindup = Mathf.Max(0f, rangedAttackWindup);
         attackWindup = Mathf.Max(0f, attackWindup);
         attackAnimationDuration = Mathf.Max(attackWindup, attackAnimationDuration);
         pursuitSpeedMultiplier = Mathf.Max(1f, pursuitSpeedMultiplier);
+        collectionDistance = Mathf.Max(0.1f, collectionDistance);
+        collectionDuration = Mathf.Max(0.1f, collectionDuration);
     }
 }
 

@@ -5,6 +5,7 @@ using UnityEngine;
 public sealed class HunterInterestSpawner : MonoBehaviour
 {
     [SerializeField] private GameObject interestPrefab;
+    [SerializeField] private GameObject interestVisualPrefab;
     [SerializeField, Min(1)] private int maximumActiveInterests = 5;
     [SerializeField, Min(0.1f)] private float spawnInterval = 8f;
     [SerializeField, Min(0f)] private float initialSpawnDelay = 2f;
@@ -35,9 +36,10 @@ public sealed class HunterInterestSpawner : MonoBehaviour
         spawnTimer = initialSpawnDelay;
     }
 
-    public void Configure(GameObject prefab)
+    public void Configure(GameObject prefab, GameObject visualPrefab)
     {
         interestPrefab = prefab;
+        interestVisualPrefab = visualPrefab;
     }
 
     public void Tick(float deltaTime)
@@ -63,10 +65,40 @@ public sealed class HunterInterestSpawner : MonoBehaviour
                 Quaternion.Euler(0f, Random.Range(0f, 360f), 0f),
                 runtimeContainer);
             interest.name = $"Hunter Interest {activeInterests.Count + 1:00}";
+            AddBeaconVisual(interest);
+            interest.SetActive(true);
             activeInterests.Add(interest);
         }
 
         spawnTimer = spawnInterval;
+    }
+
+    private void AddBeaconVisual(GameObject interest)
+    {
+        MeshRenderer placeholder = interest.GetComponent<MeshRenderer>();
+        if (placeholder != null)
+        {
+            placeholder.enabled = false;
+        }
+
+        if (interestVisualPrefab != null)
+        {
+            GameObject visual = Instantiate(interestVisualPrefab, interest.transform);
+            visual.name = "Astra Attraction Beacon";
+            visual.transform.localPosition = Vector3.zero;
+            visual.transform.localRotation = Quaternion.identity;
+            visual.transform.localScale = Vector3.one * 1.25f;
+        }
+
+        GameObject glowObject = new GameObject("Attraction Beacon Glow");
+        glowObject.transform.SetParent(interest.transform, false);
+        glowObject.transform.localPosition = Vector3.up * 1.1f;
+        Light glow = glowObject.AddComponent<Light>();
+        glow.type = LightType.Point;
+        glow.color = new Color(1f, 0.1f, 0.8f);
+        glow.range = 12f;
+        glow.intensity = 4f;
+        glow.shadows = LightShadows.None;
     }
 
     private bool TryFindSpawnPosition(out Vector3 spawnPosition)
@@ -111,7 +143,12 @@ public sealed class HunterInterestSpawner : MonoBehaviour
             return;
         }
 
-        runtimeContainer = new GameObject("Runtime Hunter Interests").transform;
+        runtimeContainer = new GameObject("Runtime Generated Interests").transform;
+        GameObject interestRoot = GameObject.Find("Interest Objects");
+        if (interestRoot != null)
+        {
+            runtimeContainer.SetParent(interestRoot.transform, false);
+        }
     }
 
     private void OnValidate()

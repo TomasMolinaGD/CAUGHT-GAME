@@ -10,7 +10,7 @@ public static class BuildExteriorPrototype
     private const string TargetScene = "Assets/Scenes/LastSave_ExteriorPrototype.unity";
     private const int ObstacleLayer = 12;
     private const int RequiredBoidCount = 6;
-    private const string PrototypeName = "Exterior Mining Outpost (Kenney v15)";
+    private const string PrototypeName = "Exterior Mining Outpost (Kenney v17)";
 
     private static readonly Vector3 LevelCenter = new Vector3(484f, 0f, 623f);
 
@@ -36,20 +36,22 @@ public static class BuildExteriorPrototype
         scene = SceneManager.GetActiveScene();
         RemovePreviousPrototype();
 
-        GameObject prototype = new GameObject(PrototypeName);
-        GameObject boundaries = CreateGroup("01 - Perimeter", prototype.transform);
-        GameObject landingZone = CreateGroup("02 - Landing Zone", prototype.transform);
-        GameObject sideHangars = CreateGroup("03 - Side Hangars", prototype.transform);
-        GameObject markers = CreateGroup("04 - Design Markers", prototype.transform);
-        GameObject astraGroup = CreateGroup("05 - Astra Group", prototype.transform);
+        GameObject scenario = new GameObject(PrototypeName);
+        GameObject environmentAssets = CreateGroup("01 - Environment Assets", scenario.transform);
+        GameObject boundaries = CreateGroup("02 - Perimeter", scenario.transform);
+        GameObject gameplayZones = CreateGroup("03 - Gameplay Zones", scenario.transform);
+        GameObject landingZone = CreateGroup("Landing Zone", environmentAssets.transform);
+        GameObject sideHangars = CreateGroup("Side Hangars", environmentAssets.transform);
+        GameObject astraGroup = new GameObject("Boids - Astra Agents");
+        GameObject interestGroup = new GameObject("Interest Objects");
 
         BuildPerimeter(boundaries.transform, scene);
         SetLayerRecursively(boundaries, ObstacleLayer);
         BuildLandingZone(landingZone.transform, scene);
         BuildSideHangars(sideHangars.transform, scene);
         SetLayerRecursively(sideHangars, ObstacleLayer);
-        DressInterestObject(scene);
-        BuildMarkers(markers.transform);
+        DressInterestObject(scene, interestGroup.transform);
+        BuildMarkers(gameplayZones.transform);
         BuildAstraGroup(astraGroup.transform, scene);
         ConfigureHunter(scene);
         FrameGameplayCamera();
@@ -118,13 +120,29 @@ public static class BuildExteriorPrototype
             4.5f, -90f, parent, scene, true);
     }
 
-    private static void DressInterestObject(Scene scene)
+    private static GameObject DressInterestObject(Scene scene, Transform parent)
     {
         GameObject interest = GameObject.Find("InterestObject");
         if (interest == null)
         {
-            return;
+            GameObject interestPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                "Assets/Actors/InterestObject.prefab");
+            interest = InstantiatePrefab(
+                interestPrefab,
+                "Interest Beacon Template",
+                LevelCenter + new Vector3(0f, 1.05f, 0f),
+                Quaternion.identity,
+                parent,
+                scene,
+                Vector3.one * 2f);
+            if (interest == null)
+            {
+                return null;
+            }
         }
+
+        interest.name = "Interest Beacon Template";
+        interest.transform.SetParent(parent, true);
 
         MeshRenderer placeholder = interest.GetComponent<MeshRenderer>();
         if (placeholder != null)
@@ -141,6 +159,8 @@ public static class BuildExteriorPrototype
         }
         CreatePointLight("Attraction Beacon Glow", interest.transform.position + Vector3.up * 2.2f,
             new Color(1f, 0.1f, 0.8f), 12f, 4f, interest.transform);
+        interest.SetActive(false);
+        return interest;
     }
 
     private static void BuildMarkers(Transform parent)
@@ -219,6 +239,7 @@ public static class BuildExteriorPrototype
         FSMAgent[] hunters = Object.FindObjectsByType<FSMAgent>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         Avatar alienAvatar = LoadAvatar("Assets/Models/Alient-Moment/Ch25_nonPBR.fbx");
         GameObject interestPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Actors/InterestObject.prefab");
+        GameObject interestVisualPrefab = LoadKenneyModel("machine_wireless");
         Vector3[] patrolPositions =
         {
             new Vector3(452f, 0.05f, 603f),
@@ -254,7 +275,7 @@ public static class BuildExteriorPrototype
             {
                 interestSpawner = hunter.gameObject.AddComponent<HunterInterestSpawner>();
             }
-            interestSpawner.Configure(interestPrefab);
+            interestSpawner.Configure(interestPrefab, interestVisualPrefab);
             EditorUtility.SetDirty(interestSpawner);
 
             if (hunter.Animator != null)
@@ -580,9 +601,29 @@ public static class BuildExteriorPrototype
         {
             existing = GameObject.Find("Exterior Mining Outpost (Kenney v14)");
         }
+        if (existing == null)
+        {
+            existing = GameObject.Find("Exterior Mining Outpost (Kenney v15)");
+        }
+        if (existing == null)
+        {
+            existing = GameObject.Find("Exterior Mining Outpost (Kenney v16)");
+        }
         if (existing != null)
         {
             Object.DestroyImmediate(existing);
+        }
+
+        GameObject boidGroup = GameObject.Find("Boids - Astra Agents");
+        if (boidGroup != null)
+        {
+            Object.DestroyImmediate(boidGroup);
+        }
+
+        GameObject interestGroup = GameObject.Find("Interest Objects");
+        if (interestGroup != null)
+        {
+            Object.DestroyImmediate(interestGroup);
         }
     }
 }

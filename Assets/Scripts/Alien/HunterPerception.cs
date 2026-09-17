@@ -11,6 +11,7 @@ public sealed class HunterPerception : MonoBehaviour
 
     private readonly Collider[] results = new Collider[32];
     private readonly HashSet<BoidLife> livingBoids = new HashSet<BoidLife>();
+    private readonly HashSet<BoidLife> deadBoids = new HashSet<BoidLife>();
 
     public BoidLife ClosestLivingBoid { get; private set; }
     public BoidLife ClosestDeadBoid { get; private set; }
@@ -20,6 +21,7 @@ public sealed class HunterPerception : MonoBehaviour
         ClosestLivingBoid = null;
         ClosestDeadBoid = null;
         livingBoids.Clear();
+        deadBoids.Clear();
         float closestLivingDistance = float.PositiveInfinity;
         float closestDeadDistance = float.PositiveInfinity;
         float maximumRadius = Mathf.Max(livingBoidDetectionRadius, deadBoidDetectionRadius);
@@ -62,11 +64,14 @@ public sealed class HunterPerception : MonoBehaviour
                 }
             }
             else if (boid.CanBeCollected &&
-                distanceSquared <= deadBoidDetectionRadius * deadBoidDetectionRadius &&
-                distanceSquared < closestDeadDistance)
+                distanceSquared <= deadBoidDetectionRadius * deadBoidDetectionRadius)
             {
-                closestDeadDistance = distanceSquared;
-                ClosestDeadBoid = boid;
+                deadBoids.Add(boid);
+                if (distanceSquared < closestDeadDistance)
+                {
+                    closestDeadDistance = distanceSquared;
+                    ClosestDeadBoid = boid;
+                }
             }
         }
     }
@@ -74,6 +79,11 @@ public sealed class HunterPerception : MonoBehaviour
     public bool IsLivingBoidDetected(BoidLife boid)
     {
         return boid != null && boid.IsAlive && livingBoids.Contains(boid);
+    }
+
+    public bool IsDeadBoidDetected(BoidLife boid)
+    {
+        return boid != null && boid.CanBeCollected && deadBoids.Contains(boid);
     }
 
     private bool HasLineOfSight(BoidLife boid)
