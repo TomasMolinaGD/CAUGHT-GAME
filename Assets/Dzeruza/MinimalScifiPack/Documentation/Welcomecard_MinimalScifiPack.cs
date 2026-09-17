@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
+#endif
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 using System.IO;
 
+#if UNITY_EDITOR
 namespace MinimalScifiPack.Editor
 {
     [InitializeOnLoad]
@@ -166,3 +169,4 @@ namespace MinimalScifiPack.Editor
         }
     }
 }
+#endif
