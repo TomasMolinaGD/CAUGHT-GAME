@@ -1,48 +1,73 @@
 using UnityEngine;
 using System.Collections.Generic;
-
-// TEMPORAL: patrulla incompleta desactivada junto con la FSM del alien.
-// PatrolData se mantiene activo para conservar los datos serializados.
-/*
+using UnityEditor.Experimental.GraphView;
 public class PatrolState : State
 {
-    public patrolState(FSMAgent agent, PatrolData data, StateMachine stateMachine) : base(stateMachine)
+    private FSMAgent _agent;
+    private PatrolData _dataPatrol;
+
+    private int currentNode = 0;
+    //private int direction = 1;
+
+    public PatrolState(FSMAgent agent,PatrolData dataPatrol,StateMachine stateMachine) : base(stateMachine)
     {
         _agent = agent;
-        _data = data;
+        _dataPatrol = dataPatrol;
     }
-    private FSMAgent _agent;
+
     public override void Enter()
     {
-        Debug.Log ("Entre en Patrol");
+        Debug.Log("Entré en Patrol");
     }
+
     public override void Update()
     {
-        Debug.Log ("Estoy en Patrol");
+        Debug.Log("Estoy en Patrol");
+
+        PatrolLoop();
+        _agent.Animator.Play("movement");
     }
 
     public override void Exit()
     {
-        Debug.Log ("Sali Patrol");
+        Debug.Log("no ma patrol");
     }
-
     private void PatrolLoop()
     {
-        var nextWayPoint = _data.waypoints[currentNode];
-        if(Vector3.Distance(nextWayPoint.position, _data.transform.position) <= _data.waypointCheckDistance)
+        var nextWayPoint = _dataPatrol.wayPoints[currentNode];
+        if(Vector3.Distance(nextWayPoint.position, _dataPatrol.transform.position) <= _dataPatrol.wayPointCheckDistance)
         {
-            currentNode = currentNode + 1 < _data.waypoints.Count ? currentNode + 1 : 0;
+            currentNode = currentNode + 1 < _dataPatrol.wayPoints.Count ? currentNode + 1 : 0;
         }
-        var dir = nextWayPoint.position - transform.position;
-        _data.transform.position += dir.normalized * _agent.speed * Time.deltaTime;
+        var dir = nextWayPoint.position - _dataPatrol.transform.position;
+        _dataPatrol.transform.position += dir.normalized * _agent.speed * Time.deltaTime;
     }
+    /* private void PatrolPingPong()
+    {
+        var nextWayPoint = _data.wayPoints[currentNode];
+        if (Vector3.Distance(nextWayPoint.position, _data.transform.position) <= _data.wayPointCheckDistance)
+        {
+            currentNode += direction;
+            if(currentNode >= _data.wayPoints.Count)
+            {
+                currentNode = _data.wayPoints.Count-1;
+                direction = -1;
+            }else if (currentNode < 0)
+            {
+                currentNode = 1;
+                direction = 1;
+            }
+        }
+        var dir = nextWayPoint.position - _data.transform.position;
+        _data.transform.position += dir.normalized * _agent.speed * Time.deltaTime;
+    }*/
 }
-*/
+
 [System.Serializable]
 public class PatrolData
 {
-    public List<Transform> waypoints;
-    public Transform transfom;
-    public float waypointCheckDistance;
+    public List<Transform> wayPoints;
+    public Transform transform;
+    public float wayPointCheckDistance = 0.1f;
 
 }

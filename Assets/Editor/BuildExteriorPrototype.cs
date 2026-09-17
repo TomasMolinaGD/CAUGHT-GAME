@@ -17,7 +17,7 @@ public static class BuildExteriorPrototype
     {
         EditorApplication.delayCall += () =>
         {
-            if (!File.Exists(TargetScene) || !File.ReadAllText(TargetScene).Contains("Exterior Mining Outpost (Kenney v7)"))
+            if (!File.Exists(TargetScene) || !File.ReadAllText(TargetScene).Contains("Exterior Mining Outpost (Kenney v8)"))
             {
                 Build();
             }
@@ -34,7 +34,7 @@ public static class BuildExteriorPrototype
         scene = SceneManager.GetActiveScene();
         RemovePreviousPrototype();
 
-        GameObject prototype = new GameObject("Exterior Mining Outpost (Kenney v7)");
+        GameObject prototype = new GameObject("Exterior Mining Outpost (Kenney v8)");
         GameObject boundaries = CreateGroup("01 - Perimeter", prototype.transform);
         GameObject landingZone = CreateGroup("02 - Landing Zone", prototype.transform);
         GameObject sideHangars = CreateGroup("03 - Side Hangars", prototype.transform);
@@ -394,6 +394,10 @@ public static class BuildExteriorPrototype
         if (existing == null)
         {
             existing = GameObject.Find("Exterior Mining Outpost (Kenney v7)");
+        }
+        if (existing == null)
+        {
+            existing = GameObject.Find("Exterior Mining Outpost (Kenney v8)");
         }
         if (existing != null)
         {
