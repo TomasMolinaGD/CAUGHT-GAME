@@ -1,65 +1,39 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 public class FSMAgent : MonoBehaviour
 {
+    [SerializeField] private Animator animator;
+    public Animator Animator => animator;
     public List<Transform> waypoints = new List<Transform>();
     public float speed = 10f;
     [SerializeField] private float waypointCheckDistance = 0.1f;
-    private int currentNode;
-    private int direction = 1;
+    //private int currentNode;
+    public int direction = 1;
     [SerializeField] private PatrolData dataPatrol;
+
+
+
 
     private StateMachine _stateMachine;
 
     private void Awake()
     {
-        _stateMachine = new FSMStateMachine();
-        IdleState idleState = new IdleState();
-        PatrolState patrolState = new PatrolState(this, dattaPatrol);
-        _stateMachine.ChangeState(IdleState):
-        _stateMachine.ChangeState(patrolState):
+        _stateMachine = new StateMachine();
+        IdleState idleState = new IdleState(_stateMachine);
+        PatrolState patrolState = new PatrolState(this, dataPatrol, _stateMachine);
+        _stateMachine.RegisterState(PoliceState.idle,idleState);
+        _stateMachine.RegisterState(PoliceState.Patrol,patrolState);
+
+        _stateMachine.ChangeState(PoliceState.idle);
+        _stateMachine.ChangeState(PoliceState.Patrol);
     }
 
     private void Update()
     {
-        PatrolLoop();
-        _stateMachine.Updadate();
+        //PatrolLoop();
+        _stateMachine.Update();
     }
-
-    /*private void PatrolLoop()
-    {
-        var nextWayPoint = waypoints[currentNode];
-        if(Vector3.Distance(nextWayPoint.position, transform.position) <= waypointCheckDistance)
-        {
-            currentNode = currentNode + 1 < waypoints.Count ? currentNode + 1 : 0;
-        }
-        var dir = nextWayPoint.position - transform.position;
-        transform.position += dir.normalized * speed * Time.deltaTime;
-    }
-    
-    private void PatrolPingPoing()
-    {
-        
-        var nextWayPoint = waypoints[currentNode];
-        if(Vector3.Distance(nextWayPoint.position, transform.position) <= waypointCheckDistance)
-        {
-            currentNode += direction;
-            if (currentNode >= waypoints.Count)
-            {
-                currentNode = waypoints.Count - 1;
-                direction = - 1;
-            }
-            else if (currentNode < 0)
-            {
-                currentNode = 1;
-                direction = 1;
-            }
-        }
-        var dir = nextWayPoint.position - transform.position;
-        transform.position += dir.normalized * speed * Time.deltaTime;
-   
-    }
-    */
 
 }
