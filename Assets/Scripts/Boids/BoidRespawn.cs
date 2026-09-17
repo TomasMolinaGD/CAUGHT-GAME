@@ -56,6 +56,11 @@ public class BoidRespawn : MonoBehaviour
         return initialPosition;
     }
 
+    public void SetRespawnArea(BoidRespawnArea area)
+    {
+        respawnArea = area;
+    }
+
     private void OnValidate()
     {
         respawnDelay = Mathf.Max(0.1f, respawnDelay);

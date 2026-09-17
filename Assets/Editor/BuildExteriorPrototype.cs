@@ -9,6 +9,8 @@ public static class BuildExteriorPrototype
     private const string SourceScene = "Assets/LastSave.unity";
     private const string TargetScene = "Assets/Scenes/LastSave_ExteriorPrototype.unity";
     private const int ObstacleLayer = 12;
+    private const int RequiredBoidCount = 6;
+    private const string PrototypeName = "Exterior Mining Outpost (Kenney v15)";
 
     private static readonly Vector3 LevelCenter = new Vector3(484f, 0f, 623f);
 
@@ -17,7 +19,7 @@ public static class BuildExteriorPrototype
     {
         EditorApplication.delayCall += () =>
         {
-            if (!File.Exists(TargetScene) || !File.ReadAllText(TargetScene).Contains("Exterior Mining Outpost (Kenney v8)"))
+            if (!File.Exists(TargetScene) || !File.ReadAllText(TargetScene).Contains(PrototypeName))
             {
                 Build();
             }
@@ -34,11 +36,12 @@ public static class BuildExteriorPrototype
         scene = SceneManager.GetActiveScene();
         RemovePreviousPrototype();
 
-        GameObject prototype = new GameObject("Exterior Mining Outpost (Kenney v8)");
+        GameObject prototype = new GameObject(PrototypeName);
         GameObject boundaries = CreateGroup("01 - Perimeter", prototype.transform);
         GameObject landingZone = CreateGroup("02 - Landing Zone", prototype.transform);
         GameObject sideHangars = CreateGroup("03 - Side Hangars", prototype.transform);
         GameObject markers = CreateGroup("04 - Design Markers", prototype.transform);
+        GameObject astraGroup = CreateGroup("05 - Astra Group", prototype.transform);
 
         BuildPerimeter(boundaries.transform, scene);
         SetLayerRecursively(boundaries, ObstacleLayer);
@@ -47,6 +50,8 @@ public static class BuildExteriorPrototype
         SetLayerRecursively(sideHangars, ObstacleLayer);
         DressInterestObject(scene);
         BuildMarkers(markers.transform);
+        BuildAstraGroup(astraGroup.transform, scene);
+        ConfigureHunter(scene);
         FrameGameplayCamera();
 
         EditorSceneManager.MarkSceneDirty(scene);
@@ -144,6 +149,154 @@ public static class BuildExteriorPrototype
         CreateMarker("INTEREST OBJECT AREA", new Vector3(483f, 0.1f, 639f), parent);
         CreateMarker("ALIEN APPROACH", new Vector3(456f, 0.1f, 615f), parent);
         CreateMarker("WIDE FLOCKING CORRIDOR", new Vector3(485f, 0.1f, 610f), parent);
+    }
+
+    private static void BuildAstraGroup(Transform parent, Scene scene)
+    {
+        GameObject astraPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Actors/AstraNPC.prefab");
+        BoidAgent[] agents = Object.FindObjectsByType<BoidAgent>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+        for (int index = agents.Length; index < RequiredBoidCount; index++)
+        {
+            GameObject instance = InstantiatePrefab(
+                astraPrefab,
+                $"AstraNPC {index + 1:00}",
+                LevelCenter,
+                Quaternion.identity,
+                parent,
+                scene);
+
+            if (instance != null)
+            {
+                ArrayUtility.Add(ref agents, instance.GetComponent<BoidAgent>());
+            }
+        }
+
+        GameObject respawnAreaObject = new GameObject("Astra Respawn Area");
+        respawnAreaObject.transform.SetParent(parent, true);
+        respawnAreaObject.transform.position = new Vector3(LevelCenter.x, 0.05f, LevelCenter.z);
+        BoxCollider respawnBounds = respawnAreaObject.AddComponent<BoxCollider>();
+        respawnBounds.isTrigger = true;
+        respawnBounds.size = new Vector3(100f, 2f, 68f);
+        BoidRespawnArea respawnArea = respawnAreaObject.AddComponent<BoidRespawnArea>();
+
+        Vector3[] formationOffsets =
+        {
+            new Vector3(-2.5f, 0f, -2f),
+            new Vector3(0f, 0f, -2f),
+            new Vector3(2.5f, 0f, -2f),
+            new Vector3(-2.5f, 0f, 1f),
+            new Vector3(0f, 0f, 1f),
+            new Vector3(2.5f, 0f, 1f)
+        };
+
+        for (int index = 0; index < agents.Length; index++)
+        {
+            BoidAgent agent = agents[index];
+            if (agent == null || agent.gameObject.scene != scene)
+            {
+                continue;
+            }
+
+            agent.name = $"AstraNPC {index + 1:00}";
+            agent.transform.SetParent(parent, true);
+            Vector3 offset = formationOffsets[index % formationOffsets.Length];
+            agent.transform.SetPositionAndRotation(
+                new Vector3(LevelCenter.x + offset.x, 0.05f, LevelCenter.z + offset.z),
+                Quaternion.identity);
+
+            BoidRespawn respawn = agent.GetComponent<BoidRespawn>();
+            if (respawn != null)
+            {
+                respawn.SetRespawnArea(respawnArea);
+                EditorUtility.SetDirty(respawn);
+            }
+        }
+    }
+
+    private static void ConfigureHunter(Scene scene)
+    {
+        FSMAgent[] hunters = Object.FindObjectsByType<FSMAgent>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        Avatar alienAvatar = LoadAvatar("Assets/Models/Alient-Moment/Ch25_nonPBR.fbx");
+        GameObject interestPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Actors/InterestObject.prefab");
+        Vector3[] patrolPositions =
+        {
+            new Vector3(452f, 0.05f, 603f),
+            new Vector3(516f, 0.05f, 603f),
+            new Vector3(516f, 0.05f, 643f),
+            new Vector3(452f, 0.05f, 643f)
+        };
+
+        foreach (FSMAgent hunter in hunters)
+        {
+            if (hunter == null || hunter.gameObject.scene != scene)
+            {
+                continue;
+            }
+
+            if (hunter.GetComponent<HunterMovement>() == null)
+            {
+                hunter.gameObject.AddComponent<HunterMovement>();
+            }
+
+            if (hunter.GetComponent<HunterPerception>() == null)
+            {
+                hunter.gameObject.AddComponent<HunterPerception>();
+            }
+
+            if (hunter.GetComponent<AlienVisualGrounding>() == null)
+            {
+                hunter.gameObject.AddComponent<AlienVisualGrounding>();
+            }
+
+            HunterInterestSpawner interestSpawner = hunter.GetComponent<HunterInterestSpawner>();
+            if (interestSpawner == null)
+            {
+                interestSpawner = hunter.gameObject.AddComponent<HunterInterestSpawner>();
+            }
+            interestSpawner.Configure(interestPrefab);
+            EditorUtility.SetDirty(interestSpawner);
+
+            if (hunter.Animator != null)
+            {
+                hunter.Animator.avatar = alienAvatar;
+                hunter.Animator.applyRootMotion = false;
+                hunter.Animator.updateMode = AnimatorUpdateMode.Normal;
+                hunter.Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                EditorUtility.SetDirty(hunter.Animator);
+            }
+
+            int waypointCount = Mathf.Min(hunter.Waypoints.Count, patrolPositions.Length);
+            for (int index = 0; index < waypointCount; index++)
+            {
+                Transform waypoint = hunter.Waypoints[index];
+                if (waypoint == null)
+                {
+                    continue;
+                }
+
+                waypoint.name = $"Hunter Waypoint {index + 1:00}";
+                waypoint.position = patrolPositions[index];
+                EditorUtility.SetDirty(waypoint);
+            }
+
+            hunter.transform.position = patrolPositions[0];
+            EditorUtility.SetDirty(hunter);
+        }
+    }
+
+    private static Avatar LoadAvatar(string modelPath)
+    {
+        foreach (Object asset in AssetDatabase.LoadAllAssetsAtPath(modelPath))
+        {
+            if (asset is Avatar avatar)
+            {
+                return avatar;
+            }
+        }
+
+        Debug.LogWarning($"Could not find an Avatar in {modelPath}");
+        return null;
     }
 
     private static void FrameGameplayCamera()
@@ -398,6 +551,34 @@ public static class BuildExteriorPrototype
         if (existing == null)
         {
             existing = GameObject.Find("Exterior Mining Outpost (Kenney v8)");
+        }
+        if (existing == null)
+        {
+            existing = GameObject.Find(PrototypeName);
+        }
+        if (existing == null)
+        {
+            existing = GameObject.Find("Exterior Mining Outpost (Kenney v9)");
+        }
+        if (existing == null)
+        {
+            existing = GameObject.Find("Exterior Mining Outpost (Kenney v10)");
+        }
+        if (existing == null)
+        {
+            existing = GameObject.Find("Exterior Mining Outpost (Kenney v11)");
+        }
+        if (existing == null)
+        {
+            existing = GameObject.Find("Exterior Mining Outpost (Kenney v12)");
+        }
+        if (existing == null)
+        {
+            existing = GameObject.Find("Exterior Mining Outpost (Kenney v13)");
+        }
+        if (existing == null)
+        {
+            existing = GameObject.Find("Exterior Mining Outpost (Kenney v14)");
         }
         if (existing != null)
         {

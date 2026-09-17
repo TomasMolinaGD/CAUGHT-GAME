@@ -22,6 +22,8 @@ public sealed class BoidAgent : MonoBehaviour
     private Rigidbody body;
     private CapsuleCollider capsule;
     private SteeringBehaviour[] steeringBehaviours;
+    private PlayAreaContainmentBehaviour containment;
+    private float movementPauseRemaining;
     private readonly Collider[] overlapBuffer = new Collider[16];
 
     private void Awake()
@@ -29,6 +31,7 @@ public sealed class BoidAgent : MonoBehaviour
         body = GetComponent<Rigidbody>();
         capsule = GetComponent<CapsuleCollider>();
         steeringBehaviours = GetComponents<SteeringBehaviour>();
+        containment = GetComponent<PlayAreaContainmentBehaviour>();
         Array.Sort(
             steeringBehaviours,
             (first, second) => second.Priority.CompareTo(first.Priority));
@@ -38,10 +41,21 @@ public sealed class BoidAgent : MonoBehaviour
     {
         Velocity = Vector3.zero;
         ActualVelocity = Vector3.zero;
+        movementPauseRemaining = 0f;
     }
 
     private void FixedUpdate()
     {
+        if (movementPauseRemaining > 0f)
+        {
+            movementPauseRemaining = Mathf.Max(
+                0f,
+                movementPauseRemaining - Time.fixedDeltaTime);
+            Velocity = Vector3.zero;
+            ActualVelocity = Vector3.zero;
+            return;
+        }
+
         Vector3 steering = CalculatePrioritySteering(out int appliedPriority);
 
         Velocity += steering * Time.fixedDeltaTime;
@@ -56,6 +70,13 @@ public sealed class BoidAgent : MonoBehaviour
 
         MoveWithEnvironmentCollision(Velocity * Time.fixedDeltaTime);
         RotateTowardsVelocity();
+    }
+
+    public void PauseMovement(float duration)
+    {
+        movementPauseRemaining = Mathf.Max(movementPauseRemaining, duration);
+        Velocity = Vector3.zero;
+        ActualVelocity = Vector3.zero;
     }
 
     private void MoveWithEnvironmentCollision(Vector3 desiredDisplacement)
@@ -107,6 +128,22 @@ public sealed class BoidAgent : MonoBehaviour
         }
 
         ResolveEnvironmentOverlaps(ref resolvedPosition);
+
+        if (containment != null)
+        {
+            resolvedPosition = containment.ClampInsidePlayableArea(
+                resolvedPosition,
+                out bool clampedX,
+                out bool clampedZ);
+            if (clampedX)
+            {
+                Velocity = new Vector3(0f, Velocity.y, Velocity.z);
+            }
+            if (clampedZ)
+            {
+                Velocity = new Vector3(Velocity.x, Velocity.y, 0f);
+            }
+        }
 
         Vector3 actualDisplacement = Vector3.ProjectOnPlane(resolvedPosition - startPosition, Vector3.up);
         ActualVelocity = actualDisplacement / Time.fixedDeltaTime;

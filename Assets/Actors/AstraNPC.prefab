@@ -186,6 +186,7 @@ GameObject:
   - component: {fileID: 6849329817682194705}
   - component: {fileID: 2711690536423068491}
   - component: {fileID: 7786410385194872936}
+  - component: {fileID: 8357291036482014756}
   - component: {fileID: 3096194319306985742}
   - component: {fileID: 6674964105994608718}
   - component: {fileID: 7342195086712345678}
@@ -228,8 +229,9 @@ MonoBehaviour:
   weight: 1
   priority: 1000
   center: {x: 484, y: 623}
-  halfExtents: {x: 68, y: 52}
-  turningMargin: 12
+  halfExtents: {x: 50, y: 34}
+  turningMargin: 8
+  hardBoundaryPadding: 1.5
   strength: 4
 --- !u!114 &7453206197823456789
 MonoBehaviour:
@@ -337,7 +339,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a712af315db4886b63a07bc82136791, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::BoidSensor
-  perceptionRadius: 10
+  perceptionRadius: 16
   separationRadius: 2.2
   threatDetectionRadius: 12
   interestDetectionRadius: 20
@@ -409,7 +411,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AlignmentBehaviour
   weight: 1
   priority: 10
-  strength: 0.8
+  strength: 1.4
   directionResponse: 4
 --- !u!114 &7190586341274036921
 MonoBehaviour:
@@ -425,9 +427,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CohesionBehaviour
   weight: 1
   priority: 10
-  strength: 2
+  strength: 4
   comfortRadius: 3
-  slowingRadius: 8
+  slowingRadius: 12
 --- !u!114 &5480162947638291052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -458,13 +460,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ac6c4e21a9d433da1bd432d8176e2a4, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::WanderBehaviour
-  weight: 1
+  weight: 0.3
   priority: 10
   areaCenter: {x: 484, y: 623}
   areaHalfExtents: {x: 50, y: 34}
-  formationRadius: 3
-  directionChangeInterval: 10
-  turnSpeed: 90
+  minimumTravelDistance: 14
+  maximumTravelDistance: 24
+  arrivalDistance: 2.5
+  directionChangeInterval: 12
+  maximumDirectionChange: 30
+  turnSpeed: 70
 --- !u!114 &3836482890985047117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -574,6 +579,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6068f4b1de994c81bcbbd60fb312f153, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::BoidActivity
+--- !u!114 &8357291036482014756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800950277290276037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a651d8fe03a4f77bc758390602f7f93, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::BoidHitReaction
+  hitStunDuration: 1.25
 --- !u!114 &6674964105994608718
 MonoBehaviour:
   m_ObjectHideFlags: 0

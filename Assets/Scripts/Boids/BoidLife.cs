@@ -23,6 +23,7 @@ public class BoidLife : MonoBehaviour
     public event Action<BoidLife> Died;
     public event Action<BoidLife> Collected;
     public event Action<BoidLife> Respawned;
+    public event Action<BoidLife, float> Damaged;
 
     private void Awake()
     {
@@ -36,7 +37,9 @@ public class BoidLife : MonoBehaviour
             return;
         }
 
+        float previousLife = currentLife;
         currentLife = Mathf.Max(0f, currentLife - amount);
+        Damaged?.Invoke(this, previousLife - currentLife);
         if (currentLife <= 0f)
         {
             Die();

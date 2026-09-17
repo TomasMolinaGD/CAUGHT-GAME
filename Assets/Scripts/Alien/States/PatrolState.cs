@@ -1,113 +1,99 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 public class PatrolState : State
 {
-    private FSMAgent _agent;
-    private PatrolData _dataPatrol;
+    private readonly FSMAgent agent;
+    private int currentNode;
 
-    private int currentNode = 0;
-    //private int direction = 1;
-
-    public PatrolState(FSMAgent agent,PatrolData dataPatrol,StateMachine stateMachine) : base(stateMachine)
+    public PatrolState(FSMAgent agent, StateMachine stateMachine) : base(stateMachine)
     {
-        _agent = agent;
-        _dataPatrol = dataPatrol;
+        this.agent = agent;
     }
 
     public override void Enter()
     {
-        Debug.Log("Entré en Patrol");
+        currentNode = FindClosestWaypointIndex();
+        agent.SetAttackAnimation(false);
     }
 
     public override void Update()
     {
-        if (!PatrolLoop())
+        if (agent.CanStartAttack())
         {
+            StateMachine.ChangeState(PoliceState.Attack);
             return;
         }
 
-        if (_agent.Animator != null)
-        {
-            _agent.Animator.Play("movement");
-        }
+        agent.SetMovingAnimation(PatrolLoop());
+        agent.InterestSpawner.Tick(Time.deltaTime);
     }
 
     public override void Exit()
     {
-        Debug.Log("no ma patrol");
+        agent.Movement.Stop();
+        agent.SetMovingAnimation(false);
     }
+
     private bool PatrolLoop()
     {
-        if (_dataPatrol == null ||
-            _dataPatrol.transform == null ||
-            _dataPatrol.wayPoints == null ||
-            _dataPatrol.wayPoints.Count == 0)
+        if (agent.Waypoints == null || agent.Waypoints.Count == 0)
         {
+            agent.Movement.Stop();
             return false;
         }
 
-        currentNode = Mathf.Clamp(currentNode, 0, _dataPatrol.wayPoints.Count - 1);
-        var nextWayPoint = _dataPatrol.wayPoints[currentNode];
-        if (nextWayPoint == null)
+        currentNode = Mathf.Clamp(currentNode, 0, agent.Waypoints.Count - 1);
+        Transform nextWaypoint = agent.Waypoints[currentNode];
+        if (nextWaypoint == null)
         {
-            currentNode = (currentNode + 1) % _dataPatrol.wayPoints.Count;
+            currentNode = (currentNode + 1) % agent.Waypoints.Count;
             return false;
         }
 
-        if(Vector3.Distance(nextWayPoint.position, _dataPatrol.transform.position) <= _dataPatrol.wayPointCheckDistance)
+        if (HorizontalDistanceSquared(nextWaypoint.position, agent.transform.position) <=
+            agent.WaypointCheckDistance * agent.WaypointCheckDistance)
         {
-            currentNode = (currentNode + 1) % _dataPatrol.wayPoints.Count;
-            nextWayPoint = _dataPatrol.wayPoints[currentNode];
-            if (nextWayPoint == null)
+            currentNode = (currentNode + 1) % agent.Waypoints.Count;
+            nextWaypoint = agent.Waypoints[currentNode];
+            if (nextWaypoint == null)
             {
                 return false;
             }
         }
 
-        var dir = nextWayPoint.position - _dataPatrol.transform.position;
-        dir.y = 0f;
-        if (dir.sqrMagnitude > 0.0001f)
+        return agent.Movement.MoveTowards(nextWaypoint.position, agent.WaypointCheckDistance);
+    }
+
+    private int FindClosestWaypointIndex()
+    {
+        if (agent.Waypoints == null || agent.Waypoints.Count == 0)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
-            _dataPatrol.transform.rotation = Quaternion.Slerp(
-                _dataPatrol.transform.rotation,
-                targetRotation,
-                _agent.turnSpeed * Time.deltaTime);
+            return 0;
         }
 
-        _dataPatrol.transform.position = Vector3.MoveTowards(
-            _dataPatrol.transform.position,
-            nextWayPoint.position,
-            _agent.speed * Time.deltaTime);
-        return true;
-    }
-    /* private void PatrolPingPong()
-    {
-        var nextWayPoint = _data.wayPoints[currentNode];
-        if (Vector3.Distance(nextWayPoint.position, _data.transform.position) <= _data.wayPointCheckDistance)
+        int closestIndex = 0;
+        float closestDistance = float.PositiveInfinity;
+        for (int index = 0; index < agent.Waypoints.Count; index++)
         {
-            currentNode += direction;
-            if(currentNode >= _data.wayPoints.Count)
+            Transform waypoint = agent.Waypoints[index];
+            if (waypoint == null)
             {
-                currentNode = _data.wayPoints.Count-1;
-                direction = -1;
-            }else if (currentNode < 0)
+                continue;
+            }
+
+            float distance = HorizontalDistanceSquared(agent.transform.position, waypoint.position);
+            if (distance < closestDistance)
             {
-                currentNode = 1;
-                direction = 1;
+                closestDistance = distance;
+                closestIndex = index;
             }
         }
-        var dir = nextWayPoint.position - _data.transform.position;
-        _data.transform.position += dir.normalized * _agent.speed * Time.deltaTime;
-    }*/
-}
 
-[System.Serializable]
-public class PatrolData
-{
-    public List<Transform> wayPoints;
-    public Transform transform;
-    public float wayPointCheckDistance = 0.1f;
+        return closestIndex;
+    }
 
+    private static float HorizontalDistanceSquared(Vector3 first, Vector3 second)
+    {
+        return Vector3.ProjectOnPlane(first - second, Vector3.up).sqrMagnitude;
+    }
 }

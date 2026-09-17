@@ -37,8 +37,11 @@ public class BoidRespawnArea : MonoBehaviour
             }
         }
 
-        position = default;
-        return false;
+        // The prototype is flat. Falling back to the area's own height keeps
+        // respawning random even when the visual floor has no Ground collider.
+        position = CreateRandomCandidate();
+        position.y = transform.position.y + groundOffset;
+        return true;
     }
 
     private Vector3 CreateRandomCandidate()
