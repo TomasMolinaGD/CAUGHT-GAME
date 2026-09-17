@@ -8,6 +8,7 @@ public class FSMAgent : MonoBehaviour
     public Animator Animator => animator;
     public List<Transform> waypoints = new List<Transform>();
     public float speed = 10f;
+    public float turnSpeed = 8f;
     [SerializeField] private float waypointCheckDistance = 0.1f;
     //private int currentNode;
     public int direction = 1;
@@ -21,6 +22,13 @@ public class FSMAgent : MonoBehaviour
     private void Awake()
     {
         InitializePatrolData();
+
+        if (animator != null)
+        {
+            // PatrolState controls translation explicitly. Root motion would add
+            // a second displacement in the animation's forward direction.
+            animator.applyRootMotion = false;
+        }
 
         _stateMachine = new StateMachine();
         IdleState idleState = new IdleState(_stateMachine);

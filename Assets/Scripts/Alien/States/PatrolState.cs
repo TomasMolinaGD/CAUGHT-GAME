@@ -66,7 +66,20 @@ public class PatrolState : State
         }
 
         var dir = nextWayPoint.position - _dataPatrol.transform.position;
-        _dataPatrol.transform.position += dir.normalized * _agent.speed * Time.deltaTime;
+        dir.y = 0f;
+        if (dir.sqrMagnitude > 0.0001f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
+            _dataPatrol.transform.rotation = Quaternion.Slerp(
+                _dataPatrol.transform.rotation,
+                targetRotation,
+                _agent.turnSpeed * Time.deltaTime);
+        }
+
+        _dataPatrol.transform.position = Vector3.MoveTowards(
+            _dataPatrol.transform.position,
+            nextWayPoint.position,
+            _agent.speed * Time.deltaTime);
         return true;
     }
     /* private void PatrolPingPong()
