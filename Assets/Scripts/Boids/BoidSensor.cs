@@ -18,12 +18,16 @@ public sealed class BoidSensor : MonoBehaviour
     [SerializeField] private LayerMask threatLayerMask = ~0;
     [SerializeField] private LayerMask interestLayerMask = ~0;
 
+    [Header("Update Frequency")]
+    [SerializeField, Min(0.02f)] private float refreshInterval = 0.12f;
+
     private readonly Collider[] detectedColliders = new Collider[MaximumDetectedColliders];
     private readonly List<BoidAgent> neighbors = new List<BoidAgent>();
     private readonly List<BoidAgent> separationNeighbors = new List<BoidAgent>();
     private BoidAgent owner;
     private BoidThreat currentThreat;
     private BoidInterest currentInterest;
+    private float refreshTimer;
 
     public IReadOnlyList<BoidAgent> Neighbors => neighbors;
     public IReadOnlyList<BoidAgent> SeparationNeighbors => separationNeighbors;
@@ -39,9 +43,22 @@ public sealed class BoidSensor : MonoBehaviour
         owner = GetComponent<BoidAgent>();
     }
 
-    private void FixedUpdate()
+    private void OnEnable()
     {
         Refresh();
+        refreshTimer = GetStaggeredRefreshDelay();
+    }
+
+    private void FixedUpdate()
+    {
+        refreshTimer -= Time.fixedDeltaTime;
+        if (refreshTimer > 0f)
+        {
+            return;
+        }
+
+        Refresh();
+        refreshTimer = refreshInterval;
     }
 
     public void Refresh()
@@ -141,6 +158,13 @@ public sealed class BoidSensor : MonoBehaviour
         separationRadius = Mathf.Clamp(separationRadius, 0.1f, perceptionRadius - 0.1f);
         threatDetectionRadius = Mathf.Max(0.1f, threatDetectionRadius);
         interestDetectionRadius = Mathf.Max(0.1f, interestDetectionRadius);
+        refreshInterval = Mathf.Max(0.02f, refreshInterval);
     }
 
+    private float GetStaggeredRefreshDelay()
+    {
+        uint stableId = unchecked((uint)GetInstanceID());
+        float phase = (stableId % 997u) / 997f;
+        return Mathf.Lerp(Time.fixedDeltaTime, refreshInterval, phase);
+    }
 }

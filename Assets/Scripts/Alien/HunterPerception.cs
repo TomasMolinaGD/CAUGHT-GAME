@@ -8,17 +8,42 @@ public sealed class HunterPerception : MonoBehaviour
     [SerializeField, Min(0.1f)] private float deadBoidDetectionRadius = 18f;
     [SerializeField] private LayerMask boidLayerMask = 1 << 9;
     [SerializeField] private LayerMask obstacleLayerMask = 1 << 12;
+    [SerializeField, Min(0.02f)] private float refreshInterval = 0.1f;
 
     private readonly Collider[] results = new Collider[32];
     private readonly HashSet<BoidLife> livingBoids = new HashSet<BoidLife>();
     private readonly HashSet<BoidLife> deadBoids = new HashSet<BoidLife>();
+    private float refreshTimer;
 
     public BoidLife ClosestLivingBoid { get; private set; }
     public BoidLife ClosestDeadBoid { get; private set; }
     public int LivingBoidCount => livingBoids.Count;
     public int DeadBoidCount => deadBoids.Count;
 
-    public void RefreshDetections()
+    private void OnEnable()
+    {
+        refreshTimer = 0f;
+    }
+
+    public void Tick(float deltaTime)
+    {
+        refreshTimer -= Mathf.Max(0f, deltaTime);
+        if (refreshTimer > 0f)
+        {
+            return;
+        }
+
+        RefreshDetections();
+        refreshTimer = refreshInterval;
+    }
+
+    public void ForceRefresh()
+    {
+        RefreshDetections();
+        refreshTimer = refreshInterval;
+    }
+
+    private void RefreshDetections()
     {
         ClosestLivingBoid = null;
         ClosestDeadBoid = null;
@@ -103,6 +128,7 @@ public sealed class HunterPerception : MonoBehaviour
     {
         livingBoidDetectionRadius = Mathf.Max(0.1f, livingBoidDetectionRadius);
         deadBoidDetectionRadius = Mathf.Max(0.1f, deadBoidDetectionRadius);
+        refreshInterval = Mathf.Max(0.02f, refreshInterval);
     }
 
     private void OnDrawGizmosSelected()

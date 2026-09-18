@@ -78,9 +78,9 @@ public class FSMAgent : MonoBehaviour
 
     private void TickAgentSystems()
     {
-        // Perception is refreshed before evaluating transitions so the FSM
-        // always makes decisions from the current frame's local sensor data.
-        perception?.RefreshDetections();
+        // Perception updates on its own interval and keeps the latest results
+        // available to the FSM between physics queries.
+        perception?.Tick(Time.deltaTime);
         combat?.Tick(Time.deltaTime);
     }
 
