@@ -41,34 +41,33 @@ public class FSMAgent : MonoBehaviour
 
     private void Awake()
     {
+        CacheDependencies();
+        ConfigureComponents();
+        InitializeStateMachine();
+    }
+
+    private void Update()
+    {
+        TickAgentSystems();
+        stateMachine?.Update();
+    }
+
+    private void CacheDependencies()
+    {
         movement = GetComponent<HunterMovement>();
-        if (movement == null)
-        {
-            movement = gameObject.AddComponent<HunterMovement>();
-        }
-
         perception = GetComponent<HunterPerception>();
-        if (perception == null)
-        {
-            perception = gameObject.AddComponent<HunterPerception>();
-        }
         interestSpawner = GetComponent<HunterInterestSpawner>();
-        if (interestSpawner == null)
-        {
-            interestSpawner = gameObject.AddComponent<HunterInterestSpawner>();
-        }
         combat = GetComponent<HunterCombat>();
-        if (combat == null)
-        {
-            combat = gameObject.AddComponent<HunterCombat>();
-        }
         animationController = GetComponent<HunterAnimationController>();
-        if (animationController == null)
-        {
-            animationController = gameObject.AddComponent<HunterAnimationController>();
-        }
-        movement.Configure(speed, turnSpeed);
+    }
 
+    private void ConfigureComponents()
+    {
+        movement.Configure(speed, turnSpeed);
+    }
+
+    private void InitializeStateMachine()
+    {
         stateMachine = new StateMachine();
         stateMachine.RegisterState(PoliceState.Patrol, new PatrolState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Pursuit, new PursuitState(this, stateMachine));
@@ -77,13 +76,12 @@ public class FSMAgent : MonoBehaviour
         stateMachine.ChangeState(PoliceState.Patrol);
     }
 
-    private void Update()
+    private void TickAgentSystems()
     {
         // Perception is refreshed before evaluating transitions so the FSM
         // always makes decisions from the current frame's local sensor data.
         perception?.RefreshDetections();
         combat?.Tick(Time.deltaTime);
-        stateMachine?.Update();
     }
 
     private void OnDisable()
