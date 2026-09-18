@@ -82,7 +82,7 @@ public sealed class BoidSensor : MonoBehaviour
             }
 
             BoidThreat detectedThreat = detectedCollider.GetComponentInParent<BoidThreat>();
-            if (detectedThreat != null)
+            if (detectedThreat != null && detectedThreat.IsAvailable)
             {
                 Vector3 threatOffset = detectedThreat.transform.position - transform.position;
                 float threatDistanceSquared = threatOffset.sqrMagnitude;
@@ -97,7 +97,7 @@ public sealed class BoidSensor : MonoBehaviour
             }
 
             BoidInterest detectedInterest = detectedCollider.GetComponentInParent<BoidInterest>();
-            if (detectedInterest != null)
+            if (detectedInterest != null && detectedInterest.IsAvailable)
             {
                 Vector3 interestOffset = detectedInterest.transform.position - transform.position;
                 float interestDistanceSquared = interestOffset.sqrMagnitude;

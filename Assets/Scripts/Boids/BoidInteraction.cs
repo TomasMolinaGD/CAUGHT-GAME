@@ -31,7 +31,7 @@ public sealed class BoidInteraction : MonoBehaviour
             interactionTimer = 0f;
         }
 
-        Vector3 offset = interest.transform.position - transform.position;
+        Vector3 offset = interest.Position - transform.position;
         offset = Vector3.ProjectOnPlane(offset, Vector3.up);
 
         if (offset.sqrMagnitude > interactionRadius * interactionRadius)
@@ -40,7 +40,7 @@ public sealed class BoidInteraction : MonoBehaviour
             return;
         }
 
-        if (!interest.TryGetComponent(out InterestLife life) || !life.IsAlive)
+        if (!interest.IsAvailable)
         {
             ResetInteraction();
             return;
@@ -53,7 +53,10 @@ public sealed class BoidInteraction : MonoBehaviour
         }
 
         interactionTimer -= interactionInterval;
-        life.TakeDamage(damagePerInteraction);
+        if (!interest.TryApplyDamage(damagePerInteraction))
+        {
+            ResetInteraction();
+        }
     }
 
     private void ResetInteraction()

@@ -12,7 +12,7 @@ public sealed class ArriveBehaviour : SteeringBehaviour
     private BoidSensor sensor;
 
     public override bool IsApplicable =>
-        sensor != null && sensor.CurrentInterest != null;
+        sensor != null && sensor.CurrentInterest != null && sensor.CurrentInterest.IsAvailable;
 
     private void Awake()
     {
@@ -28,7 +28,7 @@ public sealed class ArriveBehaviour : SteeringBehaviour
             return Vector3.zero;
         }
 
-        Vector3 directionToInterest = interest.transform.position - transform.position;
+        Vector3 directionToInterest = interest.Position - transform.position;
         directionToInterest = Vector3.ProjectOnPlane(directionToInterest, Vector3.up);
         float distance = directionToInterest.magnitude;
 

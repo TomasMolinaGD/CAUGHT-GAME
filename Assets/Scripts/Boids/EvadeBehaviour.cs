@@ -9,7 +9,7 @@ public sealed class EvadeBehaviour : SteeringBehaviour
     private BoidSensor sensor;
 
     public override bool IsApplicable =>
-        sensor != null && sensor.CurrentThreat != null;
+        sensor != null && sensor.CurrentThreat != null && sensor.CurrentThreat.IsAvailable;
 
     private void Awake()
     {
@@ -25,7 +25,7 @@ public sealed class EvadeBehaviour : SteeringBehaviour
             return Vector3.zero;
         }
 
-        Vector3 awayFromThreat = transform.position - threat.transform.position;
+        Vector3 awayFromThreat = transform.position - threat.Position;
         awayFromThreat = Vector3.ProjectOnPlane(awayFromThreat, Vector3.up);
 
         if (awayFromThreat.sqrMagnitude < 0.0001f)
@@ -34,7 +34,8 @@ public sealed class EvadeBehaviour : SteeringBehaviour
         }
 
         Vector3 desiredVelocity = awayFromThreat.normalized * owner.MaxSpeed;
-        return (desiredVelocity - owner.Velocity) * strength;
+        return (desiredVelocity - owner.Velocity) *
+            strength * threat.AvoidanceMultiplier;
     }
 
     protected override void OnValidate()

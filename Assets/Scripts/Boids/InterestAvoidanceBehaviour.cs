@@ -13,12 +13,13 @@ public sealed class InterestAvoidanceBehaviour : SteeringBehaviour
     {
         get
         {
-            if (sensor == null || sensor.CurrentInterest == null)
+            if (sensor == null || sensor.CurrentInterest == null ||
+                !sensor.CurrentInterest.IsAvailable)
             {
                 return false;
             }
 
-            Vector3 offset = transform.position - sensor.CurrentInterest.transform.position;
+            Vector3 offset = transform.position - sensor.CurrentInterest.Position;
             offset = Vector3.ProjectOnPlane(offset, Vector3.up);
             return offset.sqrMagnitude < avoidanceRadius * avoidanceRadius;
         }
@@ -38,7 +39,7 @@ public sealed class InterestAvoidanceBehaviour : SteeringBehaviour
             return Vector3.zero;
         }
 
-        Vector3 awayFromInterest = transform.position - interest.transform.position;
+        Vector3 awayFromInterest = transform.position - interest.Position;
         awayFromInterest = Vector3.ProjectOnPlane(awayFromInterest, Vector3.up);
 
         if (awayFromInterest.sqrMagnitude < 0.0001f)

@@ -71,13 +71,13 @@ public class BoidGizmos : MonoBehaviour
         if (sensor.CurrentThreat != null)
         {
             Gizmos.color = Color.magenta;
-            Gizmos.DrawLine(transform.position, sensor.CurrentThreat.transform.position);
+            Gizmos.DrawLine(transform.position, sensor.CurrentThreat.Position);
         }
 
         if (sensor.CurrentInterest != null)
         {
             Gizmos.color = Color.green;
-            Gizmos.DrawLine(transform.position, sensor.CurrentInterest.transform.position);
+            Gizmos.DrawLine(transform.position, sensor.CurrentInterest.Position);
         }
     }
 

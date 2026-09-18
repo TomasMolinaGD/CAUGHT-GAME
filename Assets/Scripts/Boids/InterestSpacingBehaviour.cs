@@ -16,13 +16,14 @@ public sealed class InterestSpacingBehaviour : SteeringBehaviour
     {
         get
         {
-            if (sensor == null || sensor.CurrentInterest == null)
+            if (sensor == null || sensor.CurrentInterest == null ||
+                !sensor.CurrentInterest.IsAvailable)
             {
                 isDistributing = false;
                 return false;
             }
 
-            Vector3 offset = transform.position - sensor.CurrentInterest.transform.position;
+            Vector3 offset = transform.position - sensor.CurrentInterest.Position;
             offset = Vector3.ProjectOnPlane(offset, Vector3.up);
             if (offset.sqrMagnitude > distributionRadius * distributionRadius)
             {
@@ -67,13 +68,14 @@ public sealed class InterestSpacingBehaviour : SteeringBehaviour
     public override Vector3 CalculateSteering()
     {
         BoidAgent closestNeighbor = FindClosestNeighbor();
-        if (closestNeighbor == null || sensor.CurrentInterest == null)
+        if (closestNeighbor == null || sensor.CurrentInterest == null ||
+            !sensor.CurrentInterest.IsAvailable)
         {
             return Vector3.zero;
         }
 
         Vector3 radialDirection =
-            transform.position - sensor.CurrentInterest.transform.position;
+            transform.position - sensor.CurrentInterest.Position;
         radialDirection = Vector3.ProjectOnPlane(radialDirection, Vector3.up);
 
         if (radialDirection.sqrMagnitude < 0.0001f)
