@@ -12,6 +12,7 @@
 /[Bb]uild/
 /[Bb]uilds/
 /output/pdf/
+/*.zip
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 *.log
