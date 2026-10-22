@@ -92,6 +92,24 @@ namespace CaughtGame.Navigation
             return LastPathResult;
         }
 
+        /// <summary>Follows a smoothed route only when its source grid and agent restrictions match.</summary>
+        public bool FollowSmoothedPath(NavigationPathSmoothingResult smoothing)
+        {
+            if (smoothing == null || !smoothing.IsUsable || smoothing.Grid != grid ||
+                smoothing.AgentType != agentType)
+            {
+                GetPathFollower().Stop();
+                LastPathResult = null;
+                return false;
+            }
+
+            LastPathResult = smoothing.SmoothedPath;
+            if (GetPathFollower().FollowPath(LastPathResult)) return true;
+
+            LastPathResult = null;
+            return false;
+        }
+
         private PathFollower GetPathFollower()
         {
             if (pathFollower == null)

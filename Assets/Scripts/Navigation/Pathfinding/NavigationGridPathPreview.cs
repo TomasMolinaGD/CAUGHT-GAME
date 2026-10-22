@@ -20,6 +20,10 @@ namespace CaughtGame.Navigation
         [SerializeField, Min(0.01f)] private float configuredSpeed = 3f;
         [SerializeField, Min(0.01f)] private float capsuleRadius = 0.5f;
         [SerializeField, Min(0.01f)] private float capsuleHeight = 2f;
+        [Tooltip("Extra physical clearance used only for the smoothing query; it does not change agent dimensions.")]
+        [SerializeField, Min(0f)] private float additionalClearance = 0.25f;
+        [Tooltip("When enabled, measured test movement uses only a successfully smoothed and validated route.")]
+        [SerializeField] private bool useSmoothedPathForMovement;
         [SerializeField] private LayerMask collisionLayers = Physics.AllLayers;
         [SerializeField] private PathFollower movementFollower;
         [SerializeField] private NavigationGridTestAgent movementTestAgent;
@@ -40,6 +44,16 @@ namespace CaughtGame.Navigation
         [NonSerialized] private float validatedHeight;
         [NonSerialized] private int validatedLayerMask;
         [NonSerialized] private bool hasCachedValidation;
+        [NonSerialized] private NavigationPathSmoothingResult lastSmoothingResult;
+        [NonSerialized] private NavigationPathResult smoothedSourcePath;
+        [NonSerialized] private NavigationGrid smoothedGrid;
+        [NonSerialized] private GeneratedGeometryMarker smoothedGeneration;
+        [NonSerialized] private GeneratedGeometryMarker smoothedExplicitGeneration;
+        [NonSerialized] private NavigationAgentType smoothedAgentType;
+        [NonSerialized] private float smoothedRadius;
+        [NonSerialized] private float smoothedHeight;
+        [NonSerialized] private float smoothedMargin;
+        [NonSerialized] private int smoothedLayerMask;
 
         public NavigationGrid Grid => grid;
         public int StartRow => startRow;
@@ -52,6 +66,8 @@ namespace CaughtGame.Navigation
         public float ConfiguredSpeed => configuredSpeed;
         public float CapsuleRadius => capsuleRadius;
         public float CapsuleHeight => capsuleHeight;
+        public float AdditionalClearance => additionalClearance;
+        public bool UseSmoothedPathForMovement => useSmoothedPathForMovement;
         public int CollisionLayers => collisionLayers.value;
         public PathFollower MovementFollower => movementFollower;
         public NavigationGridTestAgent MovementTestAgent => movementTestAgent;
@@ -70,6 +86,9 @@ namespace CaughtGame.Navigation
                 lastPhysicalValidation.Status != NavigationPathValidationStatus.Blocked))
                 ? lastPhysicalValidation
                 : null;
+        public NavigationPathSmoothingResult LastSmoothingResult => HasCurrentSmoothingResult
+            ? lastSmoothingResult
+            : null;
         public NavigationRouteMetrics LastMetrics
         {
             get
@@ -104,6 +123,7 @@ namespace CaughtGame.Navigation
             lastPhysicalValidation = null;
             validatedPath = null;
             hasCachedValidation = false;
+            ClearSmoothingResult();
             if (metricsRecorder != null) metricsRecorder.Clear();
             lastResult = NavigationGridPathfinder.FindPath(grid, startRow, startColumn,
                 destinationRow, destinationColumn, agentType);
@@ -150,11 +170,42 @@ namespace CaughtGame.Navigation
             return lastPhysicalValidation;
         }
 
+        /// <summary>Explicitly smooths and physically validates the last successful A* result.</summary>
+        public NavigationPathSmoothingResult SmoothLastPath()
+        {
+            NavigationPathResult path = LastResult;
+            GeneratedGeometryMarker source = ResolveGeneration();
+            lastSmoothingResult = NavigationPathSmoother.Smooth(grid, source, path, agentType,
+                capsuleRadius, capsuleHeight, additionalClearance, collisionLayers.value);
+            smoothedSourcePath = path;
+            smoothedGrid = grid;
+            smoothedGeneration = source;
+            smoothedExplicitGeneration = geometryGeneration;
+            smoothedAgentType = agentType;
+            smoothedRadius = capsuleRadius;
+            smoothedHeight = capsuleHeight;
+            smoothedMargin = additionalClearance;
+            smoothedLayerMask = collisionLayers.value;
+            return lastSmoothingResult;
+        }
+
         /// <summary>Starts the already-calculated route on the assigned follower and times its completion.</summary>
         public bool StartMeasuredMovement()
         {
             NavigationPathResult path = LastResult;
             PathFollower follower = EffectiveMovementFollower;
+            NavigationPathSmoothingResult smoothing = null;
+            if (useSmoothedPathForMovement)
+            {
+                // Revalidate against the current grid and colliders when movement is explicitly requested.
+                smoothing = SmoothLastPath();
+                if (smoothing == null || !smoothing.IsUsable) return false;
+                if (movementTestAgent != null && (movementTestAgent.Grid != grid ||
+                    movementTestAgent.AgentType != agentType ||
+                    (movementFollower != null && movementFollower != movementTestAgent.Follower))) return false;
+                path = smoothing.SmoothedPath;
+            }
+
             if (path == null || path.Status != NavigationPathStatus.Success || follower == null ||
                 metricsRecorder == null || metricsRecorder.IsRecording ||
                 !Mathf.Approximately(follower.Speed, configuredSpeed))
@@ -162,13 +213,38 @@ namespace CaughtGame.Navigation
                 return false;
             }
 
-            if (!follower.FollowPath(path)) return false;
-            NavigationPathValidationStatus physicalStatus = LastPhysicalValidation == null
-                ? NavigationPathValidationStatus.NotValidated
-                : LastPhysicalValidation.Status;
+            bool started = useSmoothedPathForMovement && movementTestAgent != null
+                ? movementTestAgent.FollowSmoothedPath(smoothing)
+                : follower.FollowPath(path);
+            if (!started) return false;
+            NavigationPathValidationStatus physicalStatus = useSmoothedPathForMovement
+                ? smoothing.PhysicalValidation.Status
+                : LastPhysicalValidation == null
+                    ? NavigationPathValidationStatus.NotValidated
+                    : LastPhysicalValidation.Status;
             NavigationRouteMetrics metrics = NavigationRouteMetrics.FromPath(routeIdentifier,
                 agentType, path, configuredSpeed, physicalStatus);
             return metricsRecorder.Begin(metrics, follower);
+        }
+
+        private bool HasCurrentSmoothingResult => lastSmoothingResult != null && HasCurrentResult &&
+            lastSmoothingResult.OriginalPath == lastResult && smoothedSourcePath == lastResult &&
+            smoothedGrid == grid && smoothedExplicitGeneration == geometryGeneration &&
+            smoothedAgentType == agentType && Mathf.Approximately(smoothedRadius, capsuleRadius) &&
+            Mathf.Approximately(smoothedHeight, capsuleHeight) &&
+            Mathf.Approximately(smoothedMargin, additionalClearance) &&
+            smoothedLayerMask == collisionLayers.value &&
+            (smoothedGeneration != null || lastSmoothingResult.Status == NavigationPathSmoothingStatus.MissingGeometry ||
+             lastSmoothingResult.Status == NavigationPathSmoothingStatus.InvalidPath ||
+             lastSmoothingResult.Status == NavigationPathSmoothingStatus.InvalidConfiguration);
+
+        private void ClearSmoothingResult()
+        {
+            lastSmoothingResult = null;
+            smoothedSourcePath = null;
+            smoothedGrid = null;
+            smoothedGeneration = null;
+            smoothedExplicitGeneration = null;
         }
 
         private GeneratedGeometryMarker ResolveGeneration()
@@ -245,6 +321,32 @@ namespace CaughtGame.Navigation
                         (cell.y == destinationRow && cell.x == destinationColumn)) continue;
                     DrawCell(cell.y, cell.x, new Color(1f, 0.82f, 0.1f, 0.68f));
                 }
+                NavigationPathSmoothingResult smoothing = LastSmoothingResult;
+                if (smoothing != null)
+                {
+                    Gizmos.matrix = Matrix4x4.identity;
+                    DrawWorldPath(result, new Color(1f, 0.68f, 0.12f, 1f), grid.transform.up * 0.08f);
+                    if (smoothing.IsUsable)
+                    {
+                        DrawWorldPath(smoothing.SmoothedPath, new Color(0.12f, 0.85f, 1f, 1f),
+                            grid.transform.up * 0.16f);
+                    }
+                    else if (smoothing.PhysicalValidation != null &&
+                             smoothing.PhysicalValidation.Status == NavigationPathValidationStatus.Blocked)
+                    {
+                        NavigationPathValidationResult smoothingValidation = smoothing.PhysicalValidation;
+                        for (int index = 0; index < smoothingValidation.Segments.Count; index++)
+                        {
+                            NavigationPathSegmentValidation segment = smoothingValidation.Segments[index];
+                            Gizmos.color = segment.IsClear ? new Color(0.2f, 0.9f, 0.25f, 1f) : Color.red;
+                            Gizmos.DrawLine(segment.Start, segment.End);
+                        }
+
+                        Gizmos.color = Color.red;
+                        Gizmos.DrawSphere(smoothingValidation.FirstProblemPosition,
+                            Mathf.Max(0.1f, capsuleRadius * 0.4f));
+                    }
+                }
             }
             finally
             {
@@ -260,6 +362,15 @@ namespace CaughtGame.Navigation
             Vector3 center = new Vector3((column + 0.5f) * grid.CellSize, 0.08f,
                 (row + 0.5f) * grid.CellSize);
             Gizmos.DrawCube(center, new Vector3(size, 0.04f, size));
+        }
+
+        private static void DrawWorldPath(NavigationPathResult path, Color color, Vector3 offset)
+        {
+            Gizmos.color = color;
+            for (int index = 0; index + 1 < path.Waypoints.Count; index++)
+            {
+                Gizmos.DrawLine(path.Waypoints[index] + offset, path.Waypoints[index + 1] + offset);
+            }
         }
 
     }

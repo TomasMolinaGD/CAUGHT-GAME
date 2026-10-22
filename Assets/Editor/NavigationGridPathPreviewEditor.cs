@@ -12,7 +12,7 @@ public sealed class NavigationGridPathPreviewEditor : Editor
         NavigationGridPathPreview preview = (NavigationGridPathPreview)target;
         EditorGUILayout.Space();
         EditorGUILayout.HelpBox(
-            "A* runs only after an explicit button press. The calculated route remains unchanged.",
+            "A* and smoothing run only after explicit button presses. The original A* route remains unchanged.",
             MessageType.Info);
 
         using (new EditorGUI.DisabledScope(preview.Grid == null ||
@@ -83,6 +83,48 @@ public sealed class NavigationGridPathPreviewEditor : Editor
         }
 
         EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Optional Path Smoothing", EditorStyles.boldLabel);
+        using (new EditorGUI.DisabledScope(result.Status != NavigationPathStatus.Success ||
+                                           (preview.MetricsRecorder != null && preview.MetricsRecorder.IsRecording)))
+        {
+            if (GUILayout.Button("Smooth & Validate A* Path"))
+            {
+                preview.SmoothLastPath();
+                SceneView.RepaintAll();
+                Repaint();
+            }
+        }
+
+        NavigationPathSmoothingResult smoothing = preview.LastSmoothingResult;
+        if (smoothing == null)
+        {
+            EditorGUILayout.LabelField("Smoothing", "Not run or stale");
+        }
+        else
+        {
+            MessageType smoothingMessage = smoothing.IsUsable ? MessageType.Info : MessageType.Warning;
+            string validationStatus = smoothing.PhysicalValidation == null
+                ? "No physical result"
+                : smoothing.PhysicalValidation.Status.ToString();
+            EditorGUILayout.HelpBox(
+                $"{smoothing.Status} — physical clearance: {validationStatus}. " +
+                (smoothing.PhysicalValidation == null ? string.Empty : smoothing.PhysicalValidation.Message),
+                smoothingMessage);
+            EditorGUILayout.LabelField("Waypoints",
+                $"{smoothing.OriginalWaypointCount} → {smoothing.SmoothedWaypointCount}");
+            EditorGUILayout.LabelField("Distance",
+                $"{smoothing.OriginalDistance:F3} → {smoothing.SmoothedDistance:F3} units");
+            if (smoothing.PhysicalValidation != null &&
+                smoothing.PhysicalValidation.FirstBlockingCollider != null)
+            {
+                EditorGUILayout.ObjectField("First Smoothing Obstacle",
+                    smoothing.PhysicalValidation.FirstBlockingCollider, typeof(Collider), true);
+                EditorGUILayout.LabelField("Problem Segment",
+                    smoothing.PhysicalValidation.FirstProblematicSegmentIndex.ToString());
+            }
+        }
+
+        EditorGUILayout.Space();
         EditorGUILayout.LabelField("Route Metrics", EditorStyles.boldLabel);
         NavigationRouteMetrics metrics = preview.LastMetrics;
         if (metrics == null)
@@ -136,6 +178,7 @@ public sealed class NavigationGridPathPreviewEditor : Editor
                 typeof(PathFollower), true);
             using (new EditorGUI.DisabledScope(!Application.isPlaying || result == null ||
                 result.Status != NavigationPathStatus.Success || preview.EffectiveMovementFollower == null ||
+                (preview.UseSmoothedPathForMovement && (smoothing == null || !smoothing.IsUsable)) ||
                 preview.MetricsRecorder.IsRecording ||
                 !Mathf.Approximately(preview.EffectiveMovementFollower.Speed, preview.ConfiguredSpeed)))
             {
