@@ -1,7 +1,8 @@
 {
   "name": "Navigation.EditModeTests",
   "references": [
-    "Navigation.Runtime"
+    "Navigation.Runtime",
+    "Navigation.Graybox.Editor"
   ],
   "includePlatforms": [
     "Editor"
