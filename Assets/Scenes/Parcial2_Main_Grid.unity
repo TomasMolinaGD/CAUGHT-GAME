@@ -1,0 +1,12395 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!29 &1
+OcclusionCullingSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_OcclusionBakeSettings:
+    smallestOccluder: 5
+    smallestHole: 0.25
+    backfaceThreshold: 100
+  m_SceneGUID: 00000000000000000000000000000000
+  m_OcclusionCullingData: {fileID: 0}
+--- !u!104 &2
+RenderSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 10
+  m_Fog: 0
+  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogMode: 3
+  m_FogDensity: 0.01
+  m_LinearFogStart: 0
+  m_LinearFogEnd: 300
+  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
+  m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
+  m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
+  m_AmbientIntensity: 1
+  m_AmbientMode: 0
+  m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
+  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_HaloStrength: 0.5
+  m_FlareStrength: 1
+  m_FlareFadeSpeed: 3
+  m_HaloTexture: {fileID: 0}
+  m_SpotCookie: {fileID: 10001, guid: 0000000000000000e000000000000000, type: 0}
+  m_DefaultReflectionMode: 0
+  m_DefaultReflectionResolution: 128
+  m_ReflectionBounces: 1
+  m_ReflectionIntensity: 1
+  m_CustomReflection: {fileID: 0}
+  m_Sun: {fileID: 0}
+  m_UseRadianceAmbientProbe: 0
+--- !u!157 &3
+LightmapSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
+  m_GISettings:
+    serializedVersion: 2
+    m_BounceScale: 1
+    m_IndirectOutputScale: 1
+    m_AlbedoBoost: 1
+    m_EnvironmentLightingMode: 0
+    m_EnableBakedLightmaps: 1
+    m_EnableRealtimeLightmaps: 0
+  m_LightmapEditorSettings:
+    serializedVersion: 12
+    m_Resolution: 2
+    m_BakeResolution: 40
+    m_AtlasSize: 1024
+    m_AO: 0
+    m_AOMaxDistance: 1
+    m_CompAOExponent: 1
+    m_CompAOExponentDirect: 0
+    m_ExtractAmbientOcclusion: 0
+    m_Padding: 2
+    m_LightmapParameters: {fileID: 0}
+    m_LightmapsBakeMode: 1
+    m_TextureCompression: 1
+    m_ReflectionCompression: 2
+    m_MixedBakeMode: 2
+    m_BakeBackend: 2
+    m_PVRSampling: 1
+    m_PVRDirectSampleCount: 32
+    m_PVRSampleCount: 512
+    m_PVRBounces: 2
+    m_PVREnvironmentSampleCount: 256
+    m_PVREnvironmentReferencePointCount: 2048
+    m_PVRFilteringMode: 1
+    m_PVRDenoiserTypeDirect: 1
+    m_PVRDenoiserTypeIndirect: 1
+    m_PVRDenoiserTypeAO: 1
+    m_PVRFilterTypeDirect: 0
+    m_PVRFilterTypeIndirect: 0
+    m_PVRFilterTypeAO: 0
+    m_PVREnvironmentMIS: 1
+    m_PVRCulling: 1
+    m_PVRFilteringGaussRadiusDirect: 1
+    m_PVRFilteringGaussRadiusIndirect: 1
+    m_PVRFilteringGaussRadiusAO: 1
+    m_PVRFilteringAtrousPositionSigmaDirect: 0.5
+    m_PVRFilteringAtrousPositionSigmaIndirect: 2
+    m_PVRFilteringAtrousPositionSigmaAO: 1
+    m_ExportTrainingData: 0
+    m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
+  m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
+  m_LightingSettings: {fileID: 0}
+--- !u!196 &4
+NavMeshSettings:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_BuildSettings:
+    serializedVersion: 3
+    agentTypeID: 0
+    agentRadius: 0.5
+    agentHeight: 2
+    agentSlope: 45
+    agentClimb: 0.4
+    ledgeDropHeight: 0
+    maxJumpAcrossDistance: 0
+    minRegionArea: 2
+    manualCellSize: 0
+    cellSize: 0.16666667
+    manualTileSize: 0
+    tileSize: 256
+    buildHeightMesh: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
+    debug:
+      m_Flags: 0
+  m_NavMeshData: {fileID: 0}
+--- !u!1 &448204148
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 448204151}
+  - component: {fileID: 448204150}
+  - component: {fileID: 448204149}
+  m_Layer: 0
+  m_Name: Main Camera
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!81 &448204149
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448204148}
+  m_Enabled: 1
+--- !u!20 &448204150
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448204148}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 0
+  orthographic size: 5
+  m_Depth: -1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!4 &448204151
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 448204148}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &903273464
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 903273466}
+  - component: {fileID: 903273465}
+  - component: {fileID: 903273467}
+  m_Layer: 0
+  m_Name: Directional Light
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!108 &903273465
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 903273464}
+  m_Enabled: 1
+  serializedVersion: 12
+  m_Type: 1
+  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
+  m_Intensity: 1
+  m_Range: 10
+  m_SpotAngle: 30
+  m_InnerSpotAngle: 21.80208
+  m_CookieSize2D: {x: 0.5, y: 0.5}
+  m_Shadows:
+    m_Type: 2
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ForceVisible: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
+  m_LightUnit: 1
+  m_LuxAtDistance: 1
+  m_EnableSpotReflector: 1
+--- !u!4 &903273466
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 903273464}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &903273467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 903273464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
+--- !u!1 &2098697242
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2098697244}
+  - component: {fileID: 2098697243}
+  m_Layer: 0
+  m_Name: NavigationGrid_Test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2098697243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2098697242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64766d9de8e948618777b290667c5482, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Navigation.Runtime::CaughtGame.Navigation.NavigationGrid
+  columns: 40
+  rows: 60
+  cellSize: 4
+  cells:
+  - row: 0
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 18
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 19
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 20
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 21
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 22
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 0
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 18
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 1
+    column: 19
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 1
+    column: 20
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 1
+    column: 21
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 1
+    column: 22
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 1
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 1
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 18
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 2
+    column: 19
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 2
+    column: 20
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 2
+    column: 21
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 2
+    column: 22
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 2
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 2
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 18
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 3
+    column: 19
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 3
+    column: 20
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 3
+    column: 21
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 3
+    column: 22
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 3
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 3
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 18
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 4
+    column: 19
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 4
+    column: 20
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 4
+    column: 21
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 4
+    column: 22
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 4
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 4
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 18
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 5
+    column: 19
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 5
+    column: 20
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 5
+    column: 21
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 5
+    column: 22
+    walkable: 1
+    zone: 3
+    zoneId:
+  - row: 5
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 5
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 8
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 9
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 10
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 11
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 12
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 13
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 14
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 26
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 27
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 28
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 29
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 30
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 6
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 8
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 9
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 10
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 11
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 12
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 13
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 14
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 26
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 27
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 28
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 29
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 30
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 7
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 8
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 9
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 10
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 11
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 12
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 13
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 14
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 26
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 27
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 28
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 29
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 30
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 8
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 8
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 9
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 10
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 11
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 12
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 13
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 14
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 26
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 27
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 28
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 29
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 30
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 9
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 10
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 11
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 26
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 12
+    column: 27
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 12
+    column: 28
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 12
+    column: 29
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 12
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 12
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 26
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 13
+    column: 27
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 13
+    column: 28
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 13
+    column: 29
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 13
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 13
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 26
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 14
+    column: 27
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 14
+    column: 28
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 14
+    column: 29
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 14
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 14
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 26
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 15
+    column: 27
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 15
+    column: 28
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 15
+    column: 29
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 15
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 15
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 26
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 16
+    column: 27
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 16
+    column: 28
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 16
+    column: 29
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_B
+  - row: 16
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 16
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 17
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 18
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 19
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 20
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 20
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 21
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 21
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 22
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 22
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 23
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 23
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 24
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 24
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 25
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 25
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 26
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 26
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 27
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 27
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 28
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 28
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 29
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 29
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 30
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 30
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 31
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 31
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 32
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 32
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 33
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 33
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 34
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 34
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 35
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 35
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 36
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 36
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 37
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 37
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 38
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 38
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 13
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 14
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 15
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 16
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 17
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 18
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 19
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 20
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 21
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 22
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 23
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 24
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 25
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 26
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 27
+    walkable: 1
+    zone: 1
+    zoneId:
+  - row: 39
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 39
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 40
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 41
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 42
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 11
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 43
+    column: 12
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 43
+    column: 13
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 43
+    column: 14
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 43
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 43
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 11
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 44
+    column: 12
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 44
+    column: 13
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 44
+    column: 14
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 44
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 44
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 11
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 45
+    column: 12
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 45
+    column: 13
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 45
+    column: 14
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 45
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 45
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 11
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 46
+    column: 12
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 46
+    column: 13
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 46
+    column: 14
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 46
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 46
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 11
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 47
+    column: 12
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 47
+    column: 13
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 47
+    column: 14
+    walkable: 1
+    zone: 2
+    zoneId: SafeZone_A
+  - row: 47
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 47
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 48
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 49
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 8
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 9
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 10
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 11
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 12
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 13
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 14
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 26
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 27
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 28
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 29
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 30
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 50
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 8
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 9
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 10
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 11
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 12
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 13
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 14
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 26
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 27
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 28
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 29
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 30
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 51
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 8
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 9
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 10
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 11
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 12
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 13
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 14
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 26
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 27
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 28
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 29
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 30
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 52
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 1
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 2
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 3
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 4
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 5
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 6
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 7
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 8
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 9
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 10
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 11
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 12
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 13
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 14
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 15
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 16
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 17
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 18
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 19
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 20
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 21
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 22
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 23
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 24
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 25
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 26
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 27
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 28
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 29
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 30
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 31
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 32
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 33
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 34
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 35
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 36
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 37
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 38
+    walkable: 1
+    zone: 0
+    zoneId:
+  - row: 53
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 18
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 54
+    column: 19
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 54
+    column: 20
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 54
+    column: 21
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 54
+    column: 22
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 54
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 54
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 18
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 55
+    column: 19
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 55
+    column: 20
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 55
+    column: 21
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 55
+    column: 22
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 55
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 55
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 18
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 56
+    column: 19
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 56
+    column: 20
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 56
+    column: 21
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 56
+    column: 22
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 56
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 56
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 18
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 57
+    column: 19
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 57
+    column: 20
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 57
+    column: 21
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 57
+    column: 22
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 57
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 57
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 18
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 58
+    column: 19
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 58
+    column: 20
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 58
+    column: 21
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 58
+    column: 22
+    walkable: 1
+    zone: 4
+    zoneId:
+  - row: 58
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 58
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 0
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 1
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 2
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 3
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 4
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 5
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 6
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 7
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 8
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 9
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 10
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 11
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 12
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 13
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 14
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 15
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 16
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 17
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 18
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 19
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 20
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 21
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 22
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 23
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 24
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 25
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 26
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 27
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 28
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 29
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 30
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 31
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 32
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 33
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 34
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 35
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 36
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 37
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 38
+    walkable: 0
+    zone: 0
+    zoneId:
+  - row: 59
+    column: 39
+    walkable: 0
+    zone: 0
+    zoneId:
+--- !u!4 &2098697244
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2098697242}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 448204151}
+  - {fileID: 903273466}
+  - {fileID: 2098697244}
