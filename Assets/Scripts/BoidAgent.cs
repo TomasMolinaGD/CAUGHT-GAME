@@ -1,10 +1,12 @@
 using System;
+using CaughtGame.Navigation;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public sealed class BoidAgent : MonoBehaviour
 {
     [Header("Movement")]
+    [SerializeField] private BoidAreaPolicy areaPolicy = BoidAreaPolicy.LegacyRectangle;
     [SerializeField, Min(0.1f)] private float maxSpeed = 4f;
     [SerializeField, Min(0.1f)] private float maxAcceleration = 10f;
     [SerializeField, Min(0.1f)] private float rotationSpeed = 8f;
@@ -17,12 +19,39 @@ public sealed class BoidAgent : MonoBehaviour
 
     public Vector3 Velocity { get; private set; }
     public Vector3 ActualVelocity { get; private set; }
+    public BoidAreaPolicy AreaPolicy => areaPolicy;
+    public bool RequiresHuntingGround => areaPolicy == BoidAreaPolicy.RequireHuntingGround;
     public float MaxSpeed => maxSpeed;
+    public float HorizontalCapsuleRadius
+    {
+        get
+        {
+            if (capsule == null)
+            {
+                capsule = GetComponent<CapsuleCollider>();
+            }
+
+            if (body == null)
+            {
+                body = GetComponent<Rigidbody>();
+            }
+
+            if (body != null && TryGetMovementCapsule(
+                    body.position, body.rotation,
+                    out BoidCapsuleGeometry.WorldCapsule worldCapsule))
+            {
+                return worldCapsule.HorizontalFootprintRadius;
+            }
+
+            return 0f;
+        }
+    }
 
     private Rigidbody body;
     private CapsuleCollider capsule;
     private SteeringBehaviour[] steeringBehaviours;
     private PlayAreaContainmentBehaviour containment;
+    private WanderBehaviour wander;
     private float movementPauseRemaining;
     private readonly Collider[] overlapBuffer = new Collider[16];
 
@@ -32,6 +61,7 @@ public sealed class BoidAgent : MonoBehaviour
         capsule = GetComponent<CapsuleCollider>();
         steeringBehaviours = GetComponents<SteeringBehaviour>();
         containment = GetComponent<PlayAreaContainmentBehaviour>();
+        wander = GetComponent<WanderBehaviour>();
         Array.Sort(
             steeringBehaviours,
             (first, second) => second.Priority.CompareTo(first.Priority));
@@ -46,6 +76,20 @@ public sealed class BoidAgent : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (RequiresHuntingGround &&
+            (!TryGetRequiredHuntingGroundRegion(out HuntingGroundRegion requiredRegion) ||
+             !requiredRegion.ContainsWorldPosition(body.position)))
+        {
+            StopMovement();
+            return;
+        }
+
+        if (RequiresHuntingGround && !TryGetWorldCapsule(body.position, body.rotation, out _))
+        {
+            StopMovement();
+            return;
+        }
+
         if (movementPauseRemaining > 0f)
         {
             movementPauseRemaining = Mathf.Max(
@@ -79,6 +123,68 @@ public sealed class BoidAgent : MonoBehaviour
         ActualVelocity = Vector3.zero;
     }
 
+    /// <summary>
+    /// Resolves the configured required region only when all B1 references and the current
+    /// capsule configuration are valid. Legacy agents deliberately return false.
+    /// </summary>
+    public bool TryGetRequiredHuntingGroundRegion(out HuntingGroundRegion region)
+    {
+        region = null;
+        if (!RequiresHuntingGround || containment == null ||
+            !containment.TryGetHuntingGroundRegion(out HuntingGroundRegion containmentRegion) ||
+            containmentRegion.SourceGrid == null ||
+            containmentRegion.SourceGrid.Rows <= 0 || containmentRegion.SourceGrid.Columns <= 0 ||
+            (long)containmentRegion.SourceGrid.CellCount !=
+                (long)containmentRegion.SourceGrid.Rows * containmentRegion.SourceGrid.Columns ||
+            float.IsNaN(containmentRegion.SourceGrid.CellSize) ||
+            float.IsInfinity(containmentRegion.SourceGrid.CellSize) ||
+            containmentRegion.SourceGrid.CellSize <= 0f ||
+            !IsSupportedGridTransform(containmentRegion.SourceGrid.transform) ||
+            !TryGetWorldCapsule(body != null ? body.position : transform.position,
+                body != null ? body.rotation : transform.rotation, out _))
+        {
+            return false;
+        }
+
+        if (wander != null && wander.enabled && wander.HuntingGroundRegion != containmentRegion)
+        {
+            return false;
+        }
+
+        region = containmentRegion;
+        return true;
+    }
+
+    private static bool IsSupportedGridTransform(Transform gridTransform)
+    {
+        const float AxisAlignmentTolerance = 0.000001f;
+        Matrix4x4 matrix = gridTransform.localToWorldMatrix;
+        Vector3 x = matrix.MultiplyVector(Vector3.right);
+        Vector3 y = matrix.MultiplyVector(Vector3.up);
+        Vector3 z = matrix.MultiplyVector(Vector3.forward);
+        float xMagnitude = x.magnitude;
+        float yMagnitude = y.magnitude;
+        float zMagnitude = z.magnitude;
+        if (xMagnitude <= 0.0001f || yMagnitude <= 0.0001f || zMagnitude <= 0.0001f)
+        {
+            return false;
+        }
+
+        x /= xMagnitude;
+        y /= yMagnitude;
+        z /= zMagnitude;
+        // The grid must remain horizontal; only matrix round-off is tolerated.
+        // A dot-product threshold of 0.9999 accepted roughly 0.8 degrees of tilt.
+        return y.y >= 1f - AxisAlignmentTolerance &&
+               Mathf.Abs(y.x) <= AxisAlignmentTolerance &&
+               Mathf.Abs(y.z) <= AxisAlignmentTolerance &&
+               Mathf.Abs(x.y) <= AxisAlignmentTolerance &&
+               Mathf.Abs(z.y) <= AxisAlignmentTolerance &&
+               Mathf.Abs(Vector3.Dot(x, y)) <= 0.0001f &&
+               Mathf.Abs(Vector3.Dot(x, z)) <= 0.0001f &&
+               Mathf.Abs(Vector3.Dot(y, z)) <= 0.0001f;
+    }
+
     private void MoveWithEnvironmentCollision(Vector3 desiredDisplacement)
     {
         Vector3 startPosition = body.position;
@@ -94,12 +200,16 @@ public sealed class BoidAgent : MonoBehaviour
             }
 
             Vector3 direction = remaining / distance;
-            GetWorldCapsule(resolvedPosition, out Vector3 top, out Vector3 bottom, out float radius);
+            if (!TryGetMovementCapsule(resolvedPosition, body.rotation, out BoidCapsuleGeometry.WorldCapsule worldCapsule))
+            {
+                StopMovement();
+                return;
+            }
 
             if (!Physics.CapsuleCast(
-                    top,
-                    bottom,
-                    radius,
+                    worldCapsule.Point0,
+                    worldCapsule.Point1,
+                    worldCapsule.Radius,
                     direction,
                     out RaycastHit hit,
                     distance + collisionSkin,
@@ -131,17 +241,33 @@ public sealed class BoidAgent : MonoBehaviour
 
         if (containment != null)
         {
-            resolvedPosition = containment.ClampInsidePlayableArea(
-                resolvedPosition,
-                out bool clampedX,
-                out bool clampedZ);
-            if (clampedX)
+            if (RequiresHuntingGround && containment.HasHuntingGroundRegion)
             {
-                Velocity = new Vector3(0f, Velocity.y, Velocity.z);
+                resolvedPosition = containment.ConstrainToHuntingGround(
+                    startPosition,
+                    resolvedPosition,
+                    out Vector3 outwardNormal);
+
+                float outwardSpeed = Vector3.Dot(Velocity, outwardNormal);
+                if (outwardSpeed > 0f)
+                {
+                    Velocity -= outwardNormal * outwardSpeed;
+                }
             }
-            if (clampedZ)
+            else
             {
-                Velocity = new Vector3(Velocity.x, Velocity.y, 0f);
+                resolvedPosition = containment.ClampInsidePlayableArea(
+                    resolvedPosition,
+                    out bool clampedX,
+                    out bool clampedZ);
+                if (clampedX)
+                {
+                    Velocity = new Vector3(0f, Velocity.y, Velocity.z);
+                }
+                if (clampedZ)
+                {
+                    Velocity = new Vector3(Velocity.x, Velocity.y, 0f);
+                }
             }
         }
 
@@ -154,11 +280,15 @@ public sealed class BoidAgent : MonoBehaviour
     {
         for (int pass = 0; pass < 2; pass++)
         {
-            GetWorldCapsule(position, out Vector3 top, out Vector3 bottom, out float radius);
+            if (!TryGetMovementCapsule(position, body.rotation, out BoidCapsuleGeometry.WorldCapsule worldCapsule))
+            {
+                position = body.position;
+                return;
+            }
             int overlapCount = Physics.OverlapCapsuleNonAlloc(
-                top,
-                bottom,
-                radius,
+                worldCapsule.Point0,
+                worldCapsule.Point1,
+                worldCapsule.Radius,
                 overlapBuffer,
                 environmentLayers,
                 QueryTriggerInteraction.Ignore);
@@ -195,15 +325,49 @@ public sealed class BoidAgent : MonoBehaviour
         }
     }
 
-    private void GetWorldCapsule(Vector3 position, out Vector3 top, out Vector3 bottom, out float radius)
+    private bool TryGetWorldCapsule(
+        Vector3 position,
+        Quaternion rotation,
+        out BoidCapsuleGeometry.WorldCapsule capsuleGeometry)
     {
+        return BoidCapsuleGeometry.TryGetWorldCapsule(body, position, rotation, out capsuleGeometry);
+    }
+
+    private bool TryGetMovementCapsule(
+        Vector3 position,
+        Quaternion rotation,
+        out BoidCapsuleGeometry.WorldCapsule capsuleGeometry)
+    {
+        if (TryGetWorldCapsule(position, rotation, out capsuleGeometry))
+        {
+            return true;
+        }
+
+        if (RequiresHuntingGround)
+        {
+            capsuleGeometry = default;
+            return false;
+        }
+
         Vector3 scale = transform.lossyScale;
-        radius = capsule.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
+        float radius = capsule.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
         float halfHeight = Mathf.Max(capsule.height * Mathf.Abs(scale.y) * 0.5f, radius);
-        Vector3 center = position + body.rotation * Vector3.Scale(capsule.center, scale);
-        Vector3 verticalOffset = body.rotation * Vector3.up * (halfHeight - radius);
-        top = center + verticalOffset;
-        bottom = center - verticalOffset;
+        Vector3 center = position + rotation * Vector3.Scale(capsule.center, scale);
+        Vector3 segmentOffset = rotation * Vector3.up * (halfHeight - radius);
+        capsuleGeometry = new BoidCapsuleGeometry.WorldCapsule(
+            center,
+            center + segmentOffset,
+            center - segmentOffset,
+            radius,
+            halfHeight * 2f,
+            radius);
+        return true;
+    }
+
+    private void StopMovement()
+    {
+        Velocity = Vector3.zero;
+        ActualVelocity = Vector3.zero;
     }
 
     private Vector3 CalculatePrioritySteering(out int appliedPriority)
