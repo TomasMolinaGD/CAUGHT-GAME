@@ -26,6 +26,14 @@ namespace CaughtGame.Navigation
             return IsValidHuntingCell(cell);
         }
 
+        /// <summary>Returns whether the configured grid cell belongs to this region.</summary>
+        public bool IsValidHuntingGroundCell(int row, int column)
+        {
+            return navigationGrid != null &&
+                   navigationGrid.TryGetCell(row, column, out NavigationGridCell cell) &&
+                   IsValidHuntingCell(cell);
+        }
+
         /// <summary>
         /// Selects a uniformly random valid cell and returns its world-space center.
         /// This is intended for explicit placement/respawn requests, not per-frame use.
