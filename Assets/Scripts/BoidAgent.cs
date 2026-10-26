@@ -241,20 +241,7 @@ public sealed class BoidAgent : MonoBehaviour
 
         if (containment != null)
         {
-            if (RequiresHuntingGround && containment.HasHuntingGroundRegion)
-            {
-                resolvedPosition = containment.ConstrainToHuntingGround(
-                    startPosition,
-                    resolvedPosition,
-                    out Vector3 outwardNormal);
-
-                float outwardSpeed = Vector3.Dot(Velocity, outwardNormal);
-                if (outwardSpeed > 0f)
-                {
-                    Velocity -= outwardNormal * outwardSpeed;
-                }
-            }
-            else
+            if (!RequiresHuntingGround)
             {
                 resolvedPosition = containment.ClampInsidePlayableArea(
                     resolvedPosition,
@@ -267,6 +254,42 @@ public sealed class BoidAgent : MonoBehaviour
                 if (clampedZ)
                 {
                     Velocity = new Vector3(Velocity.x, Velocity.y, 0f);
+                }
+            }
+        }
+
+        if (RequiresHuntingGround)
+        {
+            if (!TryGetRequiredHuntingGroundRegion(out HuntingGroundRegion requiredRegion) ||
+                containment == null)
+            {
+                StopMovement();
+                return;
+            }
+
+            RegionSweepResult sweep = HuntingGroundFootprint.Sweep(
+                requiredRegion,
+                startPosition,
+                resolvedPosition,
+                HorizontalCapsuleRadius,
+                containment.HuntingGroundClearance);
+            if (sweep.Status != RegionSweepStatus.Clear)
+            {
+                if (sweep.Status == RegionSweepStatus.Blocked &&
+                    sweep.SafeFraction > 0f)
+                {
+                    resolvedPosition = Vector3.Lerp(startPosition, resolvedPosition, sweep.SafeFraction);
+                }
+                else
+                {
+                    resolvedPosition = startPosition;
+                }
+
+                Vector3 blockingNormal = sweep.Normal;
+                float outwardSpeed = Vector3.Dot(Velocity, blockingNormal);
+                if (outwardSpeed > 0f)
+                {
+                    Velocity -= blockingNormal * outwardSpeed;
                 }
             }
         }

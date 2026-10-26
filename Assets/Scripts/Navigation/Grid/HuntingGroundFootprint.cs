@@ -10,6 +10,47 @@ namespace CaughtGame.Navigation
         InvalidConfiguration
     }
 
+    public enum RegionSweepStatus
+    {
+        Clear,
+        Blocked,
+        InvalidStart,
+        InvalidConfiguration,
+        BudgetExceeded
+    }
+
+    /// <summary>
+    /// Result of a continuous regional sweep. Normal points from the valid space
+    /// toward the blocking surface (the direction in which penetration would occur).
+    /// Cell coordinates are -1 when the first contact is the outer boundary.
+    /// </summary>
+    public readonly struct RegionSweepResult
+    {
+        public RegionSweepStatus Status { get; }
+        public float SafeFraction { get; }
+        public float? ContactFraction { get; }
+        public Vector3 Normal { get; }
+        public int Row { get; }
+        public int Column { get; }
+        public bool HasBlockingCell => Row >= 0 && Column >= 0;
+
+        public RegionSweepResult(
+            RegionSweepStatus status,
+            float safeFraction,
+            float? contactFraction = null,
+            Vector3 normal = default,
+            int row = -1,
+            int column = -1)
+        {
+            Status = status;
+            SafeFraction = safeFraction;
+            ContactFraction = contactFraction;
+            Normal = normal;
+            Row = row;
+            Column = column;
+        }
+    }
+
     /// <summary>Exact static circle-versus-cell queries on the horizontal grid plane.</summary>
     public static class HuntingGroundFootprint
     {
@@ -125,6 +166,318 @@ namespace CaughtGame.Navigation
             }
 
             return RegionQueryStatus.Clear;
+        }
+
+        /// <summary>Certifies the complete straight-line movement of a horizontal disk.</summary>
+        public static RegionSweepResult Sweep(
+            HuntingGroundRegion region,
+            Vector3 startPosition,
+            Vector3 endPosition,
+            float radius,
+            float margin,
+            int candidateBudget = 4096)
+        {
+            if (region == null || !IsFinite(startPosition) || !IsFinite(endPosition) ||
+                !IsFinite(radius) || !IsFinite(margin) || radius < 0f || margin < 0f ||
+                candidateBudget <= 0)
+            {
+                return InvalidSweep();
+            }
+
+            if (!TryBuildFrame(region.SourceGrid, out GridFrame frame))
+            {
+                return InvalidSweep();
+            }
+
+            double effectiveRadius = (double)radius + margin;
+            double intersectionRadius = effectiveRadius + GeometryEpsilon;
+            double radiusSquared = intersectionRadius * intersectionRadius;
+            if (!IsFinite(effectiveRadius) || !IsFinite(intersectionRadius) || !IsFinite(radiusSquared))
+            {
+                return InvalidSweep();
+            }
+
+            if (Query(region, startPosition, radius, margin) != RegionQueryStatus.Clear)
+            {
+                return new RegionSweepResult(RegionSweepStatus.InvalidStart, 0f);
+            }
+
+            Vector2 start = Project(frame, startPosition);
+            Vector2 end = Project(frame, endPosition);
+            Vector2 delta = end - start;
+            double length = delta.magnitude;
+            if (!IsFinite(length))
+            {
+                return InvalidSweep();
+            }
+
+            if (length <= double.Epsilon)
+            {
+                return new RegionSweepResult(RegionSweepStatus.Clear, 1f);
+            }
+
+            double totalWidth = (double)frame.CellWidth * frame.Columns;
+            double totalDepth = (double)frame.CellDepth * frame.Rows;
+            if (!IsFinite(totalWidth) || !IsFinite(totalDepth) || totalWidth <= 0d || totalDepth <= 0d)
+            {
+                return InvalidSweep();
+            }
+
+            double minU = Math.Min(start.x, end.x) - intersectionRadius;
+            double maxU = Math.Max(start.x, end.x) + intersectionRadius;
+            double minV = Math.Min(start.y, end.y) - intersectionRadius;
+            double maxV = Math.Max(start.y, end.y) + intersectionRadius;
+            int minColumn = FirstIntersectingCell(minU, frame.CellWidth, frame.Columns);
+            int maxColumn = LastIntersectingCell(maxU, frame.CellWidth, frame.Columns);
+            int minRow = FirstIntersectingCell(minV, frame.CellDepth, frame.Rows);
+            int maxRow = LastIntersectingCell(maxV, frame.CellDepth, frame.Rows);
+            long candidates = (long)(maxColumn - minColumn + 1) * (maxRow - minRow + 1);
+            if (candidates > candidateBudget)
+            {
+                return new RegionSweepResult(RegionSweepStatus.BudgetExceeded, 0f);
+            }
+
+            double bestT = double.PositiveInfinity;
+            Vector2 bestNormal = Vector2.zero;
+            int bestRow = -1;
+            int bestColumn = -1;
+            for (int row = minRow; row <= maxRow; row++)
+            {
+                for (int column = minColumn; column <= maxColumn; column++)
+                {
+                    if (region.IsValidHuntingGroundCell(row, column))
+                    {
+                        continue;
+                    }
+
+                    double minX = column * (double)frame.CellWidth;
+                    double maxX = minX + frame.CellWidth;
+                    double minZ = row * (double)frame.CellDepth;
+                    double maxZ = minZ + frame.CellDepth;
+                    if (TryRoundedRectangleContact(start, delta, minX, maxX, minZ, maxZ,
+                            intersectionRadius, out double contact, out Vector2 normal) && contact < bestT)
+                    {
+                        bestT = contact;
+                        bestNormal = normal;
+                        bestRow = row;
+                        bestColumn = column;
+                    }
+                }
+            }
+
+            if (TryOuterBoundaryContact(start, delta, totalWidth, totalDepth, intersectionRadius,
+                    out double outerT, out Vector2 outerNormal) && outerT < bestT)
+            {
+                bestT = outerT;
+                bestNormal = outerNormal;
+                bestRow = -1;
+                bestColumn = -1;
+            }
+
+            RegionQueryStatus finalStatus = Query(region, endPosition, radius, margin);
+            if (finalStatus == RegionQueryStatus.InvalidConfiguration)
+            {
+                return InvalidSweep();
+            }
+
+            if (double.IsPositiveInfinity(bestT))
+            {
+                if (finalStatus != RegionQueryStatus.Clear)
+                {
+                    bestT = 1d;
+                    bestNormal = Vector2.zero;
+                }
+                else
+                {
+                    return new RegionSweepResult(RegionSweepStatus.Clear, 1f);
+                }
+            }
+
+            float contactFraction = Mathf.Clamp01((float)bestT);
+            float retreat = Mathf.Min(0.001f, 0.0001f / Mathf.Max((float)length, 0.0001f));
+            float safeFraction = Mathf.Clamp01(contactFraction - retreat);
+            if (Query(region, Vector3.Lerp(startPosition, endPosition, safeFraction), radius, margin) !=
+                RegionQueryStatus.Clear)
+            {
+                safeFraction = 0f;
+            }
+            Vector3 worldNormal = frame.AxisX * bestNormal.x + frame.AxisZ * bestNormal.y;
+            return new RegionSweepResult(
+                RegionSweepStatus.Blocked,
+                safeFraction,
+                contactFraction,
+                worldNormal.sqrMagnitude > 0.0001f ? worldNormal.normalized : Vector3.zero,
+                bestRow,
+                bestColumn);
+        }
+
+        private static RegionSweepResult InvalidSweep() =>
+            new RegionSweepResult(RegionSweepStatus.InvalidConfiguration, 0f);
+
+        private static Vector2 Project(GridFrame frame, Vector3 worldPosition)
+        {
+            Vector3 offset = worldPosition - frame.Origin;
+            return new Vector2(
+                Vector3.Dot(offset, frame.AxisX),
+                Vector3.Dot(offset, frame.AxisZ));
+        }
+
+        private static bool TryRoundedRectangleContact(
+            Vector2 start,
+            Vector2 delta,
+            double minX,
+            double maxX,
+            double minZ,
+            double maxZ,
+            double radius,
+            out double contact,
+            out Vector2 normal)
+        {
+            contact = double.PositiveInfinity;
+            normal = Vector2.zero;
+            ConsiderBox(start, delta, minX, maxX, minZ - radius, maxZ + radius, ref contact, ref normal);
+            ConsiderBox(start, delta, minX - radius, maxX + radius, minZ, maxZ, ref contact, ref normal);
+            ConsiderCorner(start, delta, new Vector2((float)minX, (float)minZ), radius, ref contact, ref normal);
+            ConsiderCorner(start, delta, new Vector2((float)minX, (float)maxZ), radius, ref contact, ref normal);
+            ConsiderCorner(start, delta, new Vector2((float)maxX, (float)minZ), radius, ref contact, ref normal);
+            ConsiderCorner(start, delta, new Vector2((float)maxX, (float)maxZ), radius, ref contact, ref normal);
+            return !double.IsPositiveInfinity(contact);
+        }
+
+        private static void ConsiderCorner(Vector2 start, Vector2 delta, Vector2 corner, double radius,
+            ref double contact, ref Vector2 normal)
+        {
+            if (TrySegmentCircleContact(start, delta, corner, radius,
+                    out double cornerContact, out Vector2 cornerNormal) && cornerContact < contact)
+            {
+                contact = cornerContact;
+                normal = cornerNormal;
+            }
+        }
+
+        private static void ConsiderBox(Vector2 start, Vector2 delta, double minX, double maxX,
+            double minZ, double maxZ, ref double contact, ref Vector2 normal)
+        {
+            if (TrySegmentBoxContact(start, delta, minX, maxX, minZ, maxZ,
+                    out double boxContact, out Vector2 boxNormal) && boxContact < contact)
+            {
+                contact = boxContact;
+                normal = boxNormal;
+            }
+        }
+
+        private static bool TrySegmentBoxContact(Vector2 start, Vector2 delta, double minX, double maxX,
+            double minZ, double maxZ, out double contact, out Vector2 normal)
+        {
+            contact = 0d;
+            normal = Vector2.zero;
+            double enter = 0d;
+            double exit = 1d;
+            Vector2 enterNormal = Vector2.zero;
+            if (!ClipAxis(start.x, delta.x, minX, maxX, new Vector2(1f, 0f), new Vector2(-1f, 0f), ref enter, ref exit, ref enterNormal) ||
+                !ClipAxis(start.y, delta.y, minZ, maxZ, new Vector2(0f, 1f), new Vector2(0f, -1f), ref enter, ref exit, ref enterNormal))
+            {
+                return false;
+            }
+            contact = Math.Max(0d, enter);
+            normal = enterNormal;
+            return contact <= 1d;
+        }
+
+        private static bool ClipAxis(double origin, double direction, double min, double max,
+            Vector2 minNormal, Vector2 maxNormal, ref double enter, ref double exit, ref Vector2 enterNormal)
+        {
+            if (Math.Abs(direction) < 1e-12)
+            {
+                return origin >= min && origin <= max;
+            }
+            double t0 = (min - origin) / direction;
+            double t1 = (max - origin) / direction;
+            Vector2 n0 = minNormal;
+            Vector2 n1 = maxNormal;
+            if (t0 > t1)
+            {
+                (t0, t1) = (t1, t0);
+                (n0, n1) = (n1, n0);
+            }
+            if (t0 > enter)
+            {
+                enter = t0;
+                enterNormal = n0;
+            }
+            exit = Math.Min(exit, t1);
+            return enter <= exit;
+        }
+
+        private static bool TrySegmentCircleContact(Vector2 start, Vector2 delta, Vector2 center,
+            double radius, out double contact, out Vector2 normal)
+        {
+            contact = double.PositiveInfinity;
+            normal = Vector2.zero;
+            double offsetX = (double)start.x - center.x;
+            double offsetZ = (double)start.y - center.y;
+            double deltaX = delta.x;
+            double deltaZ = delta.y;
+            double a = deltaX * deltaX + deltaZ * deltaZ;
+            if (a <= 1e-24)
+            {
+                return false;
+            }
+            double b = 2d * (offsetX * deltaX + offsetZ * deltaZ);
+            double c = offsetX * offsetX + offsetZ * offsetZ - radius * radius;
+            double discriminant = b * b - 4d * a * c;
+            if (discriminant < 0d)
+            {
+                return false;
+            }
+            double root = Math.Sqrt(Math.Max(0d, discriminant));
+            double t0 = (-b - root) / (2d * a);
+            double t1 = (-b + root) / (2d * a);
+            double candidate = t0 >= 0d ? t0 : t1;
+            if (candidate < 0d || candidate > 1d)
+            {
+                return false;
+            }
+            double pointX = (double)start.x + deltaX * candidate;
+            double pointZ = (double)start.y + deltaZ * candidate;
+            double normalX = center.x - pointX;
+            double normalZ = center.y - pointZ;
+            double normalLength = Math.Sqrt(normalX * normalX + normalZ * normalZ);
+            normal = normalLength > 0.000001d
+                ? new Vector2((float)(normalX / normalLength), (float)(normalZ / normalLength))
+                : Vector2.zero;
+            contact = candidate;
+            return true;
+        }
+
+        private static bool TryOuterBoundaryContact(Vector2 start, Vector2 delta, double width, double depth,
+            double radius, out double contact, out Vector2 normal)
+        {
+            contact = double.PositiveInfinity;
+            normal = Vector2.zero;
+            double minX = radius;
+            double maxX = width - radius;
+            double minZ = radius;
+            double maxZ = depth - radius;
+            if (maxX < minX || maxZ < minZ)
+            {
+                return false;
+            }
+            if (delta.x < 0d) ConsiderBoundary((minX - start.x) / delta.x, new Vector2(-1f, 0f), ref contact, ref normal);
+            if (delta.x > 0d) ConsiderBoundary((maxX - start.x) / delta.x, new Vector2(1f, 0f), ref contact, ref normal);
+            if (delta.y < 0d) ConsiderBoundary((minZ - start.y) / delta.y, new Vector2(0f, -1f), ref contact, ref normal);
+            if (delta.y > 0d) ConsiderBoundary((maxZ - start.y) / delta.y, new Vector2(0f, 1f), ref contact, ref normal);
+            return !double.IsPositiveInfinity(contact);
+        }
+
+        private static void ConsiderBoundary(double candidate, Vector2 candidateNormal,
+            ref double contact, ref Vector2 normal)
+        {
+            if (candidate >= 0d && candidate <= 1d && candidate < contact)
+            {
+                contact = candidate;
+                normal = candidateNormal;
+            }
         }
 
         /// <summary>

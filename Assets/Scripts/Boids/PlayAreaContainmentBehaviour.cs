@@ -25,6 +25,7 @@ public sealed class PlayAreaContainmentBehaviour : SteeringBehaviour
     public bool HasHuntingGroundRegion => owner != null &&
         owner.RequiresHuntingGround && huntingGroundRegion != null;
     public HuntingGroundRegion HuntingGroundRegion => huntingGroundRegion;
+    public float HuntingGroundClearance => hardBoundaryPadding + huntingGroundMargin;
 
     public bool TryGetHuntingGroundRegion(out HuntingGroundRegion region)
     {

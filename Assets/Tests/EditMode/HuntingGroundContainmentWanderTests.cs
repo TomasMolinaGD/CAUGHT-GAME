@@ -708,3 +708,160 @@ public sealed class HuntingGroundFootprintExactTests
         field.SetValue(target, value);
     }
 }
+
+public sealed class HuntingGroundContinuousMovementTests
+{
+    private GameObject gridObject;
+    private NavigationGrid grid;
+    private GameObject regionObject;
+    private HuntingGroundRegion region;
+
+    [SetUp]
+    public void SetUp()
+    {
+        gridObject = new GameObject("Continuous Movement Grid Test");
+        grid = gridObject.AddComponent<NavigationGrid>();
+        Assert.That(grid.TryApplyGridSize(8, 3, 2f, true, out _), Is.True);
+
+        regionObject = new GameObject("Continuous Movement Region Test");
+        region = regionObject.AddComponent<HuntingGroundRegion>();
+        SerializedObject serialized = new SerializedObject(region);
+        serialized.FindProperty("navigationGrid").objectReferenceValue = grid;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+
+        for (int row = 0; row < grid.Rows; row++)
+        {
+            for (int column = 0; column < grid.Columns; column++)
+            {
+                Assert.That(grid.SetWalkable(row, column, true), Is.True);
+                Assert.That(grid.SetZone(row, column, NavigationGridZone.HuntingGround), Is.True);
+            }
+        }
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        if (regionObject != null) UnityEngine.Object.DestroyImmediate(regionObject);
+        if (gridObject != null) UnityEngine.Object.DestroyImmediate(gridObject);
+    }
+
+    [Test]
+    public void Sweep_AllowsFreeMulticellMovement()
+    {
+        Vector3 start = grid.GridToWorldPosition(1, 1);
+        Vector3 end = grid.GridToWorldPosition(1, 5);
+
+        RegionSweepResult result = HuntingGroundFootprint.Sweep(region, start, end, 0.25f, 0f);
+
+        Assert.That(result.Status, Is.EqualTo(RegionSweepStatus.Clear));
+        Assert.That(result.SafeFraction, Is.EqualTo(1f));
+    }
+
+    [Test]
+    public void SweepStopsAtFirstInvalidCellAndReportsSafePrefix()
+    {
+        Assert.That(grid.SetZone(1, 3, NavigationGridZone.Normal), Is.True);
+        Vector3 start = grid.GridToWorldPosition(1, 1);
+        Vector3 end = grid.GridToWorldPosition(1, 5);
+
+        RegionSweepResult result = HuntingGroundFootprint.Sweep(region, start, end, 0.25f, 0f);
+
+        Assert.That(result.Status, Is.EqualTo(RegionSweepStatus.Blocked));
+        Assert.That(result.SafeFraction, Is.LessThan(result.ContactFraction.Value));
+        Assert.That(result.Column, Is.EqualTo(3));
+        Assert.That(result.Row, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void SweepRejectsInvalidStartAndZeroLengthInvalidMovement()
+    {
+        Assert.That(grid.SetZone(1, 1, NavigationGridZone.Normal), Is.True);
+        Vector3 invalid = grid.GridToWorldPosition(1, 1);
+
+        RegionSweepResult result = HuntingGroundFootprint.Sweep(region, invalid, invalid, 0.25f, 0f);
+
+        Assert.That(result.Status, Is.EqualTo(RegionSweepStatus.InvalidStart));
+    }
+
+    [Test]
+    public void SweepRejectsCandidateBudgetWithoutTruncatingTheSearch()
+    {
+        Vector3 start = grid.GridToWorldPosition(1, 0);
+        Vector3 end = grid.GridToWorldPosition(1, 7);
+
+        RegionSweepResult result = HuntingGroundFootprint.Sweep(region, start, end, 0.25f, 0f, 1);
+
+        Assert.That(result.Status, Is.EqualTo(RegionSweepStatus.BudgetExceeded));
+        Assert.That(result.SafeFraction, Is.EqualTo(0f));
+    }
+
+    [Test]
+    public void SweepBlocksOuterBoundaryContact()
+    {
+        Vector3 start = grid.GridToWorldPosition(1, 1);
+        Vector3 end = grid.transform.TransformPoint(new Vector3(-0.25f, 0f, 3f));
+
+        RegionSweepResult result = HuntingGroundFootprint.Sweep(region, start, end, 0.25f, 0f);
+
+        Assert.That(result.Status, Is.EqualTo(RegionSweepStatus.Blocked));
+        Assert.That(result.Normal.x, Is.LessThan(0f));
+    }
+
+    [Test]
+    public void SweepSupportsYawAndNonUniformHorizontalScale()
+    {
+        grid.transform.SetPositionAndRotation(new Vector3(10f, 0f, -4f), Quaternion.Euler(0f, 35f, 0f));
+        grid.transform.localScale = new Vector3(1.5f, 1f, 0.75f);
+        Vector3 start = grid.GridToWorldPosition(1, 1);
+        Vector3 end = grid.GridToWorldPosition(1, 5);
+
+        RegionSweepResult result = HuntingGroundFootprint.Sweep(region, start, end, 0.25f, 0.1f);
+
+        Assert.That(result.Status, Is.EqualTo(RegionSweepStatus.Clear));
+    }
+
+    [Test]
+    public void SweepDetectsDiagonalCornerContactWithDoublePrecision()
+    {
+        Assert.That(grid.SetZone(1, 3, NavigationGridZone.Normal), Is.True);
+        Vector3 start = grid.transform.TransformPoint(new Vector3(4f, 0f, 1f));
+        Vector3 end = grid.transform.TransformPoint(new Vector3(6.2f, 0f, 1.05f));
+
+        RegionSweepResult result = HuntingGroundFootprint.Sweep(region, start, end, 0.96f, 0f);
+
+        Assert.That(result.Status, Is.EqualTo(RegionSweepStatus.Blocked));
+        Assert.That(result.Column, Is.EqualTo(3));
+    }
+
+    [Test]
+    public void SweepLeavesAReallyFreeNearbyCornerUnblocked()
+    {
+        Assert.That(grid.SetZone(1, 3, NavigationGridZone.Normal), Is.True);
+        Vector3 start = grid.transform.TransformPoint(new Vector3(4f, 0f, 1f));
+        Vector3 end = grid.transform.TransformPoint(new Vector3(6.2f, 0f, 1.05f));
+
+        RegionSweepResult result = HuntingGroundFootprint.Sweep(region, start, end, 0.94f, 0f);
+
+        Assert.That(result.Status, Is.EqualTo(RegionSweepStatus.Clear));
+    }
+
+    [Test]
+    public void SweepNormalsPointTowardTheBlockingSurfaceForCellsAndOuterBoundary()
+    {
+        Assert.That(grid.SetZone(1, 3, NavigationGridZone.Normal), Is.True);
+        Vector3 internalStart = grid.GridToWorldPosition(1, 1);
+        Vector3 internalEnd = grid.GridToWorldPosition(1, 5);
+        RegionSweepResult internalResult = HuntingGroundFootprint.Sweep(
+            region, internalStart, internalEnd, 0.25f, 0f);
+
+        Vector3 outerEnd = grid.transform.TransformPoint(new Vector3(-0.25f, 0f, 3f));
+        RegionSweepResult outerResult = HuntingGroundFootprint.Sweep(
+            region, internalStart, outerEnd, 0.25f, 0f);
+
+        Assert.That(internalResult.Status, Is.EqualTo(RegionSweepStatus.Blocked));
+        Assert.That(internalResult.Normal.x, Is.GreaterThan(0.5f));
+        Assert.That(outerResult.Status, Is.EqualTo(RegionSweepStatus.Blocked));
+        Assert.That(outerResult.Normal.x, Is.LessThan(-0.5f));
+    }
+}
