@@ -55,6 +55,13 @@ public sealed class BoidAgent : MonoBehaviour
     private float movementPauseRemaining;
     private readonly Collider[] overlapBuffer = new Collider[16];
 
+    private enum PhysicalClearanceResult
+    {
+        Clear,
+        Blocked,
+        Uncertain
+    }
+
     private void Awake()
     {
         body = GetComponent<Rigidbody>();
@@ -85,6 +92,14 @@ public sealed class BoidAgent : MonoBehaviour
         }
 
         if (RequiresHuntingGround && !TryGetWorldCapsule(body.position, body.rotation, out _))
+        {
+            StopMovement();
+            return;
+        }
+
+        if (RequiresHuntingGround &&
+            (!TryValidatePhysicalConfiguration(out BoidCapsuleGeometry.WorldCapsule initialCapsule) ||
+             !IsEnvironmentClear(initialCapsule)))
         {
             StopMovement();
             return;
@@ -237,7 +252,11 @@ public sealed class BoidAgent : MonoBehaviour
             remaining = Vector3.ProjectOnPlane(remaining - travelled, surfaceNormal);
         }
 
-        ResolveEnvironmentOverlaps(ref resolvedPosition);
+        if (!ResolveEnvironmentOverlaps(ref resolvedPosition) && RequiresHuntingGround)
+        {
+            StopMovement();
+            return;
+        }
 
         if (containment != null)
         {
@@ -292,6 +311,12 @@ public sealed class BoidAgent : MonoBehaviour
                     Velocity -= blockingNormal * outwardSpeed;
                 }
             }
+
+            if (!TryRecertifyPhysicalMovement(startPosition, resolvedPosition, out resolvedPosition))
+            {
+                StopMovement();
+                return;
+            }
         }
 
         Vector3 actualDisplacement = Vector3.ProjectOnPlane(resolvedPosition - startPosition, Vector3.up);
@@ -299,14 +324,14 @@ public sealed class BoidAgent : MonoBehaviour
         body.MovePosition(resolvedPosition);
     }
 
-    private void ResolveEnvironmentOverlaps(ref Vector3 position)
+    private bool ResolveEnvironmentOverlaps(ref Vector3 position)
     {
         for (int pass = 0; pass < 2; pass++)
         {
             if (!TryGetMovementCapsule(position, body.rotation, out BoidCapsuleGeometry.WorldCapsule worldCapsule))
             {
                 position = body.position;
-                return;
+                return false;
             }
             int overlapCount = Physics.OverlapCapsuleNonAlloc(
                 worldCapsule.Point0,
@@ -315,6 +340,11 @@ public sealed class BoidAgent : MonoBehaviour
                 overlapBuffer,
                 environmentLayers,
                 QueryTriggerInteraction.Ignore);
+
+            if (overlapCount >= overlapBuffer.Length && RequiresHuntingGround)
+            {
+                return false;
+            }
 
             bool corrected = false;
             for (int i = 0; i < overlapCount; i++)
@@ -346,6 +376,141 @@ public sealed class BoidAgent : MonoBehaviour
                 break;
             }
         }
+
+        return true;
+    }
+
+    private bool TryValidatePhysicalConfiguration(
+        out BoidCapsuleGeometry.WorldCapsule capsuleGeometry)
+    {
+        capsuleGeometry = default;
+        if (body == null || capsule == null || !capsule.enabled || capsule.isTrigger ||
+            capsule.attachedRigidbody != body || environmentLayers.value == 0 ||
+            !body.detectCollisions)
+        {
+            return false;
+        }
+
+        return TryGetMovementCapsule(body.position, body.rotation, out capsuleGeometry);
+    }
+
+    private bool IsEnvironmentClear(BoidCapsuleGeometry.WorldCapsule capsuleGeometry)
+    {
+        return QueryEnvironmentClearance(capsuleGeometry) == PhysicalClearanceResult.Clear;
+    }
+
+    private PhysicalClearanceResult QueryEnvironmentClearance(
+        BoidCapsuleGeometry.WorldCapsule capsuleGeometry)
+    {
+        int overlapCount = Physics.OverlapCapsuleNonAlloc(
+            capsuleGeometry.Point0,
+            capsuleGeometry.Point1,
+            capsuleGeometry.Radius,
+            overlapBuffer,
+            environmentLayers,
+            QueryTriggerInteraction.Ignore);
+
+        if (overlapCount >= overlapBuffer.Length)
+        {
+            return PhysicalClearanceResult.Uncertain;
+        }
+
+        for (int i = 0; i < overlapCount; i++)
+        {
+            Collider obstacle = overlapBuffer[i];
+            if (obstacle == null || obstacle == capsule || obstacle.attachedRigidbody == body)
+            {
+                continue;
+            }
+
+            return PhysicalClearanceResult.Blocked;
+        }
+
+        return PhysicalClearanceResult.Clear;
+    }
+
+    private bool TryRecertifyPhysicalMovement(
+        Vector3 startPosition,
+        Vector3 candidatePosition,
+        out Vector3 approvedPosition)
+    {
+        approvedPosition = startPosition;
+        if (!TryGetMovementCapsule(startPosition, body.rotation, out BoidCapsuleGeometry.WorldCapsule startCapsule) ||
+            QueryEnvironmentClearance(startCapsule) != PhysicalClearanceResult.Clear)
+        {
+            return false;
+        }
+
+        Vector3 displacement = candidatePosition - startPosition;
+        displacement = Vector3.ProjectOnPlane(displacement, Vector3.up);
+        float distance = displacement.magnitude;
+        if (distance <= 0.0001f)
+        {
+            approvedPosition = startPosition;
+            return true;
+        }
+
+        Vector3 direction = displacement / distance;
+        float safeDistance = distance;
+        if (Physics.CapsuleCast(
+                startCapsule.Point0,
+                startCapsule.Point1,
+                startCapsule.Radius,
+                direction,
+                out RaycastHit hit,
+                distance + collisionSkin,
+                environmentLayers,
+                QueryTriggerInteraction.Ignore))
+        {
+            safeDistance = Mathf.Clamp(hit.distance - collisionSkin, 0f, distance);
+        }
+
+        approvedPosition = startPosition + direction * safeDistance;
+        if (!TryGetMovementCapsule(approvedPosition, body.rotation, out BoidCapsuleGeometry.WorldCapsule finalCapsule))
+        {
+            return false;
+        }
+
+        PhysicalClearanceResult finalClearance = QueryEnvironmentClearance(finalCapsule);
+        if (finalClearance == PhysicalClearanceResult.Uncertain)
+        {
+            return false;
+        }
+
+        if (finalClearance == PhysicalClearanceResult.Clear)
+        {
+            return true;
+        }
+
+        // Retreat along the already-certified segment; never add a second slide here.
+        Vector3 clearPosition = startPosition;
+        Vector3 blockedPosition = approvedPosition;
+        for (int iteration = 0; iteration < 8; iteration++)
+        {
+            Vector3 midpoint = Vector3.Lerp(clearPosition, blockedPosition, 0.5f);
+            if (!TryGetMovementCapsule(midpoint, body.rotation, out BoidCapsuleGeometry.WorldCapsule midpointCapsule))
+            {
+                return false;
+            }
+
+            PhysicalClearanceResult midpointClearance = QueryEnvironmentClearance(midpointCapsule);
+            if (midpointClearance == PhysicalClearanceResult.Uncertain)
+            {
+                return false;
+            }
+
+            if (midpointClearance == PhysicalClearanceResult.Clear)
+            {
+                clearPosition = midpoint;
+            }
+            else
+            {
+                blockedPosition = midpoint;
+            }
+        }
+
+        approvedPosition = clearPosition;
+        return true;
     }
 
     private bool TryGetWorldCapsule(

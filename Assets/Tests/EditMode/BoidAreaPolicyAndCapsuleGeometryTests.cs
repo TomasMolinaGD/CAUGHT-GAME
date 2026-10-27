@@ -17,6 +17,8 @@ public sealed class BoidAreaPolicyAndCapsuleGeometryTests
     private Type wanderType;
     private Type respawnAreaType;
     private Type areaPolicyType;
+    private GameObject obstacleObject;
+    private GameObject saturationObstaclesObject;
 
     [SetUp]
     public void SetUp()
@@ -42,6 +44,8 @@ public sealed class BoidAreaPolicyAndCapsuleGeometryTests
     [TearDown]
     public void TearDown()
     {
+        if (obstacleObject != null) UnityEngine.Object.DestroyImmediate(obstacleObject);
+        if (saturationObstaclesObject != null) UnityEngine.Object.DestroyImmediate(saturationObstaclesObject);
         if (respawnAreaObject != null) UnityEngine.Object.DestroyImmediate(respawnAreaObject);
         if (regionObject != null) UnityEngine.Object.DestroyImmediate(regionObject);
         if (gridObject != null) UnityEngine.Object.DestroyImmediate(gridObject);
@@ -210,6 +214,87 @@ public sealed class BoidAreaPolicyAndCapsuleGeometryTests
         float radius = (float)boidAgentType.GetProperty("HorizontalCapsuleRadius").GetValue(agent);
 
         Assert.That(radius, Is.GreaterThan(0f));
+    }
+
+    [Test]
+    public void RequiredPolicy_PhysicalRecertificationPreservesClearSegment()
+    {
+        Component agent = PreparePhysicalAgent();
+
+        bool accepted = TryRecertify(agent, new Vector3(1f, 0f, 0f), out Vector3 approved);
+
+        Assert.That(accepted, Is.True);
+        Assert.That(approved.x, Is.EqualTo(1f).Within(0.0001f));
+    }
+
+    [Test]
+    public void RequiredPolicy_PhysicalRecertificationStopsBeforeObstacleWithoutSliding()
+    {
+        Component agent = PreparePhysicalAgent();
+        obstacleObject = CreateObstacle(new Vector3(1.5f, 1f, 0f), new Vector3(0.2f, 2f, 2f));
+
+        bool accepted = TryRecertify(agent, new Vector3(3f, 0f, 0f), out Vector3 approved);
+
+        Assert.That(accepted, Is.True);
+        Assert.That(approved.x, Is.GreaterThan(0f));
+        Assert.That(approved.x, Is.LessThan(1f));
+        Assert.That(approved.z, Is.EqualTo(0f).Within(0.0001f));
+    }
+
+    [Test]
+    public void RequiredPolicy_PhysicalRecertificationFailsClosedForInitialOverlap()
+    {
+        Component agent = PreparePhysicalAgent();
+        obstacleObject = CreateObstacle(Vector3.zero, new Vector3(2f, 2f, 2f));
+
+        bool accepted = TryRecertify(agent, new Vector3(1f, 0f, 0f), out Vector3 approved);
+
+        Assert.That(accepted, Is.False);
+        Assert.That(approved, Is.EqualTo(Vector3.zero));
+    }
+
+    [Test]
+    public void RequiredPolicy_PhysicalRecertificationIgnoresTriggerObstacles()
+    {
+        Component agent = PreparePhysicalAgent();
+        obstacleObject = CreateObstacle(new Vector3(1.5f, 1f, 0f), new Vector3(0.2f, 2f, 2f));
+        obstacleObject.GetComponent<BoxCollider>().isTrigger = true;
+
+        bool accepted = TryRecertify(agent, new Vector3(3f, 0f, 0f), out Vector3 approved);
+
+        Assert.That(accepted, Is.True);
+        Assert.That(approved.x, Is.EqualTo(3f).Within(0.0001f));
+    }
+
+    [Test]
+    public void LegacyPolicy_SaturatedOverlapBufferStillResolvesPenetration()
+    {
+        Component agent = PreparePhysicalAgent();
+        SetPolicy(agent, "LegacyRectangle");
+        saturationObstaclesObject = CreateSaturationObstacles();
+        Vector3 resolvedPosition = Vector3.zero;
+
+        Assert.That(CountPhysicalOverlaps(resolvedPosition), Is.GreaterThanOrEqualTo(16));
+        bool resolved = ResolveEnvironmentOverlaps(agent, ref resolvedPosition);
+
+        Assert.That(resolved, Is.True);
+        Assert.That(CountPhysicalOverlaps(resolvedPosition), Is.EqualTo(0));
+    }
+
+    [Test]
+    public void RequiredPolicy_SaturatedOverlapBufferRejectsPhysicalMovement()
+    {
+        Component agent = PreparePhysicalAgent();
+        saturationObstaclesObject = CreateSaturationObstacles();
+        Vector3 resolvedPosition = Vector3.zero;
+
+        bool resolved = ResolveEnvironmentOverlaps(agent, ref resolvedPosition);
+        bool recertified = TryRecertify(agent, new Vector3(1f, 0f, 0f), out Vector3 approved);
+
+        Assert.That(resolved, Is.False);
+        Assert.That(recertified, Is.False);
+        Assert.That(approved, Is.EqualTo(Vector3.zero));
+        Assert.That(CountPhysicalOverlaps(approved), Is.GreaterThanOrEqualTo(16));
     }
 
     [Test]
@@ -449,6 +534,85 @@ public sealed class BoidAreaPolicyAndCapsuleGeometryTests
         SetPrivateField(wander, "owner", agent);
         SetPrivateField(wander, "huntingGroundRegion", region);
         SetPolicy(agent, "RequireHuntingGround");
+    }
+
+    private Component PreparePhysicalAgent()
+    {
+        Component agent = boidObject.GetComponent(boidAgentType);
+        Rigidbody body = boidObject.GetComponent<Rigidbody>();
+        CapsuleCollider capsule = boidObject.GetComponent<CapsuleCollider>();
+        SetPrivateField(agent, "body", body);
+        SetPrivateField(agent, "capsule", capsule);
+        SetPrivateField(agent, "environmentLayers", (LayerMask)(1 << 12));
+        SetPolicy(agent, "RequireHuntingGround");
+        boidObject.transform.position = Vector3.zero;
+        body.position = Vector3.zero;
+        body.rotation = Quaternion.identity;
+        Physics.SyncTransforms();
+        return agent;
+    }
+
+    private bool TryRecertify(Component agent, Vector3 candidate, out Vector3 approved)
+    {
+        MethodInfo method = agent.GetType().GetMethod(
+            "TryRecertifyPhysicalMovement",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.That(method, Is.Not.Null);
+        object[] arguments = { Vector3.zero, candidate, null };
+        bool accepted = (bool)method.Invoke(agent, arguments);
+        approved = (Vector3)arguments[2];
+        return accepted;
+    }
+
+    private static bool ResolveEnvironmentOverlaps(Component agent, ref Vector3 position)
+    {
+        MethodInfo method = agent.GetType().GetMethod(
+            "ResolveEnvironmentOverlaps",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.That(method, Is.Not.Null);
+        object[] arguments = { position };
+        bool resolved = (bool)method.Invoke(agent, arguments);
+        position = (Vector3)arguments[0];
+        return resolved;
+    }
+
+    private static GameObject CreateSaturationObstacles()
+    {
+        GameObject root = new GameObject("B4 Saturation Test Obstacles");
+        for (int index = 0; index < 16; index++)
+        {
+            GameObject obstacle = new GameObject($"Saturation Obstacle {index}");
+            obstacle.layer = 12;
+            obstacle.transform.SetParent(root.transform, false);
+            BoxCollider collider = obstacle.AddComponent<BoxCollider>();
+            collider.size = new Vector3(1.2f, 2f, 1.2f);
+        }
+
+        Physics.SyncTransforms();
+        return root;
+    }
+
+    private static int CountPhysicalOverlaps(Vector3 position)
+    {
+        Collider[] overlaps = new Collider[32];
+        return Physics.OverlapCapsuleNonAlloc(
+            position + Vector3.up * 0.5f,
+            position - Vector3.up * 0.5f,
+            0.5f,
+            overlaps,
+            1 << 12,
+            QueryTriggerInteraction.Ignore);
+    }
+
+    private static GameObject CreateObstacle(Vector3 position, Vector3 size)
+    {
+        GameObject obstacle = new GameObject("B4 Physical Test Obstacle");
+        obstacle.layer = 12;
+        obstacle.transform.position = position;
+        BoxCollider collider = obstacle.AddComponent<BoxCollider>();
+        collider.size = size;
+        Physics.SyncTransforms();
+        return obstacle;
     }
 
     private static MethodInfo FindCapsuleGeometryMethod()
