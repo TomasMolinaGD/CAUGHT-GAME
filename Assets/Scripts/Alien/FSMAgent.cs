@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using CaughtGame.Navigation;
 
 [RequireComponent(typeof(HunterMovement), typeof(HunterPerception), typeof(HunterInterestSpawner))]
 [RequireComponent(typeof(HunterCombat), typeof(HunterAnimationController))]
@@ -17,12 +18,18 @@ public class FSMAgent : MonoBehaviour
     [SerializeField, Min(0.1f)] private float collectionDistance = 1.4f;
     [SerializeField, Min(0.1f)] private float collectionDuration = 2f;
 
+    [Header("Grid Navigation")]
+    [SerializeField] private NavigationGrid navigationGrid;
+    [SerializeField] private bool enableGridNavigation;
+
     private StateMachine stateMachine;
     private HunterMovement movement;
     private HunterPerception perception;
     private HunterInterestSpawner interestSpawner;
     private HunterCombat combat;
     private HunterAnimationController animationController;
+    private HunterNavigationIntent navigationIntent;
+    private HunterNavigationController navigationController;
 
     public IReadOnlyList<Transform> Waypoints => waypoints;
     public float WaypointCheckDistance => waypointCheckDistance;
@@ -31,6 +38,10 @@ public class FSMAgent : MonoBehaviour
     public HunterInterestSpawner InterestSpawner => interestSpawner;
     public HunterCombat Combat => combat;
     public HunterAnimationController Animation => animationController;
+    public HunterNavigationIntent NavigationIntent => navigationIntent ?? (navigationIntent = new HunterNavigationIntent());
+    public HunterNavigationController NavigationController => navigationController;
+    public NavigationGrid NavigationGrid => navigationGrid;
+    public bool GridNavigationEnabled => enableGridNavigation;
     public float PursuitSpeedMultiplier => pursuitSpeedMultiplier;
     public float CollectionDistance => collectionDistance;
     public float CollectionDuration => collectionDuration;
@@ -43,13 +54,26 @@ public class FSMAgent : MonoBehaviour
     {
         CacheDependencies();
         ConfigureComponents();
+        ConfigureNavigationController();
+        navigationController.SetEnabled(enableGridNavigation);
         InitializeStateMachine();
     }
 
     private void Update()
     {
         TickAgentSystems();
+        navigationController?.Tick();
         stateMachine?.Update();
+    }
+
+    private void OnEnable()
+    {
+        if (stateMachine != null && stateMachine.CurrentState == null)
+        {
+            stateMachine.ChangeState(PoliceState.Patrol);
+        }
+
+        navigationController?.SetEnabled(enableGridNavigation);
     }
 
     private void CacheDependencies()
@@ -88,6 +112,16 @@ public class FSMAgent : MonoBehaviour
     {
         stateMachine?.Stop();
         movement?.Stop();
+        navigationController?.SetEnabled(false);
+        navigationIntent?.CancelAll();
+    }
+
+    public void ConfigureNavigation(NavigationGrid grid, bool enabled)
+    {
+        navigationGrid = grid;
+        enableGridNavigation = enabled;
+        ConfigureNavigationController();
+        navigationController.SetEnabled(enabled);
     }
 
     public bool CanStartAttack()
@@ -108,6 +142,25 @@ public class FSMAgent : MonoBehaviour
         {
             combat?.ClearTargetCommitment();
         }
+    }
+
+    public ulong RequestNavigation(Vector3 destination, float stoppingDistance, float speedMultiplier = 1f) =>
+        NavigationIntent.RequestNavigation(destination, stoppingDistance, speedMultiplier);
+
+    public bool ReplaceNavigation(
+        ulong expectedId,
+        Vector3 destination,
+        float stoppingDistance,
+        float speedMultiplier,
+        out ulong newId) =>
+        NavigationIntent.ReplaceNavigation(
+            expectedId, destination, stoppingDistance, speedMultiplier, out newId);
+
+    public bool CancelNavigation(ulong expectedId) => NavigationIntent.CancelNavigation(expectedId);
+
+    private void ConfigureNavigationController()
+    {
+        navigationController = new HunterNavigationController(transform, NavigationIntent, navigationGrid);
     }
 
     private void OnValidate()
