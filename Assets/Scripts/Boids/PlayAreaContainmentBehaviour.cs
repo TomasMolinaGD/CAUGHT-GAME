@@ -1,4 +1,5 @@
 using UnityEngine;
+using CaughtGame.Navigation;
 
 [RequireComponent(typeof(BoidAgent))]
 public sealed class PlayAreaContainmentBehaviour : SteeringBehaviour
@@ -10,13 +11,40 @@ public sealed class PlayAreaContainmentBehaviour : SteeringBehaviour
     [SerializeField, Min(0f)] private float hardBoundaryPadding = 1.5f;
     [SerializeField, Min(0.1f)] private float strength = 6f;
 
+    [Header("Hunting Ground")]
+    [SerializeField] private HuntingGroundRegion huntingGroundRegion;
+    [SerializeField, Min(0f)] private float huntingGroundMargin = 0.1f;
+
     private BoidAgent owner;
+    private Vector3 lastSafePosition;
+    private Vector3 recoveryTarget;
+    private bool hasLastSafePosition;
+    private bool hasRecoveryTarget;
+    private bool attemptedRecoveryTargetSearch;
+
+    public bool HasHuntingGroundRegion => owner != null &&
+        owner.RequiresHuntingGround && huntingGroundRegion != null;
+    public HuntingGroundRegion HuntingGroundRegion => huntingGroundRegion;
+    public float HuntingGroundClearance => hardBoundaryPadding + huntingGroundMargin;
+
+    public bool TryGetHuntingGroundRegion(out HuntingGroundRegion region)
+    {
+        region = huntingGroundRegion;
+        return owner != null && owner.RequiresHuntingGround && region != null;
+    }
 
     public override bool IsApplicable => GetReturnDirection().sqrMagnitude > 0.0001f;
 
     private void Awake()
     {
         owner = GetComponent<BoidAgent>();
+    }
+
+    private void OnEnable()
+    {
+        hasLastSafePosition = false;
+        hasRecoveryTarget = false;
+        attemptedRecoveryTargetSearch = false;
     }
 
     public override Vector3 CalculateSteering()
@@ -29,14 +57,30 @@ public sealed class PlayAreaContainmentBehaviour : SteeringBehaviour
 
         // Aim at the middle instead of merely stepping away from the nearest
         // edge. Cancelling the tangential velocity prevents wall-following.
-        Vector3 areaCenter = new Vector3(center.x, transform.position.y, center.y);
-        Vector3 inward = Vector3.ProjectOnPlane(areaCenter - transform.position, Vector3.up).normalized;
+        Vector3 inward;
+        if (HasHuntingGroundRegion)
+        {
+            inward = Vector3.ProjectOnPlane(returnDirection, Vector3.up).normalized;
+        }
+        else
+        {
+            Vector3 areaCenter = new Vector3(center.x, transform.position.y, center.y);
+            inward = Vector3.ProjectOnPlane(areaCenter - transform.position, Vector3.up).normalized;
+        }
+
         Vector3 desiredVelocity = inward * owner.MaxSpeed;
         return (desiredVelocity - owner.Velocity) * strength;
     }
 
     public Vector3 ClampInsidePlayableArea(Vector3 position, out bool clampedX, out bool clampedZ)
     {
+        if (owner != null && owner.RequiresHuntingGround)
+        {
+            clampedX = false;
+            clampedZ = false;
+            return position;
+        }
+
         float usableHalfWidth = Mathf.Max(0.1f, halfExtents.x - hardBoundaryPadding);
         float usableHalfDepth = Mathf.Max(0.1f, halfExtents.y - hardBoundaryPadding);
         float clampedPositionX = Mathf.Clamp(position.x, center.x - usableHalfWidth, center.x + usableHalfWidth);
@@ -48,8 +92,55 @@ public sealed class PlayAreaContainmentBehaviour : SteeringBehaviour
         return position;
     }
 
+    public Vector3 ConstrainToHuntingGround(
+        Vector3 startPosition,
+        Vector3 proposedPosition,
+        out Vector3 outwardNormal)
+    {
+        if (!HasHuntingGroundRegion)
+        {
+            outwardNormal = Vector3.zero;
+            if (owner != null && owner.RequiresHuntingGround)
+            {
+                Vector3 attemptedDisplacement = proposedPosition - startPosition;
+                outwardNormal = attemptedDisplacement.sqrMagnitude > 0.0001f
+                    ? attemptedDisplacement.normalized
+                    : Vector3.zero;
+                return startPosition;
+            }
+
+            return proposedPosition;
+        }
+
+        if (owner == null)
+        {
+            outwardNormal = Vector3.zero;
+            return proposedPosition;
+        }
+
+        return HuntingGroundFootprint.ConstrainMovement(
+            huntingGroundRegion,
+            startPosition,
+            proposedPosition,
+            owner.HorizontalCapsuleRadius,
+            hardBoundaryPadding + huntingGroundMargin,
+            hasRecoveryTarget,
+            recoveryTarget,
+            out outwardNormal);
+    }
+
     private Vector3 GetReturnDirection()
     {
+        if (HasHuntingGroundRegion)
+        {
+            return GetHuntingGroundReturnDirection();
+        }
+
+        if (owner != null && owner.RequiresHuntingGround)
+        {
+            return Vector3.zero;
+        }
+
         float safeHalfWidth = Mathf.Max(0.1f, halfExtents.x - turningMargin);
         float safeHalfDepth = Mathf.Max(0.1f, halfExtents.y - turningMargin);
         Vector3 position = transform.position;
@@ -58,6 +149,60 @@ public sealed class PlayAreaContainmentBehaviour : SteeringBehaviour
         float safeZ = Mathf.Clamp(position.z, center.y - safeHalfDepth, center.y + safeHalfDepth);
 
         return new Vector3(safeX - position.x, 0f, safeZ - position.z);
+    }
+
+    private Vector3 GetHuntingGroundReturnDirection()
+    {
+        if (owner == null)
+        {
+            return Vector3.zero;
+        }
+
+        Vector3 position = transform.position;
+        float capsuleRadius = owner.HorizontalCapsuleRadius;
+        float returnMargin = hardBoundaryPadding + huntingGroundMargin + turningMargin;
+
+        if (HuntingGroundFootprint.Contains(
+                huntingGroundRegion,
+                position,
+                capsuleRadius,
+                returnMargin))
+        {
+            lastSafePosition = position;
+            recoveryTarget = position;
+            hasLastSafePosition = true;
+            hasRecoveryTarget = true;
+            return Vector3.zero;
+        }
+
+        if (hasLastSafePosition)
+        {
+            recoveryTarget = lastSafePosition;
+            hasRecoveryTarget = true;
+        }
+        else if (!hasRecoveryTarget && !attemptedRecoveryTargetSearch)
+        {
+            TryChooseRecoveryTarget(capsuleRadius, hardBoundaryPadding + huntingGroundMargin);
+        }
+
+        return hasRecoveryTarget
+            ? Vector3.ProjectOnPlane(recoveryTarget - position, Vector3.up)
+            : Vector3.zero;
+    }
+
+    private void TryChooseRecoveryTarget(float capsuleRadius, float margin)
+    {
+        attemptedRecoveryTargetSearch = true;
+        for (int attempt = 0; attempt < 8; attempt++)
+        {
+            if (huntingGroundRegion.TryGetRandomWorldPosition(out Vector3 candidate) &&
+                HuntingGroundFootprint.Contains(huntingGroundRegion, candidate, capsuleRadius, margin))
+            {
+                recoveryTarget = candidate;
+                hasRecoveryTarget = true;
+                return;
+            }
+        }
     }
 
     protected override void OnValidate()
@@ -71,10 +216,16 @@ public sealed class PlayAreaContainmentBehaviour : SteeringBehaviour
             0f,
             Mathf.Min(halfExtents.x, halfExtents.y) - 0.1f);
         strength = Mathf.Max(0.1f, strength);
+        huntingGroundMargin = Mathf.Max(0f, huntingGroundMargin);
     }
 
     private void OnDrawGizmosSelected()
     {
+        if (HasHuntingGroundRegion)
+        {
+            return;
+        }
+
         Vector3 areaCenter = new Vector3(center.x, transform.position.y, center.y);
         Vector3 outerSize = new Vector3(halfExtents.x * 2f, 0.2f, halfExtents.y * 2f);
         Vector3 safeSize = new Vector3(

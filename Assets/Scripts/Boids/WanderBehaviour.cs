@@ -1,4 +1,5 @@
 using UnityEngine;
+using CaughtGame.Navigation;
 
 [RequireComponent(typeof(BoidAgent))]
 public sealed class WanderBehaviour : SteeringBehaviour
@@ -10,6 +11,10 @@ public sealed class WanderBehaviour : SteeringBehaviour
     [SerializeField, Min(1f)] private float maximumTravelDistance = 26f;
     [SerializeField, Min(0.1f)] private float arrivalDistance = 2.5f;
 
+    [Header("Hunting Ground")]
+    [SerializeField] private HuntingGroundRegion huntingGroundRegion;
+    [SerializeField, Min(0f)] private float huntingGroundMargin = 0.1f;
+
     [Header("Direction Changes")]
     [SerializeField, Min(0.1f)] private float directionChangeInterval = 10f;
     [SerializeField, Range(0f, 180f)] private float maximumDirectionChange = 65f;
@@ -20,6 +25,9 @@ public sealed class WanderBehaviour : SteeringBehaviour
     private Vector3 targetPosition;
     private float nextTargetChangeTime;
     private bool hasTarget;
+    private bool hasUsableTarget;
+
+    public HuntingGroundRegion HuntingGroundRegion => huntingGroundRegion;
 
     private void Awake()
     {
@@ -32,6 +40,7 @@ public sealed class WanderBehaviour : SteeringBehaviour
     {
         desiredDirection = GetHorizontalDirection(transform.forward);
         hasTarget = false;
+        hasUsableTarget = false;
     }
 
     public override Vector3 CalculateSteering()
@@ -40,6 +49,11 @@ public sealed class WanderBehaviour : SteeringBehaviour
             HorizontalDistanceSquared(transform.position, targetPosition) <= arrivalDistance * arrivalDistance)
         {
             SelectLocalTarget();
+        }
+
+        if (!hasUsableTarget)
+        {
+            return -owner.Velocity;
         }
 
         Vector3 targetDirection = GetHorizontalDirection(targetPosition - transform.position);
@@ -56,6 +70,19 @@ public sealed class WanderBehaviour : SteeringBehaviour
 
     private void SelectLocalTarget()
     {
+        if (owner != null && owner.RequiresHuntingGround && huntingGroundRegion != null)
+        {
+            SelectHuntingGroundTarget();
+            return;
+        }
+
+        if (owner != null && owner.RequiresHuntingGround)
+        {
+            hasTarget = false;
+            hasUsableTarget = false;
+            return;
+        }
+
         Vector3 currentPosition = transform.position;
         Vector3 currentDirection = desiredDirection.sqrMagnitude > 0.001f
             ? desiredDirection
@@ -90,6 +117,65 @@ public sealed class WanderBehaviour : SteeringBehaviour
         }
 
         hasTarget = true;
+        hasUsableTarget = true;
+        nextTargetChangeTime = Time.time + directionChangeInterval * Random.Range(0.85f, 1.15f);
+    }
+
+    private void SelectHuntingGroundTarget()
+    {
+        Vector3 currentPosition = transform.position;
+        Vector3 currentDirection = desiredDirection.sqrMagnitude > 0.001f
+            ? desiredDirection
+            : GetHorizontalDirection(transform.forward);
+        float radius = owner != null ? owner.HorizontalCapsuleRadius : 0f;
+        float minimumDistanceSquared = minimumTravelDistance * minimumTravelDistance;
+
+        for (int attempt = 0; attempt < 8; attempt++)
+        {
+            float yaw = Random.Range(-maximumDirectionChange, maximumDirectionChange);
+            Vector3 candidateDirection = Quaternion.Euler(0f, yaw, 0f) * currentDirection;
+            float travelDistance = Random.Range(minimumTravelDistance, maximumTravelDistance);
+            Vector3 candidate = currentPosition + candidateDirection * travelDistance;
+            candidate.y = currentPosition.y;
+
+            if (HorizontalDistanceSquared(currentPosition, candidate) >= minimumDistanceSquared &&
+                HuntingGroundFootprint.Contains(
+                    huntingGroundRegion,
+                    candidate,
+                    radius,
+                    huntingGroundMargin))
+            {
+                SetHuntingGroundTarget(candidate);
+                return;
+            }
+        }
+
+        for (int attempt = 0; attempt < 4; attempt++)
+        {
+            if (huntingGroundRegion.TryGetRandomWorldPosition(out Vector3 candidate) &&
+                HuntingGroundFootprint.Contains(
+                    huntingGroundRegion,
+                    candidate,
+                    radius,
+                    huntingGroundMargin))
+            {
+                candidate.y = currentPosition.y;
+                SetHuntingGroundTarget(candidate);
+                return;
+            }
+        }
+
+        targetPosition = currentPosition;
+        hasTarget = true;
+        hasUsableTarget = false;
+        nextTargetChangeTime = Time.time + directionChangeInterval * Random.Range(0.85f, 1.15f);
+    }
+
+    private void SetHuntingGroundTarget(Vector3 candidate)
+    {
+        targetPosition = candidate;
+        hasTarget = true;
+        hasUsableTarget = true;
         nextTargetChangeTime = Time.time + directionChangeInterval * Random.Range(0.85f, 1.15f);
     }
 
@@ -117,5 +203,6 @@ public sealed class WanderBehaviour : SteeringBehaviour
         directionChangeInterval = Mathf.Max(0.1f, directionChangeInterval);
         maximumDirectionChange = Mathf.Clamp(maximumDirectionChange, 0f, 180f);
         turnSpeed = Mathf.Clamp(turnSpeed, 15f, 180f);
+        huntingGroundMargin = Mathf.Max(0f, huntingGroundMargin);
     }
 }

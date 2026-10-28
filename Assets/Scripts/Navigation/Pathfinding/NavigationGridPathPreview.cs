@@ -173,20 +173,7 @@ namespace CaughtGame.Navigation
 
         private GeneratedGeometryMarker ResolveGeneration()
         {
-            if (geometryGeneration != null) return geometryGeneration;
-            if (grid == null || !gameObject.scene.IsValid()) return null;
-
-            GeneratedGeometryMarker[] candidates = FindObjectsByType<GeneratedGeometryMarker>(
-                FindObjectsSortMode.None);
-            GeneratedGeometryMarker match = null;
-            foreach (GeneratedGeometryMarker candidate in candidates)
-            {
-                if (candidate.SourceGrid != grid || candidate.gameObject.scene != gameObject.scene) continue;
-                if (match != null) return null;
-                match = candidate;
-            }
-
-            return match;
+            return geometryGeneration;
         }
 
         private void OnDrawGizmos()
