@@ -3,7 +3,14 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class HunterMovement : MonoBehaviour
 {
+    public enum BoundsPolicy
+    {
+        LegacyRectangle = 0,
+        NavigationGrid = 1
+    }
+
     [Header("Playable Area")]
+    [SerializeField] private BoundsPolicy boundsPolicy = BoundsPolicy.LegacyRectangle;
     [SerializeField] private Vector2 areaCenter = new Vector2(484f, 623f);
     [SerializeField] private Vector2 areaHalfExtents = new Vector2(50f, 34f);
     [SerializeField, Min(0f)] private float boundaryPadding = 1.5f;
@@ -11,12 +18,17 @@ public sealed class HunterMovement : MonoBehaviour
 
     private float speed = 3f;
     private float turnSpeed = 8f;
+    private bool movementCommandIssued;
+    private bool movementCommandGateActive;
 
     public Vector3 Velocity { get; private set; }
 
     private void Awake()
     {
-        ClampInsidePlayableArea();
+        if (boundsPolicy == BoundsPolicy.LegacyRectangle)
+        {
+            ClampInsidePlayableArea();
+        }
     }
 
     private void LateUpdate()
@@ -32,21 +44,63 @@ public sealed class HunterMovement : MonoBehaviour
         turnSpeed = Mathf.Max(0.1f, rotationSpeed);
     }
 
+    /// <summary>Starts the single-command window used by FSMAgent for one frame.</summary>
+    public void BeginMovementFrame()
+    {
+        movementCommandIssued = false;
+        movementCommandGateActive = true;
+    }
+
     public bool MoveTowards(Vector3 destination, float stoppingDistance, float speedMultiplier = 1f)
     {
-        Vector3 clampedDestination = ClampPosition(destination);
+        return MoveTowardsInternal(
+            destination,
+            stoppingDistance,
+            speedMultiplier,
+            boundsPolicy == BoundsPolicy.LegacyRectangle);
+    }
+
+    /// <summary>
+    /// Moves toward a navigation target without applying the legacy rectangular clamp.
+    /// The grid/controller remains responsible for selecting a valid target.
+    /// </summary>
+    public bool MoveTowardsNavigation(Vector3 destination, float stoppingDistance, float speedMultiplier = 1f)
+    {
+        return MoveTowardsInternal(destination, stoppingDistance, speedMultiplier, false);
+    }
+
+    private bool MoveTowardsInternal(
+        Vector3 destination,
+        float stoppingDistance,
+        float speedMultiplier,
+        bool constrainToLegacyArea)
+    {
+        if (movementCommandGateActive && movementCommandIssued)
+        {
+            return false;
+        }
+
+        movementCommandIssued = true;
+        Vector3 clampedDestination = constrainToLegacyArea
+            ? ClampPosition(destination)
+            : new Vector3(destination.x, groundHeight, destination.z);
         Vector3 direction = Vector3.ProjectOnPlane(clampedDestination - transform.position, Vector3.up);
         float distance = direction.magnitude;
         if (distance <= Mathf.Max(0f, stoppingDistance))
         {
-            Stop();
+            Velocity = Vector3.zero;
             return false;
         }
 
         Vector3 previousPosition = transform.position;
         float effectiveSpeed = speed * Mathf.Max(0.1f, speedMultiplier);
         float travelDistance = Mathf.Min(effectiveSpeed * Time.deltaTime, distance);
-        Vector3 nextPosition = ClampPosition(previousPosition + direction.normalized * travelDistance);
+        Vector3 nextPosition = constrainToLegacyArea
+            ? ClampPosition(previousPosition + direction.normalized * travelDistance)
+            : new Vector3(
+                previousPosition.x + direction.normalized.x * travelDistance,
+                groundHeight,
+                previousPosition.z + direction.normalized.z * travelDistance);
         transform.position = nextPosition;
         Velocity = Time.deltaTime > 0f
             ? Vector3.ProjectOnPlane(nextPosition - previousPosition, Vector3.up) / Time.deltaTime
@@ -72,6 +126,11 @@ public sealed class HunterMovement : MonoBehaviour
 
     public void Stop()
     {
+        if (movementCommandGateActive && movementCommandIssued)
+        {
+            return;
+        }
+
         Velocity = Vector3.zero;
     }
 

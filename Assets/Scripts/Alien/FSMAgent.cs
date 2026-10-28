@@ -17,10 +17,17 @@ public class FSMAgent : MonoBehaviour
     [Header("Gather")]
     [SerializeField, Min(0.1f)] private float collectionDistance = 1.4f;
     [SerializeField, Min(0.1f)] private float collectionDuration = 2f;
+    [SerializeField, Min(1)] private int requiredGathers = 3;
 
     [Header("Grid Navigation")]
     [SerializeField] private NavigationGrid navigationGrid;
+    [SerializeField] private HuntingGroundRegion huntingGroundRegion;
     [SerializeField] private bool enableGridNavigation;
+    [Header("Search Exploration")]
+    [SerializeField] private int searchRandomSeed = 417;
+    [SerializeField, Min(0f)] private float searchMinimumDistanceMultiplier = 0.75f;
+    [SerializeField, Min(0.1f)] private float searchMaximumDistanceMultiplier = 2f;
+    [SerializeField, Min(1)] private int searchSelectionAttempts = 24;
 
     private StateMachine stateMachine;
     private HunterMovement movement;
@@ -41,10 +48,15 @@ public class FSMAgent : MonoBehaviour
     public HunterNavigationIntent NavigationIntent => navigationIntent ?? (navigationIntent = new HunterNavigationIntent());
     public HunterNavigationController NavigationController => navigationController;
     public NavigationGrid NavigationGrid => navigationGrid;
+    public HuntingGroundRegion HuntingGroundRegion => huntingGroundRegion;
     public bool GridNavigationEnabled => enableGridNavigation;
     public float PursuitSpeedMultiplier => pursuitSpeedMultiplier;
     public float CollectionDistance => collectionDistance;
     public float CollectionDuration => collectionDuration;
+    public int RequiredGathers => requiredGathers;
+    public int CompletedGathers { get; private set; }
+    public bool HasReachedRequiredGathers => CompletedGathers >= requiredGathers;
+    public PoliceState EngagementReturnState => enableGridNavigation ? PoliceState.Search : PoliceState.Patrol;
     public BoidLife CurrentTarget { get; private set; }
     public PoliceState CurrentState => stateMachine?.CurrentStateKey is PoliceState state
         ? state
@@ -62,7 +74,9 @@ public class FSMAgent : MonoBehaviour
     private void Update()
     {
         TickAgentSystems();
+        movement?.BeginMovementFrame();
         navigationController?.Tick();
+        ExecuteNavigationMovement();
         stateMachine?.Update();
     }
 
@@ -70,7 +84,7 @@ public class FSMAgent : MonoBehaviour
     {
         if (stateMachine != null && stateMachine.CurrentState == null)
         {
-            stateMachine.ChangeState(PoliceState.Patrol);
+            stateMachine.ChangeState(enableGridNavigation ? PoliceState.Search : PoliceState.Patrol);
         }
 
         navigationController?.SetEnabled(enableGridNavigation);
@@ -94,10 +108,14 @@ public class FSMAgent : MonoBehaviour
     {
         stateMachine = new StateMachine();
         stateMachine.RegisterState(PoliceState.Patrol, new PatrolState(this, stateMachine));
+        stateMachine.RegisterState(PoliceState.Search, new SearchState(
+            this, stateMachine, huntingGroundRegion, searchRandomSeed,
+            searchMinimumDistanceMultiplier, searchMaximumDistanceMultiplier, searchSelectionAttempts));
         stateMachine.RegisterState(PoliceState.Pursuit, new PursuitState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Attack, new AttackState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Gather, new GatherState(this, stateMachine));
-        stateMachine.ChangeState(PoliceState.Patrol);
+        stateMachine.RegisterState(PoliceState.Exit, new ExitState(this, stateMachine));
+        stateMachine.ChangeState(enableGridNavigation ? PoliceState.Search : PoliceState.Patrol);
     }
 
     private void TickAgentSystems()
@@ -144,6 +162,21 @@ public class FSMAgent : MonoBehaviour
         }
     }
 
+    /// <summary>Resets the Hunter's gather progress for a future run or respawn.</summary>
+    public void ResetGatherProgress()
+    {
+        CompletedGathers = 0;
+    }
+
+    /// <summary>Records one successful collection performed by GatherState.</summary>
+    internal void RegisterGatherCompletion()
+    {
+        if (CompletedGathers < requiredGathers)
+        {
+            CompletedGathers++;
+        }
+    }
+
     public ulong RequestNavigation(Vector3 destination, float stoppingDistance, float speedMultiplier = 1f) =>
         NavigationIntent.RequestNavigation(destination, stoppingDistance, speedMultiplier);
 
@@ -163,6 +196,44 @@ public class FSMAgent : MonoBehaviour
         navigationController = new HunterNavigationController(transform, NavigationIntent, navigationGrid);
     }
 
+    private void ExecuteNavigationMovement()
+    {
+        if (!enableGridNavigation || navigationController == null || movement == null ||
+            navigationController.Status != HunterNavigationControllerStatus.InProgress ||
+            !NavigationIntent.TryGetCurrent(out HunterNavigationRequest request))
+        {
+            return;
+        }
+
+        ulong requestId = request.Id;
+        ulong routeVersion = navigationController.CurrentRouteVersion;
+        int waypointIndex = navigationController.CurrentWaypointIndex;
+        Vector3 target;
+        bool isWaypoint = navigationController.TryGetNextWaypoint(out target);
+        if (!isWaypoint && !navigationController.TryGetTerminalDestination(
+                requestId, routeVersion, out target))
+        {
+            navigationController.Tick();
+            return;
+        }
+
+        movement.MoveTowardsNavigation(target, request.StoppingDistance, request.SpeedMultiplier);
+
+        if (isWaypoint && IsWithinHorizontalDistance(target, request.StoppingDistance))
+        {
+            navigationController.TryAdvanceWaypoint(requestId, routeVersion, waypointIndex);
+        }
+
+        navigationController.Tick();
+    }
+
+    private bool IsWithinHorizontalDistance(Vector3 target, float stoppingDistance)
+    {
+        Vector3 delta = transform.position - target;
+        delta.y = 0f;
+        return delta.sqrMagnitude <= stoppingDistance * stoppingDistance;
+    }
+
     private void OnValidate()
     {
         speed = Mathf.Max(0.1f, speed);
@@ -171,5 +242,9 @@ public class FSMAgent : MonoBehaviour
         pursuitSpeedMultiplier = Mathf.Max(1f, pursuitSpeedMultiplier);
         collectionDistance = Mathf.Max(0.1f, collectionDistance);
         collectionDuration = Mathf.Max(0.1f, collectionDuration);
+        requiredGathers = Mathf.Max(1, requiredGathers);
+        searchMinimumDistanceMultiplier = Mathf.Max(0f, searchMinimumDistanceMultiplier);
+        searchMaximumDistanceMultiplier = Mathf.Max(0.1f, searchMaximumDistanceMultiplier);
+        searchSelectionAttempts = Mathf.Max(1, searchSelectionAttempts);
     }
 }

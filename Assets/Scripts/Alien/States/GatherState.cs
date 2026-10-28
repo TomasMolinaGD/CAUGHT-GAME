@@ -60,8 +60,11 @@ public sealed class GatherState : State
 
         if (target.Collect())
         {
+            agent.RegisterGatherCompletion();
             agent.SetCurrentTarget(null);
-            StateMachine.ChangeState(PoliceState.Patrol);
+            StateMachine.ChangeState(agent.GridNavigationEnabled && agent.HasReachedRequiredGathers
+                ? PoliceState.Exit
+                : agent.EngagementReturnState);
             return;
         }
 
@@ -80,6 +83,6 @@ public sealed class GatherState : State
     private void AbortCollection()
     {
         agent.SetCurrentTarget(null);
-        StateMachine.ChangeState(PoliceState.Patrol);
+        StateMachine.ChangeState(agent.EngagementReturnState);
     }
 }
