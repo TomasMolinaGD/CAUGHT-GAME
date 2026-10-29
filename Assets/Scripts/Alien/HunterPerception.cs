@@ -44,6 +44,15 @@ public sealed class HunterPerception : MonoBehaviour
         refreshTimer = refreshInterval;
     }
 
+    public void ClearDetections()
+    {
+        ClosestLivingBoid = null;
+        ClosestDeadBoid = null;
+        livingBoids.Clear();
+        deadBoids.Clear();
+        refreshTimer = 0f;
+    }
+
     private void RefreshDetections()
     {
         ClosestLivingBoid = null;

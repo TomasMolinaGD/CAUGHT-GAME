@@ -434,6 +434,106 @@ public sealed class HunterNavigationControllerTests
     }
 
     [Test]
+    public void SpawnSelectorChoosesFirstWalkableSpawnDeterministically()
+    {
+        NavigationGrid grid = (NavigationGrid)gridObject.GetComponent(gridType);
+        grid.SetWalkable(0, 0, false);
+        grid.SetZone(0, 1, NavigationGridZone.Spawn);
+        grid.SetZone(1, 1, NavigationGridZone.Spawn);
+
+        Assert.That(HunterSpawnSelector.TrySelectSpawn(grid, 0.05f, out Vector3 position), Is.True);
+        Vector3 expected = grid.GridToWorldPosition(0, 1);
+        Assert.That(position.x, Is.EqualTo(expected.x));
+        Assert.That(position.z, Is.EqualTo(expected.z));
+        Assert.That(position.y, Is.EqualTo(0.05f));
+    }
+
+    [Test]
+    public void SpawnSelectorRejectsBlockedOrMissingSpawnWithoutMutation()
+    {
+        NavigationGrid grid = (NavigationGrid)gridObject.GetComponent(gridType);
+        grid.SetWalkable(0, 0, false);
+        grid.SetZone(0, 0, NavigationGridZone.Spawn);
+
+        Assert.That(HunterSpawnSelector.TrySelectSpawn(grid, 0.05f, out _), Is.False);
+        grid.SetWalkable(0, 0, true);
+        grid.SetZone(0, 0, NavigationGridZone.Normal);
+        Assert.That(HunterSpawnSelector.TrySelectSpawn(grid, 0.05f, out _), Is.False);
+    }
+
+    [Test]
+    public void SpawnSelectorRejectsNonFiniteHeight()
+    {
+        NavigationGrid grid = (NavigationGrid)gridObject.GetComponent(gridType);
+        grid.SetZone(0, 0, NavigationGridZone.Spawn);
+
+        Assert.That(HunterSpawnSelector.TrySelectSpawn(grid, float.NaN, out _), Is.False);
+    }
+
+    [Test]
+    public void StopAndPlaceClearsMotionAndRejectsStaleCommand()
+    {
+        GameObject movementObject = new GameObject("HunterNavigationControllerTests.StopAndPlace");
+        try
+        {
+            Component movement = movementObject.AddComponent(FindProjectType("HunterMovement"));
+            Rigidbody body = movementObject.AddComponent<Rigidbody>();
+            body.useGravity = false;
+            SetPrivateField(movement, "boundsPolicy", Enum.Parse(
+                movement.GetType().GetNestedType("BoundsPolicy"), "NavigationGrid"));
+            Invoke(movement, "BeginMovementFrame");
+            Invoke(movement, "MoveTowardsNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+
+            object result = Invoke(movement, "TryStopAndPlace", new Vector3(3f, 9f, 4f));
+            Assert.That(result.ToString(), Is.EqualTo("Placed"));
+            Assert.That(movementObject.transform.position, Is.EqualTo(new Vector3(3f, 0.05f, 4f)));
+            Assert.That(body.position, Is.EqualTo(movementObject.transform.position));
+            Assert.That(body.linearVelocity, Is.EqualTo(Vector3.zero));
+            Assert.That((bool)Invoke(movement, "MoveTowardsNavigation", new Vector3(9f, 0f, 4f), 0.1f, 1f), Is.False);
+            Assert.That(GetProperty<Vector3>(movement, "Velocity"), Is.EqualTo(Vector3.zero));
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(movementObject);
+        }
+    }
+
+    [Test]
+    public void StopAndPlacePreservesLegacyRectangleClamping()
+    {
+        GameObject movementObject = new GameObject("HunterNavigationControllerTests.LegacyPlacement");
+        try
+        {
+            Component movement = movementObject.AddComponent(FindProjectType("HunterMovement"));
+            object result = Invoke(movement, "TryStopAndPlace", new Vector3(82f, 0.05f, 14f));
+            Assert.That(result.ToString(), Is.EqualTo("Placed"));
+            Assert.That(movementObject.transform.position, Is.EqualTo(new Vector3(435.5f, 0.05f, 590.5f)));
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(movementObject);
+        }
+    }
+
+    [Test]
+    public void StopAndPlaceRejectsNonFinitePositionWithoutMutation()
+    {
+        GameObject movementObject = new GameObject("HunterNavigationControllerTests.InvalidPlacement");
+        try
+        {
+            Component movement = movementObject.AddComponent(FindProjectType("HunterMovement"));
+            movementObject.transform.position = new Vector3(2f, 0.05f, 3f);
+            object result = Invoke(movement, "TryStopAndPlace", new Vector3(float.NaN, 0f, 0f));
+            Assert.That(result.ToString(), Is.EqualTo("InvalidPosition"));
+            Assert.That(movementObject.transform.position, Is.EqualTo(new Vector3(2f, 0.05f, 3f)));
+        }
+        finally
+        {
+            UnityEngine.Object.DestroyImmediate(movementObject);
+        }
+    }
+
+    [Test]
     public void SearchTransitionsToGatherBeforeAttackWhenBothTargetsAreDetected()
     {
         Component fsm = CreateSearchAgent();
@@ -588,6 +688,63 @@ public sealed class HunterNavigationControllerTests
     }
 
     [Test]
+    public void ReachedExitRestartsAtSpawnAndRequestsFreshSearchRoute()
+    {
+        NavigationGrid grid = (NavigationGrid)gridObject.GetComponent(gridType);
+        grid.SetZone(0, 0, NavigationGridZone.Spawn);
+        grid.SetZone(0, 2, NavigationGridZone.Exit);
+        Component fsm = CreateSearchAgent();
+        Component movement = fsm.GetComponent(FindProjectType("HunterMovement"));
+        fsm.transform.position = grid.GridToWorldPosition(0, 2);
+        InvokePrivate(fsm, "RegisterGatherCompletion");
+        InvokePrivate(fsm, "RegisterGatherCompletion");
+        InvokePrivate(fsm, "RegisterGatherCompletion");
+        Component target = CreateDetectedBoid(false);
+        Invoke(fsm, "SetCurrentTarget", target);
+        Invoke(fsm.GetComponent(FindProjectType("HunterPerception")), "ForceRefresh");
+
+        object stateMachine = GetPrivateField(fsm, "stateMachine");
+        Type policeState = FindProjectType("PoliceState");
+        Invoke(stateMachine, "ChangeState", Enum.Parse(policeState, "Exit"));
+        ulong previousRequestId = GetActiveRequestId(GetProperty<object>(fsm, "NavigationIntent"));
+
+        InvokePrivate(fsm, "Update");
+
+        Assert.That(GetProperty<Enum>(fsm, "CurrentState").ToString(), Is.EqualTo("Search"));
+        Assert.That(GetProperty<int>(fsm, "CompletedGathers"), Is.EqualTo(0));
+        Assert.That(GetProperty<object>(fsm, "CurrentTarget"), Is.Null);
+        Assert.That(GetProperty<object>(fsm.GetComponent(FindProjectType("HunterPerception")), "ClosestDeadBoid"), Is.Null);
+        Assert.That(fsm.transform.position, Is.EqualTo(new Vector3(2f, 0.05f, 2f)));
+        Assert.That(GetProperty<Vector3>(movement, "Velocity"), Is.EqualTo(Vector3.zero));
+        Assert.That(GetProperty<bool>(GetProperty<object>(fsm, "NavigationIntent"), "HasActiveRequest"), Is.True);
+        Assert.That(GetActiveRequestId(GetProperty<object>(fsm, "NavigationIntent")), Is.GreaterThan(previousRequestId));
+    }
+
+    [Test]
+    public void MissingSpawnDefersExitRestartWithoutPartialMutation()
+    {
+        NavigationGrid grid = (NavigationGrid)gridObject.GetComponent(gridType);
+        grid.SetZone(0, 2, NavigationGridZone.Exit);
+        Component fsm = CreateSearchAgent();
+        fsm.transform.position = grid.GridToWorldPosition(0, 2);
+        InvokePrivate(fsm, "RegisterGatherCompletion");
+        InvokePrivate(fsm, "RegisterGatherCompletion");
+        InvokePrivate(fsm, "RegisterGatherCompletion");
+        object stateMachine = GetPrivateField(fsm, "stateMachine");
+        Type policeState = FindProjectType("PoliceState");
+        Invoke(stateMachine, "ChangeState", Enum.Parse(policeState, "Exit"));
+        Vector3 previousPosition = fsm.transform.position;
+        ulong previousRequestId = GetActiveRequestId(GetProperty<object>(fsm, "NavigationIntent"));
+
+        InvokePrivate(fsm, "Update");
+
+        Assert.That(GetProperty<Enum>(fsm, "CurrentState").ToString(), Is.EqualTo("Exit"));
+        Assert.That(GetProperty<int>(fsm, "CompletedGathers"), Is.EqualTo(3));
+        Assert.That(fsm.transform.position, Is.EqualTo(previousPosition));
+        Assert.That(GetActiveRequestId(GetProperty<object>(fsm, "NavigationIntent")), Is.EqualTo(previousRequestId));
+    }
+
+    [Test]
     public void SearchDestinationSelectorWithSameSeedProducesSameSequence()
     {
         Component gridComponent = gridObject.GetComponent(gridType);
@@ -722,6 +879,13 @@ public sealed class HunterNavigationControllerTests
         FieldInfo field = target.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
         Assert.That(field, Is.Not.Null, "Missing private field " + fieldName + ".");
         return field.GetValue(target);
+    }
+
+    private static ulong GetActiveRequestId(object intent)
+    {
+        object activeRequest = GetPrivateField(intent, "activeRequest");
+        Assert.That(activeRequest, Is.Not.Null);
+        return (ulong)activeRequest.GetType().GetProperty("Id").GetValue(activeRequest);
     }
 
     private static void SetPrivateField(object target, string fieldName, object value)

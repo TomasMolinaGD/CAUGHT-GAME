@@ -15,6 +15,7 @@ public sealed class ExitState : State
     private bool ownsRequest;
 
     public bool HasReachedExit { get; private set; }
+    public ulong CompletionRequestId { get; private set; }
 
     public ExitState(FSMAgent agent, StateMachine stateMachine) : base(stateMachine)
     {
@@ -25,6 +26,7 @@ public sealed class ExitState : State
     {
         CancelOwnedRequest();
         HasReachedExit = false;
+        CompletionRequestId = 0;
         candidateIndex = 0;
         exitCandidates.Clear();
         CollectExitCandidates();
@@ -51,7 +53,7 @@ public sealed class ExitState : State
             case HunterNavigationControllerStatus.DestinationReached:
                 agent.Animation.SetMoving(false);
                 HasReachedExit = true;
-                CancelOwnedRequest();
+                CompletionRequestId = ownedRequestId;
                 break;
             case HunterNavigationControllerStatus.NoPath:
             case HunterNavigationControllerStatus.InvalidGrid:
@@ -69,6 +71,20 @@ public sealed class ExitState : State
     {
         agent.Animation.SetMoving(false);
         CancelOwnedRequest();
+    }
+
+    public bool TryGetCompletedRequestId(out ulong requestId)
+    {
+        requestId = CompletionRequestId;
+        return HasReachedExit && ownsRequest && requestId != 0;
+    }
+
+    internal void PrepareForRestart()
+    {
+        agent.Animation.SetMoving(false);
+        CancelOwnedRequest();
+        HasReachedExit = false;
+        CompletionRequestId = 0;
     }
 
     private void CollectExitCandidates()

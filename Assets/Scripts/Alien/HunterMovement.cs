@@ -3,6 +3,12 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class HunterMovement : MonoBehaviour
 {
+    public enum PlacementResult
+    {
+        Placed = 0,
+        InvalidPosition = 1
+    }
+
     public enum BoundsPolicy
     {
         LegacyRectangle = 0,
@@ -22,6 +28,7 @@ public sealed class HunterMovement : MonoBehaviour
     private bool movementCommandGateActive;
 
     public Vector3 Velocity { get; private set; }
+    public float GroundHeight => groundHeight;
 
     private void Awake()
     {
@@ -134,6 +141,36 @@ public sealed class HunterMovement : MonoBehaviour
         Velocity = Vector3.zero;
     }
 
+    /// <summary>
+    /// Stops the current command and places the Hunter at a validated world position.
+    /// The command gate remains consumed so stale movement cannot run in the same frame.
+    /// </summary>
+    public PlacementResult TryStopAndPlace(Vector3 worldPosition)
+    {
+        if (!IsFinite(worldPosition))
+        {
+            return PlacementResult.InvalidPosition;
+        }
+
+        worldPosition = boundsPolicy == BoundsPolicy.LegacyRectangle
+            ? ClampPosition(worldPosition)
+            : new Vector3(worldPosition.x, groundHeight, worldPosition.z);
+        movementCommandGateActive = true;
+        movementCommandIssued = true;
+        Velocity = Vector3.zero;
+
+        Rigidbody body = GetComponent<Rigidbody>();
+        if (body != null)
+        {
+            body.linearVelocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+            body.position = worldPosition;
+        }
+
+        transform.position = worldPosition;
+        return PlacementResult.Placed;
+    }
+
     private void ClampInsidePlayableArea()
     {
         transform.position = ClampPosition(transform.position);
@@ -148,6 +185,12 @@ public sealed class HunterMovement : MonoBehaviour
         position.y = groundHeight;
         return position;
     }
+
+    private static bool IsFinite(Vector3 value) =>
+        IsFinite(value.x) && IsFinite(value.y) && IsFinite(value.z);
+
+    private static bool IsFinite(float value) =>
+        !float.IsNaN(value) && !float.IsInfinity(value);
 
     private void OnValidate()
     {

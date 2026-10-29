@@ -35,8 +35,11 @@ public class FSMAgent : MonoBehaviour
     private HunterInterestSpawner interestSpawner;
     private HunterCombat combat;
     private HunterAnimationController animationController;
+    private ExitState exitState;
+    private Renderer[] visualRenderers;
     private HunterNavigationIntent navigationIntent;
     private HunterNavigationController navigationController;
+    private bool exitRestartDiagnosticReported;
 
     public IReadOnlyList<Transform> Waypoints => waypoints;
     public float WaypointCheckDistance => waypointCheckDistance;
@@ -69,6 +72,7 @@ public class FSMAgent : MonoBehaviour
         ConfigureNavigationController();
         navigationController.SetEnabled(enableGridNavigation);
         InitializeStateMachine();
+        visualRenderers = GetComponentsInChildren<Renderer>(true);
     }
 
     private void Update()
@@ -78,6 +82,7 @@ public class FSMAgent : MonoBehaviour
         navigationController?.Tick();
         ExecuteNavigationMovement();
         stateMachine?.Update();
+        TryRestartAfterExit();
     }
 
     private void OnEnable()
@@ -114,7 +119,8 @@ public class FSMAgent : MonoBehaviour
         stateMachine.RegisterState(PoliceState.Pursuit, new PursuitState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Attack, new AttackState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Gather, new GatherState(this, stateMachine));
-        stateMachine.RegisterState(PoliceState.Exit, new ExitState(this, stateMachine));
+        exitState = new ExitState(this, stateMachine);
+        stateMachine.RegisterState(PoliceState.Exit, exitState);
         stateMachine.ChangeState(enableGridNavigation ? PoliceState.Search : PoliceState.Patrol);
     }
 
@@ -190,6 +196,79 @@ public class FSMAgent : MonoBehaviour
             expectedId, destination, stoppingDistance, speedMultiplier, out newId);
 
     public bool CancelNavigation(ulong expectedId) => NavigationIntent.CancelNavigation(expectedId);
+
+    private void TryRestartAfterExit()
+    {
+        if (!enableGridNavigation || !Equals(stateMachine?.CurrentStateKey, PoliceState.Exit) ||
+            exitState == null || !exitState.TryGetCompletedRequestId(out ulong completedRequestId) ||
+            !NavigationIntent.TryGetCurrent(out HunterNavigationRequest request) ||
+            request.Id != completedRequestId)
+        {
+            if (!Equals(stateMachine?.CurrentStateKey, PoliceState.Exit))
+            {
+                exitRestartDiagnosticReported = false;
+            }
+            return;
+        }
+
+        if (navigationGrid == null || movement == null ||
+            !HunterSpawnSelector.TrySelectSpawn(navigationGrid, movement.GroundHeight, out Vector3 spawnPosition))
+        {
+            ReportExitRestartFailure("No valid Hunter Spawn is available.");
+            return;
+        }
+
+        exitState.PrepareForRestart();
+        navigationController?.SetEnabled(false);
+        NavigationIntent.CancelAll();
+
+        SetVisualsVisible(false);
+        HunterMovement.PlacementResult placement = movement.TryStopAndPlace(spawnPosition);
+        if (placement != HunterMovement.PlacementResult.Placed)
+        {
+            SetVisualsVisible(true);
+            ReportExitRestartFailure("Hunter Spawn placement was rejected.");
+            return;
+        }
+
+        SetCurrentTarget(null);
+        ResetGatherProgress();
+        movement.Stop();
+        Animation.SetMoving(false);
+        Animation.SetAttacking(false);
+        perception?.ClearDetections();
+        navigationController?.SetEnabled(true);
+        exitRestartDiagnosticReported = false;
+        SetVisualsVisible(true);
+        stateMachine.ChangeState(PoliceState.Search);
+    }
+
+    private void ReportExitRestartFailure(string message)
+    {
+        if (exitRestartDiagnosticReported)
+        {
+            return;
+        }
+
+        exitRestartDiagnosticReported = true;
+        Debug.LogWarning($"Hunter Exit restart deferred: {message}", this);
+    }
+
+    private void SetVisualsVisible(bool visible)
+    {
+        if (visualRenderers == null)
+        {
+            return;
+        }
+
+        foreach (Renderer renderer in visualRenderers)
+        {
+            if (renderer != null)
+            {
+                renderer.enabled = visible;
+            }
+        }
+    }
 
     private void ConfigureNavigationController()
     {
