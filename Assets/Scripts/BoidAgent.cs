@@ -139,8 +139,9 @@ public sealed class BoidAgent : MonoBehaviour
     }
 
     /// <summary>
-    /// Resolves the configured required region only when all B1 references and the current
-    /// capsule configuration are valid. Legacy agents deliberately return false.
+    /// Resolves the configured required region from persistent semantic configuration.
+    /// Physical capsule validity is checked by the movement and respawn consumers, so a
+    /// temporarily unavailable collider cannot hide an otherwise valid required region.
     /// </summary>
     public bool TryGetRequiredHuntingGroundRegion(out HuntingGroundRegion region)
     {
@@ -154,9 +155,7 @@ public sealed class BoidAgent : MonoBehaviour
             float.IsNaN(containmentRegion.SourceGrid.CellSize) ||
             float.IsInfinity(containmentRegion.SourceGrid.CellSize) ||
             containmentRegion.SourceGrid.CellSize <= 0f ||
-            !IsSupportedGridTransform(containmentRegion.SourceGrid.transform) ||
-            !TryGetWorldCapsule(body != null ? body.position : transform.position,
-                body != null ? body.rotation : transform.rotation, out _))
+            !IsSupportedGridTransform(containmentRegion.SourceGrid.transform))
         {
             return false;
         }

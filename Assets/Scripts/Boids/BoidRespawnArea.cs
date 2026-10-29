@@ -52,12 +52,14 @@ public class BoidRespawnArea : MonoBehaviour
             return false;
         }
 
-        if (agentCapsule == null || maximumPlacementAttempts <= 0 || agentCapsule.attachedRigidbody == null)
+        Rigidbody agentBody = agentCapsule != null
+            ? (agentCapsule.attachedRigidbody ?? agentCapsule.GetComponent<Rigidbody>())
+            : null;
+        if (agentCapsule == null || maximumPlacementAttempts <= 0 || agentBody == null)
         {
             return false;
         }
 
-        Rigidbody agentBody = agentCapsule.attachedRigidbody;
         if (!BoidCapsuleGeometry.TryGetWorldCapsule(
                 agentBody, agentBody.position, agentBody.rotation,
                 out BoidCapsuleGeometry.WorldCapsule currentCapsule))

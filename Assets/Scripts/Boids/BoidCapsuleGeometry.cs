@@ -43,9 +43,22 @@ public static class BoidCapsuleGeometry
         Quaternion bodyRotation,
         out WorldCapsule capsule)
     {
+        return TryGetWorldCapsule(body, bodyPosition, bodyRotation, out capsule, out _);
+    }
+
+    /// <summary>Diagnostic overload that reports the first rejected geometry predicate.</summary>
+    public static bool TryGetWorldCapsule(
+        Rigidbody body,
+        Vector3 bodyPosition,
+        Quaternion bodyRotation,
+        out WorldCapsule capsule,
+        out string failureReason)
+    {
         capsule = default;
+        failureReason = null;
         if (body == null || !IsFinite(bodyPosition) || !IsFinite(bodyRotation))
         {
+            failureReason = body == null ? "RigidbodyMissing" : "BodyPoseNonFinite";
             return false;
         }
 
@@ -54,6 +67,7 @@ public static class BoidCapsuleGeometry
             bodyRotation.z * bodyRotation.z + bodyRotation.w * bodyRotation.w);
         if (!IsFinite(rotationMagnitude) || rotationMagnitude <= MinimumDimension)
         {
+            failureReason = "RotationInvalid";
             return false;
         }
 
@@ -64,16 +78,25 @@ public static class BoidCapsuleGeometry
             bodyRotation.w / rotationMagnitude);
         if (Vector3.Dot(bodyRotation * Vector3.up, Vector3.up) < UprightTolerance)
         {
+            failureReason = "RotationNotUpright";
             return false;
         }
 
         Transform bodyTransform = body.transform;
         CapsuleCollider collider = bodyTransform.GetComponent<CapsuleCollider>();
         if (collider == null || collider.transform != bodyTransform ||
-            collider.attachedRigidbody != body || collider.direction != 1 ||
+            (collider.attachedRigidbody != null && collider.attachedRigidbody != body) ||
+            collider.direction != 1 ||
             !IsFinite(collider.center) || !IsFinite(collider.radius) ||
             !IsFinite(collider.height) || collider.radius <= 0f || collider.height <= 0f)
         {
+            failureReason = collider == null ? "CapsuleColliderMissing" :
+                collider.transform != bodyTransform ? "CapsuleColliderNotOnRigidbody" :
+                collider.attachedRigidbody != null && collider.attachedRigidbody != body ? "CapsuleRigidbodyMismatch" :
+                collider.direction != 1 ? "CapsuleDirectionUnsupported" :
+                !IsFinite(collider.center) ? "CapsuleCenterNonFinite" :
+                !IsFinite(collider.radius) || collider.radius <= 0f ? "CapsuleRadiusInvalid" :
+                "CapsuleHeightInvalid";
             return false;
         }
 
@@ -83,6 +106,10 @@ public static class BoidCapsuleGeometry
             absoluteScale.y <= MinimumDimension || absoluteScale.z <= MinimumDimension ||
             !HasOrthogonalWorldScale(bodyTransform))
         {
+            failureReason = !IsFinite(scale) ? "WorldScaleNonFinite" :
+                absoluteScale.x <= MinimumDimension || absoluteScale.y <= MinimumDimension || absoluteScale.z <= MinimumDimension
+                    ? "WorldScaleDegenerate"
+                    : "WorldScaleNotOrthogonal";
             return false;
         }
 
@@ -90,6 +117,7 @@ public static class BoidCapsuleGeometry
         float height = Mathf.Max(collider.height * absoluteScale.y, radius * 2f);
         if (!IsFinite(radius) || !IsFinite(height) || radius <= 0f || height < radius * 2f)
         {
+            failureReason = "WorldCapsuleDimensionsInvalid";
             return false;
         }
 
@@ -98,6 +126,7 @@ public static class BoidCapsuleGeometry
         Vector3 capsuleAxis = bodyRotation * Vector3.up;
         if (capsuleAxis.sqrMagnitude <= MinimumDimension * MinimumDimension)
         {
+            failureReason = "CapsuleAxisDegenerate";
             return false;
         }
         capsuleAxis.Normalize();
@@ -110,6 +139,7 @@ public static class BoidCapsuleGeometry
         float horizontalFootprintRadius = radius + horizontalOffset + horizontalSegmentProjection;
         if (!IsFinite(center) || !IsFinite(horizontalOffset) || !IsFinite(horizontalFootprintRadius))
         {
+            failureReason = "WorldCapsuleDerivedValuesNonFinite";
             return false;
         }
 
