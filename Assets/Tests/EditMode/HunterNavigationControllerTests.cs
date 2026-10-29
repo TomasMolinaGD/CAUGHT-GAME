@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 using CaughtGame.Navigation;
 
 public sealed class HunterNavigationControllerTests
@@ -736,6 +737,7 @@ public sealed class HunterNavigationControllerTests
         Vector3 previousPosition = fsm.transform.position;
         ulong previousRequestId = GetActiveRequestId(GetProperty<object>(fsm, "NavigationIntent"));
 
+        LogAssert.Expect(LogType.Warning, "Hunter Exit restart deferred: No valid Hunter Spawn is available.");
         InvokePrivate(fsm, "Update");
 
         Assert.That(GetProperty<Enum>(fsm, "CurrentState").ToString(), Is.EqualTo("Exit"));

@@ -95,8 +95,11 @@ public class BoidRespawn : MonoBehaviour
 
         transform.position = respawnPosition;
         body.position = respawnPosition;
-        body.linearVelocity = Vector3.zero;
-        body.angularVelocity = Vector3.zero;
+        if (!body.isKinematic)
+        {
+            body.linearVelocity = Vector3.zero;
+            body.angularVelocity = Vector3.zero;
+        }
         life.Respawn();
         return true;
     }
