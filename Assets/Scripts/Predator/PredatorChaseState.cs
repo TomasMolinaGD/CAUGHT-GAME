@@ -20,7 +20,7 @@ public sealed class PredatorChaseState : State
             return;
         }
 
-        if (agent.Perception.CanTrackTarget(target))
+        if (agent.Perception.CanSeeTarget)
         {
             if (agent.Perception.CanSeeTarget && agent.Perception.Target != target)
             {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(PredatorMovement), typeof(PredatorPerception), typeof(PredatorCombat))]
@@ -8,25 +9,30 @@ using UnityEngine;
 public sealed class PredatorFSM : MonoBehaviour
 {
     [Header("Target")]
-    [SerializeField] private GameObject alienTarget;
+    [FormerlySerializedAs("alienTarget")]
+    [SerializeField] private GameObject targetReference;
 
     [Header("Patrol")]
     [SerializeField] private List<Transform> waypoints = new List<Transform>();
-    [SerializeField, Min(0.1f)] private float patrolSpeed = 6f;
+    [SerializeField, Min(0.1f)] private float patrolSpeed = 2.5f;
     [SerializeField, Min(0.1f)] private float waypointCheckDistance = 0.6f;
 
     [Header("Pursuit")]
-    [SerializeField, Min(0.1f)] private float chaseSpeed = 7.6f;
-    [SerializeField, Min(0.1f)] private float hunterMaximumSpeed = 8f;
+    [SerializeField, Min(0.1f)] private float chaseSpeed = 5.4f;
+    [SerializeField, Min(0.1f)] private float hunterPatrolSpeed = 3f;
+    [SerializeField, Min(0.1f)] private float hunterMaximumSpeed = 6f;
     [SerializeField, Min(0.1f)] private float turnSpeed = 8f;
     [SerializeField, Range(0.1f, 1f)] private float captureRadius = 0.9f;
-    [SerializeField, Range(0.1f, 0.99f)] private float speedBelowHunterRatio = 0.95f;
+    [SerializeField, Range(0.1f, 0.99f)] private float speedBelowHunterRatio = 0.9f;
+    [SerializeField] private AudioSource howlSource;
+    [SerializeField] private AudioClip howlClip;
 
     private StateMachine stateMachine;
     private PredatorMovement movement;
     private PredatorPerception perception;
     private PredatorCombat combat;
     private PredatorAnimationController animationController;
+    private PredatorAlertSystem alertSystem;
 
     public IReadOnlyList<Transform> Waypoints => waypoints;
     public float WaypointCheckDistance => waypointCheckDistance;
@@ -35,6 +41,8 @@ public sealed class PredatorFSM : MonoBehaviour
     public PredatorPerception Perception => perception;
     public PredatorCombat Combat => combat;
     public PredatorAnimationController Animation => animationController;
+    public bool ReceivedAlert { get; private set; }
+    public int AlertsSent { get; private set; }
     public GameObject CurrentTarget { get; private set; }
     public Vector3 LastKnownPosition => perception != null ? perception.LastSeenPosition : transform.position;
     public bool HasLastKnownPosition => perception != null && perception.HasLastKnownPosition;
@@ -52,16 +60,31 @@ public sealed class PredatorFSM : MonoBehaviour
     public void ConfigureTargets(IReadOnlyList<GameObject> targets)
     {
         perception.ConfigureTargets(targets);
+        if (targetReference != null) perception.AddTarget(targetReference);
+    }
+
+    public void ConfigureAlertSystem(PredatorAlertSystem system)
+    {
+        if (alertSystem == system) return;
+        if (alertSystem != null) alertSystem.AlertRaised -= ReceiveAlert;
+        alertSystem = system;
+        if (isActiveAndEnabled && alertSystem != null)
+        {
+            alertSystem.AlertRaised += ReceiveAlert;
+            if (alertSystem.TryGetRecentAlert(out PredatorAlert recentAlert))
+                ReceiveAlert(recentAlert);
+        }
     }
 
     public void Configure(float patrolMovementSpeed, float pursuitMovementSpeed,
-        float maximumHunterSpeed, float rotationSpeed, float targetCaptureRadius,
+        float maximumHunterSpeed, float hunterBaseSpeed, float rotationSpeed, float targetCaptureRadius,
         float maximumSpeedRatio, float viewDistance, float viewAngle, LayerMask alienLayers,
         LayerMask obstacleLayers, float perceptionRefreshInterval, float eyeHeight,
-        float attackFallbackDuration)
+        float attackFallbackDuration, AudioClip alertClip)
     {
-        hunterMaximumSpeed = Mathf.Max(0.1f, maximumHunterSpeed);
-        speedBelowHunterRatio = Mathf.Clamp(maximumSpeedRatio, 0.95f, 0.99f);
+        hunterMaximumSpeed = Mathf.Clamp(maximumHunterSpeed, 0.1f, 6f);
+        hunterPatrolSpeed = Mathf.Clamp(hunterBaseSpeed, 0.1f, 3f);
+        speedBelowHunterRatio = Mathf.Clamp(maximumSpeedRatio, 0.1f, 0.99f);
         patrolSpeed = patrolMovementSpeed;
         chaseSpeed = pursuitMovementSpeed;
         turnSpeed = Mathf.Max(0.1f, rotationSpeed);
@@ -69,6 +92,7 @@ public sealed class PredatorFSM : MonoBehaviour
         ClampMovementSpeeds();
         perception.Configure(viewDistance, viewAngle, alienLayers, obstacleLayers,
             perceptionRefreshInterval, eyeHeight);
+        if (alertClip != null) howlClip = alertClip;
         animationController.ConfigureAttackDuration(attackFallbackDuration);
     }
 
@@ -77,9 +101,9 @@ public sealed class PredatorFSM : MonoBehaviour
     private void Awake()
     {
         CacheDependencies();
-        if (alienTarget != null)
-            perception.AddTarget(alienTarget);
+        if (howlSource != null) howlSource.spatialBlend = 1f;
         ConfigureComponents();
+        RegisterTarget(targetReference);
         InitializeStateMachine();
         if (GetComponent<PredatorDebugFeedback>() == null)
             gameObject.AddComponent<PredatorDebugFeedback>();
@@ -111,52 +135,81 @@ public sealed class PredatorFSM : MonoBehaviour
     private void Start()
     {
         movement.Configure(patrolSpeed, chaseSpeed, turnSpeed,
-            hunterMaximumSpeed * speedBelowHunterRatio);
+            hunterMaximumSpeed * speedBelowHunterRatio, perception.ObstacleLayers);
     }
 
     private void OnEnable()
     {
-        PredatorAlertSystem.AlertRaised += ReceiveAlert;
+        if (alertSystem != null) alertSystem.AlertRaised += ReceiveAlert;
         if (stateMachine?.CurrentStateKey == null)
             stateMachine?.ChangeState(PredatorStateId.Patrol);
     }
 
     private void OnDisable()
     {
-        PredatorAlertSystem.AlertRaised -= ReceiveAlert;
+        if (alertSystem != null) alertSystem.AlertRaised -= ReceiveAlert;
         stateMachine?.Stop();
         movement?.Stop();
     }
 
     private void Update()
     {
-        perception?.Tick(Time.deltaTime);
-        combat?.Tick(Time.deltaTime);
-
-        if (perception != null && perception.CanSeeTarget)
-        {
-            CurrentTarget = perception.Target;
-            if (perception.NewlyDetected)
-            {
-                PredatorAlertSystem.Broadcast(this, CurrentTarget, perception.LastSeenPosition);
-            }
-        }
-
-        if (!IsTargetAvailable(CurrentTarget) && CurrentTarget != null)
-        {
-            ClearTargetAndReturnToPatrol();
-            return;
-        }
-
+        UpdateComponents();
+        UpdateVisibleTarget();
+        if (DiscardUnavailableTarget()) return;
         stateMachine?.Update();
     }
 
-    private void ReceiveAlert(PredatorFSM source, GameObject target, Vector3 lastKnownPosition)
+    private void UpdateComponents()
     {
-        if (source == this || !IsTargetAvailable(target)) return;
-        CurrentTarget = target;
-        perception.ReceiveAlert(target, lastKnownPosition);
+        perception?.Tick(Time.deltaTime);
+        combat?.Tick(Time.deltaTime);
+    }
+
+    private void UpdateVisibleTarget()
+    {
+        if (perception == null || !perception.CanSeeTarget) return;
+
+        CurrentTarget = perception.Target;
+        if (!perception.NewlyDetected) return;
+
+        PlayHowl();
+        if (alertSystem == null) return;
+
+        alertSystem.Broadcast(this, CurrentTarget, perception.LastSeenPosition);
+        AlertsSent++;
+    }
+
+    private bool DiscardUnavailableTarget()
+    {
+        if (CurrentTarget == null || IsTargetAvailable(CurrentTarget)) return false;
+        ClearTargetAndReturnToPatrol();
+        return true;
+    }
+
+    private void RegisterTarget(GameObject target)
+    {
+        if (target != null) perception.AddTarget(target);
+    }
+
+    private void ReceiveAlert(PredatorAlert alert)
+    {
+        if (alert.Source == this || alertSystem == null || !alertSystem.IsRecent(alert) ||
+            !IsTargetAvailable(alert.Target)) return;
+        if (perception != null && perception.CanSeeTarget) return;
+        CurrentTarget = alert.Target;
+        ReceivedAlert = true;
+        perception.ReceiveAlert(alert.Target, alert.LastKnownPosition);
         if (!perception.CanSeeTarget) stateMachine.ChangeState(PredatorStateId.Search);
+    }
+
+    private void PlayHowl()
+    {
+        if (howlClip == null) return;
+        if (howlSource == null) howlSource = GetComponent<AudioSource>();
+        if (howlSource == null) howlSource = gameObject.AddComponent<AudioSource>();
+        howlSource.spatialBlend = 1f;
+        howlSource.PlayOneShot(howlClip);
     }
 
     public bool CanStartAttack()
@@ -168,8 +221,8 @@ public sealed class PredatorFSM : MonoBehaviour
 
     public bool IsTargetAvailable(GameObject target)
     {
-        return target != null && target.activeInHierarchy &&
-            !PredatorCaptureRegistry.IsCaptured(target) &&
+        return perception != null && perception.IsValidTarget(target) && target.activeInHierarchy &&
+            !PredatorCaptureRegistry.IsCaptured(target, perception.IsExplicitThreatTarget(target)) &&
             !SafeZoneVolume.IsPositionSafe(target.transform.position);
     }
 
@@ -181,6 +234,7 @@ public sealed class PredatorFSM : MonoBehaviour
     public void ClearTargetAndReturnToPatrol()
     {
         CurrentTarget = null;
+        ReceivedAlert = false;
         perception.ClearTarget();
         stateMachine?.ChangeState(PredatorStateId.Patrol);
     }
@@ -191,19 +245,19 @@ public sealed class PredatorFSM : MonoBehaviour
         turnSpeed = Mathf.Max(0.1f, turnSpeed);
         waypointCheckDistance = Mathf.Max(0.1f, waypointCheckDistance);
         captureRadius = Mathf.Clamp(captureRadius, 0.1f, 1f);
-        speedBelowHunterRatio = Mathf.Clamp(speedBelowHunterRatio, 0.95f, 0.99f);
+        hunterPatrolSpeed = Mathf.Max(0.1f, hunterPatrolSpeed);
+        speedBelowHunterRatio = Mathf.Clamp(speedBelowHunterRatio, 0.1f, 0.99f);
     }
 
     private void ClampMovementSpeeds()
     {
-        hunterMaximumSpeed = Mathf.Max(8f, hunterMaximumSpeed);
-        speedBelowHunterRatio = Mathf.Clamp(speedBelowHunterRatio, 0.95f, 0.99f);
+        hunterMaximumSpeed = Mathf.Clamp(hunterMaximumSpeed, 0.1f, 6f);
+        hunterPatrolSpeed = Mathf.Clamp(hunterPatrolSpeed, 0.1f, 3f);
+        speedBelowHunterRatio = Mathf.Clamp(speedBelowHunterRatio, 0.1f, 0.99f);
         float maximumPredatorSpeed = hunterMaximumSpeed * speedBelowHunterRatio;
-        float minimumPursuitSpeed = Mathf.Min(hunterMaximumSpeed * 0.9f, maximumPredatorSpeed);
-        chaseSpeed = Mathf.Clamp(chaseSpeed, minimumPursuitSpeed, maximumPredatorSpeed);
-        float maximumPatrolSpeed = chaseSpeed * 0.9f;
-        float minimumPatrolSpeed = Mathf.Min(hunterMaximumSpeed * 0.75f, maximumPatrolSpeed);
-        patrolSpeed = Mathf.Clamp(patrolSpeed, minimumPatrolSpeed, maximumPatrolSpeed);
+        chaseSpeed = Mathf.Clamp(chaseSpeed, 0.1f, maximumPredatorSpeed);
+        float maximumPatrolSpeed = Mathf.Min(chaseSpeed * 0.9f, hunterPatrolSpeed * 0.95f);
+        patrolSpeed = Mathf.Clamp(patrolSpeed, 0.1f, maximumPatrolSpeed);
     }
 
 }

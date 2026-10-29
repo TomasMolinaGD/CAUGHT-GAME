@@ -1,12 +1,14 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Serialization;
 
 [DisallowMultipleComponent]
 public sealed class PredatorPerception : MonoBehaviour
 {
     [SerializeField, Min(0.1f)] private float viewDistance = 18f;
     [SerializeField, Range(1f, 360f)] private float fieldOfView = 120f;
-    [SerializeField] private LayerMask alienLayerMask = (1 << 9) | (1 << 10);
+    [FormerlySerializedAs("alienLayerMask")]
+    [SerializeField] private LayerMask targetLayers = (1 << 6) | (1 << 7) | (1 << 9);
     [SerializeField] private LayerMask obstacleLayers = 1 << 12;
     [SerializeField, Min(0.02f)] private float refreshInterval = 0.1f;
     [SerializeField, Min(0f)] private float eyeHeight = 1.5f;
@@ -19,6 +21,7 @@ public sealed class PredatorPerception : MonoBehaviour
 
     public GameObject Target => target;
     public float ViewDistance => viewDistance;
+    public LayerMask ObstacleLayers => obstacleLayers;
     public bool CanSeeTarget { get; private set; }
     public Vector3 LastSeenPosition { get; private set; }
     public bool HasLastKnownPosition { get; private set; }
@@ -31,7 +34,7 @@ public sealed class PredatorPerception : MonoBehaviour
     {
         viewDistance = Mathf.Max(0.1f, distance);
         fieldOfView = Mathf.Clamp(viewAngle, 1f, 360f);
-        alienLayerMask = alienLayers | (1 << 10);
+        targetLayers = alienLayers;
         obstacleLayers = obstacles;
         refreshInterval = Mathf.Max(0.02f, interval);
         eyeHeight = Mathf.Max(0f, height);
@@ -49,8 +52,24 @@ public sealed class PredatorPerception : MonoBehaviour
 
     public void AddTarget(GameObject target)
     {
-        if (target != null && !targets.Contains(target))
-            targets.Add(target);
+        GameObject allowedTarget = GetTargetObject(target, true);
+        bool explicitThreat = PredatorCaptureRegistry.HasThreatComponent(allowedTarget);
+        if (allowedTarget != null &&
+            (PredatorCaptureRegistry.IsSupportedTarget(allowedTarget) || explicitThreat) &&
+            !PredatorCaptureRegistry.IsCaptured(allowedTarget, explicitThreat) &&
+            !targets.Contains(allowedTarget))
+            targets.Add(allowedTarget);
+    }
+
+    public bool IsValidTarget(GameObject candidate)
+    {
+        return PredatorCaptureRegistry.IsSupportedTarget(candidate) || IsExplicitThreatTarget(candidate);
+    }
+
+    public bool IsExplicitThreatTarget(GameObject candidate)
+    {
+        return candidate != null && targets.Contains(candidate) &&
+            PredatorCaptureRegistry.HasThreatComponent(candidate);
     }
 
     public void Tick(float deltaTime)
@@ -74,17 +93,21 @@ public sealed class PredatorPerception : MonoBehaviour
 
     public void ReceiveAlert(GameObject alertedTarget, Vector3 position)
     {
-        if (alertedTarget == null || PredatorCaptureRegistry.IsCaptured(alertedTarget) ||
+        if (alertedTarget == null || !IsValidTarget(alertedTarget) ||
+            PredatorCaptureRegistry.IsCaptured(alertedTarget, IsExplicitThreatTarget(alertedTarget)) ||
             SafeZoneVolume.IsPositionSafe(alertedTarget.transform.position)) return;
         target = alertedTarget;
         LastSeenPosition = position;
         HasLastKnownPosition = true;
+        CanSeeTarget = false;
+        NewlyDetected = false;
+        wasVisible = false;
     }
 
     public bool CanTrackTarget(GameObject candidate)
     {
         return candidate != null && candidate.activeInHierarchy &&
-            !PredatorCaptureRegistry.IsCaptured(candidate) &&
+            !PredatorCaptureRegistry.IsCaptured(candidate, IsExplicitThreatTarget(candidate)) &&
             !SafeZoneVolume.IsPositionSafe(candidate.transform.position) &&
             IsWithinViewDistance(candidate.transform.position) &&
             HasLineOfSight(candidate.transform.position);
@@ -140,7 +163,7 @@ public sealed class PredatorPerception : MonoBehaviour
         }
 
         int count = Physics.OverlapSphereNonAlloc(transform.position, viewDistance,
-            results, alienLayerMask | (1 << 10), QueryTriggerInteraction.Collide);
+            results, targetLayers, QueryTriggerInteraction.Collide);
 
         GameObject closest = null;
         float closestDistance = float.PositiveInfinity;
@@ -154,7 +177,8 @@ public sealed class PredatorPerception : MonoBehaviour
         foreach (GameObject candidate in candidateTargets)
         {
             if (candidate == null || !candidate.activeInHierarchy ||
-                PredatorCaptureRegistry.IsCaptured(candidate)) continue;
+                !IsValidTarget(candidate) ||
+                PredatorCaptureRegistry.IsCaptured(candidate, IsExplicitThreatTarget(candidate))) continue;
 
             Vector3 candidatePosition = candidate.transform.position;
             if (SafeZoneVolume.IsPositionSafe(candidatePosition) ||
@@ -173,15 +197,28 @@ public sealed class PredatorPerception : MonoBehaviour
     private static GameObject GetTargetObject(Collider detectedCollider)
     {
         if (detectedCollider == null) return null;
-        BoidLife life = detectedCollider.GetComponentInParent<BoidLife>();
-        if (life != null) return life.gameObject;
-        BoidThreat threat = detectedCollider.GetComponentInParent<BoidThreat>();
+        return GetTargetObject(detectedCollider.gameObject, false);
+    }
+
+    private static GameObject GetTargetObject(GameObject candidate, bool allowThreat)
+    {
+        if (candidate == null) return null;
+        FSMAgent hunter = candidate.GetComponentInParent<FSMAgent>();
+        if (hunter == null) hunter = candidate.GetComponentInChildren<FSMAgent>();
+        if (hunter != null) return hunter.gameObject;
+
+        BoidLife life = candidate.GetComponentInParent<BoidLife>();
+        if (life == null) life = candidate.GetComponentInChildren<BoidLife>();
+        if (life != null && life.IsAlive) return life.gameObject;
+
+        if (!allowThreat) return null;
+        BoidThreat threat = candidate.GetComponentInParent<BoidThreat>();
+        if (threat == null) threat = candidate.GetComponentInChildren<BoidThreat>();
         return threat != null ? threat.gameObject : null;
     }
 
     private void OnValidate()
     {
-        alienLayerMask |= 1 << 10;
         viewDistance = Mathf.Max(0.1f, viewDistance);
         fieldOfView = Mathf.Clamp(fieldOfView, 1f, 360f);
         refreshInterval = Mathf.Max(0.02f, refreshInterval);
@@ -199,5 +236,11 @@ public sealed class PredatorPerception : MonoBehaviour
         if (CanSeeTarget && target != null)
             Gizmos.DrawLine(transform.position + Vector3.up * eyeHeight,
                 target.transform.position + Vector3.up * eyeHeight);
+        else if (HasLastKnownPosition)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawSphere(LastSeenPosition, 0.25f);
+            Gizmos.DrawLine(transform.position, LastSeenPosition);
+        }
     }
 }

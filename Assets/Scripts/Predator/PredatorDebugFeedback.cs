@@ -28,11 +28,16 @@ public sealed class PredatorDebugFeedback : MonoBehaviour
     {
         if (!visible || agent == null || perception == null) return;
         EnsureStyles();
-        GUI.Box(new Rect(16f, 16f, 310f, 128f), GUIContent.none, boxStyle);
-        GUILayout.BeginArea(new Rect(28f, 22f, 286f, 116f));
+        GUI.Box(new Rect(16f, 16f, 410f, 160f), GUIContent.none, boxStyle);
+        GUILayout.BeginArea(new Rect(28f, 22f, 386f, 148f));
         GUILayout.Label("PREDATOR FSM", titleStyle);
         GUILayout.Label($"Estado: {agent.CurrentState}", textStyle);
-        GUILayout.Label($"Percepción del Alien: {(perception.CanSeeTarget ? "VISIBLE" : "SIN CONTACTO VISUAL")}", textStyle);
+        GUILayout.Label($"Percepción: {(perception.CanSeeTarget ? "VISIBLE" : "SIN CONTACTO VISUAL")}", textStyle);
+        GUILayout.Label($"Alertas emitidas: {agent.AlertsSent}", textStyle);
+        GUILayout.Label($"Alerta recibida: {(agent.ReceivedAlert ? "SÍ" : "NO")}", textStyle);
+        GUILayout.Label(agent.HasLastKnownPosition
+            ? $"Última posición: {agent.LastKnownPosition}"
+            : "Última posición: ninguna", textStyle);
         GUILayout.Label(agent.CurrentTarget != null
             ? $"Objetivo: {agent.CurrentTarget.name}"
             : "Objetivo: ninguno", textStyle);

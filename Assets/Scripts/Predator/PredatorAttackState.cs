@@ -29,7 +29,7 @@ public sealed class PredatorAttackState : State
             return;
         }
 
-        if (!agent.Perception.CanTrackTarget(target))
+        if (!agent.Perception.CanSeeTarget || agent.Perception.Target != target)
         {
             StateMachine.ChangeState(PredatorStateId.Search);
             return;
@@ -50,8 +50,11 @@ public sealed class PredatorAttackState : State
         if (!agent.Animation.IsAttackFinished(attackElapsedTime, ref attackStateObserved))
             return;
 
-        if (agent.Combat.TryCapture(target, agent.CaptureRadius, offset.magnitude))
+        if (agent.Combat.TryCapture(target, agent.CaptureRadius, offset.magnitude,
+            agent.Perception.IsExplicitThreatTarget(target)))
             agent.ClearTargetAndReturnToPatrol();
+        else
+            StateMachine.ChangeState(PredatorStateId.Pursuit);
     }
 
     public override void Exit()

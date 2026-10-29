@@ -2,11 +2,13 @@ using UnityEngine;
 
 public sealed class PredatorSearchState : State
 {
+    private const int MaximumSearchAttempts = 8;
     private readonly PredatorFSM agent;
     private Vector3 searchCenter;
     private float searchAngle;
     private float searchRadius = 2f;
     private bool reachedSearchPosition;
+    private int searchAttempts;
 
     public PredatorSearchState(PredatorFSM agent, StateMachine stateMachine) : base(stateMachine)
     {
@@ -18,6 +20,7 @@ public sealed class PredatorSearchState : State
         searchCenter = agent.LastKnownPosition;
         searchAngle = 0f;
         reachedSearchPosition = false;
+        searchAttempts = 0;
     }
 
     public override void Update()
@@ -40,12 +43,20 @@ public sealed class PredatorSearchState : State
             searchCenter = agent.LastKnownPosition;
             searchAngle = 0f;
             reachedSearchPosition = false;
+            searchAttempts = 0;
         }
 
         if (!reachedSearchPosition)
         {
             bool movingToLastKnown = agent.Movement.MoveTowards(
                 searchCenter, true, agent.WaypointCheckDistance);
+            if (!movingToLastKnown && agent.Movement.WasBlocked)
+            {
+                searchCenter = agent.transform.position;
+                reachedSearchPosition = true;
+                return;
+            }
+
             if (!movingToLastKnown) reachedSearchPosition = true;
             return;
         }
@@ -54,7 +65,12 @@ public sealed class PredatorSearchState : State
             Mathf.Cos(searchAngle) * searchRadius, 0f,
             Mathf.Sin(searchAngle) * searchRadius);
         bool moving = agent.Movement.MoveTowards(searchPoint, true, agent.WaypointCheckDistance * 0.5f);
-        if (!moving) searchAngle += Mathf.PI * 0.5f;
+        if (moving) return;
+
+        searchAngle += Mathf.PI * 0.25f;
+        searchAttempts++;
+        if (searchAttempts >= MaximumSearchAttempts)
+            agent.ClearTargetAndReturnToPatrol();
     }
 
     public override void Exit() { agent.Movement.Stop(); }

@@ -24,7 +24,11 @@ public sealed class PredatorPatrolState : State
             return;
         }
 
-        if (agent.Waypoints.Count == 0) return;
+        if (agent.Waypoints.Count == 0)
+        {
+            agent.Movement.ScanInPlace();
+            return;
+        }
         waypointIndex %= agent.Waypoints.Count;
         Transform waypoint = agent.Waypoints[waypointIndex];
         if (waypoint == null)
@@ -34,7 +38,8 @@ public sealed class PredatorPatrolState : State
         }
 
         bool moving = agent.Movement.MoveTowards(waypoint.position, false, agent.WaypointCheckDistance);
-        if (!moving) waypointIndex = (waypointIndex + 1) % agent.Waypoints.Count;
+        if (!moving && !agent.Movement.WasBlocked)
+            waypointIndex = (waypointIndex + 1) % agent.Waypoints.Count;
     }
 
     public override void Exit() { agent.Movement.Stop(); }
