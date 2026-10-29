@@ -3,7 +3,9 @@ using UnityEngine;
 public sealed class PredatorAttackState : State
 {
     private readonly PredatorFSM agent;
-    private FSMAgent target;
+    private GameObject target;
+    private float attackElapsedTime;
+    private bool attackStateObserved;
 
     public PredatorAttackState(PredatorFSM agent, StateMachine stateMachine) : base(stateMachine)
     {
@@ -13,32 +15,40 @@ public sealed class PredatorAttackState : State
     public override void Enter()
     {
         target = agent.CurrentTarget;
+        attackElapsedTime = 0f;
+        attackStateObserved = false;
         agent.Movement.Stop();
+        agent.Animation.SetAttacking(true);
     }
 
     public override void Update()
     {
-        if (target == null || target.IsDead ||
-            SafeZoneVolume.IsPositionSafe(target.transform.position))
+        if (!agent.IsTargetAvailable(target))
         {
             agent.ClearTargetAndReturnToPatrol();
             return;
         }
 
-        if (!agent.Perception.CanSeeHunter)
+        if (!agent.Perception.CanTrackTarget(target))
         {
             StateMachine.ChangeState(PredatorStateId.Search);
             return;
         }
+
+        agent.Perception.UpdateTrackedPosition(target);
 
         Vector3 offset = Vector3.ProjectOnPlane(
             target.transform.position - agent.transform.position, Vector3.up);
         agent.Movement.FaceDirection(offset);
         if (offset.magnitude > agent.CaptureRadius)
         {
-            StateMachine.ChangeState(PredatorStateId.Chase);
+            StateMachine.ChangeState(PredatorStateId.Pursuit);
             return;
         }
+
+        attackElapsedTime += Time.deltaTime;
+        if (!agent.Animation.IsAttackFinished(attackElapsedTime, ref attackStateObserved))
+            return;
 
         if (agent.Combat.TryCapture(target, agent.CaptureRadius, offset.magnitude))
             agent.ClearTargetAndReturnToPatrol();
@@ -47,6 +57,9 @@ public sealed class PredatorAttackState : State
     public override void Exit()
     {
         agent.Movement.Stop();
+        agent.Animation.SetAttacking(false);
         target = null;
+        attackElapsedTime = 0f;
+        attackStateObserved = false;
     }
 }

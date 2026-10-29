@@ -32,7 +32,7 @@ public sealed class PredatorDebugFeedback : MonoBehaviour
         GUILayout.BeginArea(new Rect(28f, 22f, 286f, 116f));
         GUILayout.Label("PREDATOR FSM", titleStyle);
         GUILayout.Label($"Estado: {agent.CurrentState}", textStyle);
-        GUILayout.Label($"Percepción del cazador: {(perception.CanSeeHunter ? "VISIBLE" : "SIN CONTACTO VISUAL")}", textStyle);
+        GUILayout.Label($"Percepción del Alien: {(perception.CanSeeTarget ? "VISIBLE" : "SIN CONTACTO VISUAL")}", textStyle);
         GUILayout.Label(agent.CurrentTarget != null
             ? $"Objetivo: {agent.CurrentTarget.name}"
             : "Objetivo: ninguno", textStyle);

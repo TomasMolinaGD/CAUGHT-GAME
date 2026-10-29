@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>Marks a volume that protects the hunter and is excluded from predator paths.</summary>
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Collider))]
 public sealed class SafeZoneVolume : MonoBehaviour

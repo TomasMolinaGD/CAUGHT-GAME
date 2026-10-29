@@ -14,13 +14,13 @@ public sealed class PredatorCombat : MonoBehaviour
         cooldownRemaining = Mathf.Max(0f, cooldownRemaining - Mathf.Max(0f, deltaTime));
     }
 
-    public bool TryCapture(FSMAgent target, float captureRadius, float currentDistance)
+    public bool TryCapture(GameObject target, float captureRadius, float currentDistance)
     {
-        if (!IsAttackReady || target == null || target.IsDead ||
+        if (!IsAttackReady || target == null || PredatorCaptureRegistry.IsCaptured(target) ||
             currentDistance > captureRadius || SafeZoneVolume.IsPositionSafe(target.transform.position))
             return false;
 
-        target.SetDead();
+        if (!PredatorCaptureRegistry.TryCapture(target)) return false;
         cooldownRemaining = attackCooldown;
         return true;
     }

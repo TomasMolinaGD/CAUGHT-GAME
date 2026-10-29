@@ -4,7 +4,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class GraphNavigationAgent : MonoBehaviour
 {
-    [SerializeField] private MonoBehaviour graphComponent;
+    private MonoBehaviour graphComponent;
     [SerializeField] private bool avoidSafeZones;
     [SerializeField] private LayerMask obstacleLayers = 1 << 12;
     [SerializeField, Min(0.1f)] private float agentRadius = 0.4f;
@@ -26,6 +26,17 @@ public sealed class GraphNavigationAgent : MonoBehaviour
         avoidSafeZones = excludeSafeZones;
         agentRadius = Mathf.Max(0.1f, radius);
         agentHeight = Mathf.Max(agentRadius * 2f, height);
+    }
+
+    public void ConfigureGraphComponent(MonoBehaviour component)
+    {
+        graphComponent = component;
+        graph = component as IAStarGraphProvider;
+        if (component != null && graph == null)
+        {
+            Debug.LogError("The assigned graph component must implement IAStarGraphProvider.", component);
+            warningShown = true;
+        }
     }
 
     public bool TryMoveTowards(Vector3 destination, float speed, float stoppingDistance, out bool moving)
@@ -87,21 +98,12 @@ public sealed class GraphNavigationAgent : MonoBehaviour
 
     private void ResolveGraph()
     {
-        if (graphComponent != null)
+        if (graph != null || graphComponent == null) return;
+        graph = graphComponent as IAStarGraphProvider;
+        if (graph == null && !warningShown)
         {
-            graph = graphComponent as IAStarGraphProvider;
-            return;
-        }
-
-        MonoBehaviour[] components = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
-        foreach (MonoBehaviour component in components)
-        {
-            if (component is IAStarGraphProvider provider)
-            {
-                graphComponent = component;
-                graph = provider;
-                return;
-            }
+            Debug.LogError("The assigned graph component must implement IAStarGraphProvider.", this);
+            warningShown = true;
         }
     }
 

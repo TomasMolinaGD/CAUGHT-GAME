@@ -17,10 +17,10 @@ public sealed class PredatorPatrolState : State
 
     public override void Update()
     {
-        if (agent.Perception.CanSeeHunter && agent.Perception.Hunter != null)
+        if (agent.Perception.CanSeeTarget && agent.Perception.Target != null)
         {
-            agent.SetTarget(agent.Perception.Hunter);
-            StateMachine.ChangeState(PredatorStateId.Chase);
+            agent.SetTarget(agent.Perception.Target);
+            StateMachine.ChangeState(PredatorStateId.Pursuit);
             return;
         }
 

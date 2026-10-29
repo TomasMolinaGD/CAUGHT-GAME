@@ -3,7 +3,7 @@ using UnityEngine;
 public sealed class PredatorChaseState : State
 {
     private readonly PredatorFSM agent;
-    private FSMAgent target;
+    private GameObject target;
 
     public PredatorChaseState(PredatorFSM agent, StateMachine stateMachine) : base(stateMachine)
     {
@@ -14,22 +14,29 @@ public sealed class PredatorChaseState : State
 
     public override void Update()
     {
-        if (target == null || target.IsDead ||
-            SafeZoneVolume.IsPositionSafe(target.transform.position))
+        if (!agent.IsTargetAvailable(target))
         {
             agent.ClearTargetAndReturnToPatrol();
             return;
         }
 
-        if (agent.Perception.CanSeeHunter)
+        if (agent.Perception.CanTrackTarget(target))
         {
+            if (agent.Perception.CanSeeTarget && agent.Perception.Target != target)
+            {
+                target = agent.Perception.Target;
+                agent.SetTarget(target);
+            }
+
+            agent.Perception.UpdateTrackedPosition(target);
+
             if (agent.CanStartAttack())
             {
                 StateMachine.ChangeState(PredatorStateId.Attack);
                 return;
             }
 
-            agent.Movement.MoveTowards(target.transform.position, true, agent.CaptureRadius * 0.8f);
+            agent.Movement.MoveTowards(target.transform.position, true, agent.CaptureRadius * 0.35f);
             return;
         }
 

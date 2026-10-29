@@ -22,16 +22,15 @@ public sealed class PredatorSearchState : State
 
     public override void Update()
     {
-        if (agent.CurrentTarget == null || agent.CurrentTarget.IsDead ||
-            SafeZoneVolume.IsPositionSafe(agent.CurrentTarget.transform.position))
+        if (!agent.IsTargetAvailable(agent.CurrentTarget))
         {
             agent.ClearTargetAndReturnToPatrol();
             return;
         }
 
-        if (agent.Perception.CanSeeHunter)
+        if (agent.Perception.CanSeeTarget && agent.Perception.Target == agent.CurrentTarget)
         {
-            StateMachine.ChangeState(PredatorStateId.Chase);
+            StateMachine.ChangeState(PredatorStateId.Pursuit);
             return;
         }
 
