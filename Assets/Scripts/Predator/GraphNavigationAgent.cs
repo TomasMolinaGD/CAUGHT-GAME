@@ -4,6 +4,16 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class GraphNavigationAgent : MonoBehaviour
 {
+    public enum NavigationStatus
+    {
+        Idle,
+        FollowingDirect,
+        FollowingPath,
+        Arrived,
+        NoPath,
+        MissingProvider
+    }
+
     private MonoBehaviour graphComponent;
     [SerializeField] private bool avoidSafeZones;
     [SerializeField] private LayerMask obstacleLayers = 1 << 12;
@@ -11,6 +21,7 @@ public sealed class GraphNavigationAgent : MonoBehaviour
     [SerializeField, Min(0.1f)] private float agentHeight = 1.8f;
     [SerializeField, Min(0.1f)] private float nodeReachDistance = 0.5f;
     [SerializeField, Min(0.1f)] private float turnSpeed = 8f;
+    [SerializeField, Min(0f)] private float replanCooldown = 0.25f;
 
     private readonly List<Vector3> path = new List<Vector3>();
     private IAStarGraphProvider graph;
@@ -18,6 +29,14 @@ public sealed class GraphNavigationAgent : MonoBehaviour
     private int pathIndex;
     private bool pathValid;
     private bool warningShown;
+    private bool hasRequestedDestination;
+    private bool hasFailedDestination;
+    private Vector3 failedDestination;
+    private float nextReplanTime;
+
+    public NavigationStatus Status { get; private set; } = NavigationStatus.Idle;
+    public bool HasMovementTarget => pathValid && pathIndex < path.Count;
+    public Vector3 MovementTarget => HasMovementTarget ? path[pathIndex] : transform.position;
 
     private void Awake() { ResolveGraph(); }
 
@@ -42,50 +61,106 @@ public sealed class GraphNavigationAgent : MonoBehaviour
     public bool TryMoveTowards(Vector3 destination, float speed, float stoppingDistance, out bool moving)
     {
         moving = false;
-        if (avoidSafeZones && SafeZoneVolume.IsPositionSafe(destination)) return true;
+        if (!IsFinite(destination))
+        {
+            InvalidatePath();
+            Status = NavigationStatus.NoPath;
+            return false;
+        }
+
+        if (avoidSafeZones && SafeZoneVolume.IsPositionSafe(destination))
+        {
+            InvalidatePath();
+            Status = NavigationStatus.NoPath;
+            return false;
+        }
+
         ResolveGraph();
         if (graph == null)
         {
-            if (!HasDirectLineOfSight(destination))
+            InvalidatePath();
+            Status = NavigationStatus.MissingProvider;
+            if (!warningShown)
             {
-                if (!warningShown)
-                {
-                    Debug.LogWarning("No scene component implements IAStarGraphProvider; blocked movement is paused until the existing graph is connected.", this);
-                    warningShown = true;
-                }
-                return true;
+                Debug.LogWarning("No scene component implements IAStarGraphProvider; navigation is paused until the existing graph is connected.", this);
+                warningShown = true;
             }
-            InvalidatePath();
             return false;
         }
 
-        if (graph.HasDirectLineOfSight(transform.position, destination, agentRadius, agentHeight))
-        {
-            InvalidatePath();
-            return false;
-        }
-
-        if (!pathValid || (destination - requestedDestination).sqrMagnitude > 1f)
+        bool destinationChanged = !hasRequestedDestination ||
+            (destination - requestedDestination).sqrMagnitude > 1f;
+        if (destinationChanged)
         {
             requestedDestination = destination;
-            pathValid = graph.TryFindPath(transform.position, destination, avoidSafeZones, path);
-            pathIndex = path.Count > 1 ? 1 : 0;
-            if (!pathValid) return true;
+            hasRequestedDestination = true;
+            pathValid = false;
+            hasFailedDestination = false;
         }
 
-        while (pathIndex < path.Count &&
+        float stopping = Mathf.Max(0f, stoppingDistance);
+        if (Vector3.ProjectOnPlane(destination - transform.position, Vector3.up).magnitude <= stopping)
+        {
+            InvalidatePath();
+            Status = NavigationStatus.Arrived;
+            return true;
+        }
+
+        if (!pathValid)
+        {
+            if (hasFailedDestination && (destination - failedDestination).sqrMagnitude <= 1f &&
+                Time.realtimeSinceStartup < nextReplanTime)
+            {
+                Status = NavigationStatus.NoPath;
+                return false;
+            }
+
+            if (graph.HasDirectLineOfSight(transform.position, destination, agentRadius, agentHeight))
+            {
+                path.Clear();
+                path.Add(destination);
+                pathIndex = 0;
+                pathValid = true;
+                Status = NavigationStatus.FollowingDirect;
+            }
+            else
+            {
+                path.Clear();
+                pathValid = graph.TryFindPath(transform.position, destination, avoidSafeZones, path);
+                pathIndex = path.Count > 1 ? 1 : 0;
+                if (!pathValid || path.Count == 0)
+                {
+                    hasFailedDestination = true;
+                    failedDestination = destination;
+                    nextReplanTime = Time.realtimeSinceStartup + replanCooldown;
+                    Status = NavigationStatus.NoPath;
+                    path.Clear();
+                    return false;
+                }
+                Status = NavigationStatus.FollowingPath;
+            }
+        }
+
+        while (pathIndex < path.Count - 1 &&
             Vector3.ProjectOnPlane(path[pathIndex] - transform.position, Vector3.up).magnitude <= nodeReachDistance)
             pathIndex++;
 
-        if (pathIndex >= path.Count) return true;
+        if (pathIndex >= path.Count)
+        {
+            Status = NavigationStatus.Arrived;
+            pathValid = false;
+            return true;
+        }
+
         Vector3 offset = Vector3.ProjectOnPlane(path[pathIndex] - transform.position, Vector3.up);
-        if (offset.magnitude <= stoppingDistance) return true;
-        Vector3 direction = offset.normalized;
-        float travel = Mathf.Min(Mathf.Max(0f, speed) * Time.deltaTime, offset.magnitude - stoppingDistance);
-        transform.position += direction * travel;
-        transform.rotation = Quaternion.Slerp(transform.rotation,
-            Quaternion.LookRotation(direction, Vector3.up), turnSpeed * Time.deltaTime);
-        moving = travel > 0.0001f;
+        if (pathIndex == path.Count - 1 && offset.magnitude <= stopping)
+        {
+            InvalidatePath();
+            Status = NavigationStatus.Arrived;
+            return true;
+        }
+
+        moving = offset.sqrMagnitude > 0.0001f;
         return true;
     }
 
@@ -94,6 +169,8 @@ public sealed class GraphNavigationAgent : MonoBehaviour
         pathValid = false;
         path.Clear();
         pathIndex = 0;
+        hasRequestedDestination = false;
+        Status = NavigationStatus.Idle;
     }
 
     private void ResolveGraph()
@@ -107,11 +184,11 @@ public sealed class GraphNavigationAgent : MonoBehaviour
         }
     }
 
-    private bool HasDirectLineOfSight(Vector3 destination)
+    private static bool IsFinite(Vector3 value)
     {
-        Vector3 start = transform.position + Vector3.up * (agentHeight * 0.5f);
-        Vector3 end = destination + Vector3.up * (agentHeight * 0.5f);
-        return !Physics.Linecast(start, end, obstacleLayers, QueryTriggerInteraction.Ignore);
+        return !float.IsNaN(value.x) && !float.IsInfinity(value.x) &&
+            !float.IsNaN(value.y) && !float.IsInfinity(value.y) &&
+            !float.IsNaN(value.z) && !float.IsInfinity(value.z);
     }
 
     private void OnValidate()
@@ -120,6 +197,7 @@ public sealed class GraphNavigationAgent : MonoBehaviour
         agentHeight = Mathf.Max(agentRadius * 2f, agentHeight);
         nodeReachDistance = Mathf.Max(0.1f, nodeReachDistance);
         turnSpeed = Mathf.Max(0.1f, turnSpeed);
+        replanCooldown = Mathf.Max(0f, replanCooldown);
     }
 
     private void OnDrawGizmosSelected()
