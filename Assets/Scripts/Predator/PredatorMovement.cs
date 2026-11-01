@@ -55,7 +55,7 @@ public sealed class PredatorMovement : MonoBehaviour
         transform.position += movement;
         Velocity = Time.deltaTime > 0f ? direction * (travelDistance / Time.deltaTime) : Vector3.zero;
         FaceDirection(direction);
-        agentAnimation?.SetMoving(Velocity.sqrMagnitude > 0.0001f);
+        agentAnimation?.SetMovementVelocity(Velocity);
         return Velocity.sqrMagnitude > 0.0001f;
     }
 
@@ -77,7 +77,7 @@ public sealed class PredatorMovement : MonoBehaviour
     public void Stop()
     {
         Velocity = Vector3.zero;
-        agentAnimation?.SetMoving(false);
+        agentAnimation?.SetMovementVelocity(Velocity);
     }
 
     private bool CanMove(Vector3 movement)
