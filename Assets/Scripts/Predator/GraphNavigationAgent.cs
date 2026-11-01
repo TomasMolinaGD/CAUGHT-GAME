@@ -4,6 +4,8 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class GraphNavigationAgent : MonoBehaviour
 {
+    internal const float DistanceTolerance = 0.0001f;
+
     public enum NavigationStatus
     {
         Idle,
@@ -100,7 +102,8 @@ public sealed class GraphNavigationAgent : MonoBehaviour
         }
 
         float stopping = Mathf.Max(0f, stoppingDistance);
-        if (Vector3.ProjectOnPlane(destination - transform.position, Vector3.up).magnitude <= stopping)
+        if (Vector3.ProjectOnPlane(destination - transform.position, Vector3.up).magnitude <=
+            stopping + DistanceTolerance)
         {
             InvalidatePath();
             Status = NavigationStatus.Arrived;
@@ -165,7 +168,7 @@ public sealed class GraphNavigationAgent : MonoBehaviour
         }
 
         Vector3 offset = Vector3.ProjectOnPlane(path[pathIndex] - transform.position, Vector3.up);
-        if (pathIndex == path.Count - 1 && offset.magnitude <= stopping)
+        if (pathIndex == path.Count - 1 && offset.magnitude <= stopping + DistanceTolerance)
         {
             InvalidatePath();
             Status = NavigationStatus.Arrived;

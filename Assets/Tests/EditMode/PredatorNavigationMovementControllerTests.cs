@@ -113,6 +113,49 @@ public sealed class PredatorNavigationMovementControllerTests
         Assert.That(root.transform.position.x, Is.GreaterThan(before.x));
     }
 
+    [Test]
+    public void FinalDestinationArrivesWithinSharedStoppingTolerance()
+    {
+        NavigationGrid grid = CreateGrid(1, 3);
+        Component provider = CreateProvider(grid);
+        GameObject root = CreateRoot();
+        Component controller = Add(root, "PredatorNavigationMovementController");
+        Component agent = root.GetComponent(Type.GetType("GraphNavigationAgent, Assembly-CSharp"));
+        Invoke(controller, "ConfigureGraphProvider", provider);
+        SetPrivateField(agent, "nodeReachDistance", 0.1f);
+        SetPrivateField(controller, "stoppingDistance", 0.25f);
+        Vector3 destination = grid.GridToWorldPosition(0, 2);
+        root.transform.position = destination + Vector3.left * 0.25005f;
+        Invoke(controller, "RequestDestination", destination);
+
+        Invoke(controller, "TickNavigation");
+
+        Assert.That(GetEnum(controller, "Status"), Is.EqualTo("Arrived"));
+        Assert.IsFalse((bool)controller.GetType().GetProperty("HasDestination").GetValue(controller));
+        Assert.That(root.transform.position, Is.EqualTo(destination + Vector3.left * 0.25005f));
+    }
+
+    [Test]
+    public void FinalDestinationImmediatelyOutsideSharedStoppingToleranceDoesNotArrive()
+    {
+        NavigationGrid grid = CreateGrid(1, 3);
+        Component provider = CreateProvider(grid);
+        GameObject root = CreateRoot();
+        Component controller = Add(root, "PredatorNavigationMovementController");
+        Component agent = root.GetComponent(Type.GetType("GraphNavigationAgent, Assembly-CSharp"));
+        Invoke(controller, "ConfigureGraphProvider", provider);
+        SetPrivateField(agent, "nodeReachDistance", 0.1f);
+        SetPrivateField(controller, "stoppingDistance", 0.25f);
+        Vector3 destination = grid.GridToWorldPosition(0, 2);
+        root.transform.position = destination + Vector3.left * 0.2502f;
+        Invoke(controller, "RequestDestination", destination);
+
+        Invoke(controller, "TickNavigation");
+
+        Assert.That(GetEnum(controller, "Status"), Is.EqualTo("FollowingDirect"));
+        Assert.IsTrue((bool)controller.GetType().GetProperty("HasDestination").GetValue(controller));
+    }
+
     private GameObject CreateRoot()
     {
         GameObject root = new GameObject("PredatorNavigationMovementControllerTests_Root");

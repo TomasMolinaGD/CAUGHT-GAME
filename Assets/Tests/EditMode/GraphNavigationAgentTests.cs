@@ -50,6 +50,44 @@ public sealed class GraphNavigationAgentTests
     }
 
     [Test]
+    public void FinalMovementTargetArrivesWithinStoppingTolerance()
+    {
+        NavigationGrid grid = CreateGrid(1, 3);
+        Component provider = CreateProvider(grid);
+        Component agent = CreateAgent(out Type agentType);
+        Vector3 destination = grid.GridToWorldPosition(0, 2);
+        ConfigureGraph(agentType, agent, provider);
+
+        Assert.IsTrue(InvokeTryMove(agentType, agent, destination, 0.25f, out _));
+        agent.transform.position = destination + Vector3.left * 0.25005f;
+
+        Assert.IsTrue(InvokeTryMove(agentType, agent, destination, 0.25f, out bool moving));
+
+        Assert.IsFalse(moving);
+        Assert.That(GetStatus(agentType, agent), Is.EqualTo("Arrived"));
+        Assert.IsFalse((bool)agentType.GetProperty("HasMovementTarget").GetValue(agent));
+    }
+
+    [Test]
+    public void FinalMovementTargetOutsideStoppingToleranceDoesNotArrive()
+    {
+        NavigationGrid grid = CreateGrid(1, 3);
+        Component provider = CreateProvider(grid);
+        Component agent = CreateAgent(out Type agentType);
+        Vector3 destination = grid.GridToWorldPosition(0, 2);
+        ConfigureGraph(agentType, agent, provider);
+
+        Assert.IsTrue(InvokeTryMove(agentType, agent, destination, 0.25f, out _));
+        agent.transform.position = destination + Vector3.left * 0.2502f;
+
+        Assert.IsTrue(InvokeTryMove(agentType, agent, destination, 0.25f, out bool moving));
+
+        Assert.IsTrue(moving);
+        Assert.That(GetStatus(agentType, agent), Is.EqualTo("FollowingDirect"));
+        Assert.IsTrue((bool)agentType.GetProperty("HasMovementTarget").GetValue(agent));
+    }
+
+    [Test]
     public void TryMoveTowards_SelectsWaypointWhenDirectCorridorIsBlocked()
     {
         NavigationGrid grid = CreateGrid(3, 3, new Vector2Int(1, 1));
@@ -164,9 +202,16 @@ public sealed class GraphNavigationAgentTests
         agentType.GetMethod("ConfigureGraphComponent").Invoke(agent, new object[] { provider });
     }
 
-    private static bool InvokeTryMove(Type agentType, Component agent, Vector3 destination, out bool moving)
+    private static bool InvokeTryMove(Type agentType, Component agent, Vector3 destination,
+        out bool moving)
     {
-        object[] args = { destination, 2f, 0.1f, false };
+        return InvokeTryMove(agentType, agent, destination, 0.1f, out moving);
+    }
+
+    private static bool InvokeTryMove(Type agentType, Component agent, Vector3 destination,
+        float stoppingDistance, out bool moving)
+    {
+        object[] args = { destination, 2f, stoppingDistance, false };
         bool result = (bool)agentType.GetMethod("TryMoveTowards").Invoke(agent, args);
         moving = (bool)args[3];
         return result;
