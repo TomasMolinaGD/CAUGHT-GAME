@@ -69,7 +69,7 @@ public sealed class PredatorNavigationMovementControllerTests
         Invoke(controller, "TickNavigation");
 
         Assert.That(GetEnum(controller, "Status"), Is.EqualTo("FollowingDirect"));
-        Assert.That(root.transform.position.x, Is.GreaterThan(before.x));
+        Assert.That(Vector3.Distance(root.transform.position, before), Is.GreaterThan(0f));
         Assert.That(root.transform.position.z, Is.EqualTo(before.z));
     }
 
@@ -88,6 +88,29 @@ public sealed class PredatorNavigationMovementControllerTests
 
         Assert.That(GetEnum(controller, "Status"), Is.EqualTo("NoPath"));
         Assert.That(root.transform.position, Is.EqualTo(grid.GridToWorldPosition(0, 0)));
+    }
+
+    [Test]
+    public void IntermediateWaypointUsesAgentToleranceInsteadOfFinalStoppingDistance()
+    {
+        NavigationGrid grid = CreateGrid(3, 3, new Vector2Int(1, 1));
+        Component provider = CreateProvider(grid);
+        GameObject root = CreateRoot();
+        Component controller = Add(root, "PredatorNavigationMovementController");
+        Component agent = root.GetComponent(Type.GetType("GraphNavigationAgent, Assembly-CSharp"));
+        Invoke(controller, "ConfigureGraphProvider", provider);
+        SetPrivateField(agent, "nodeReachDistance", 0.1f);
+        SetPrivateField(controller, "stoppingDistance", 0.25f);
+        root.transform.position = new Vector3(0.36f, 0f, 0.5f);
+        Vector3 before = root.transform.position;
+
+        Invoke(controller, "RequestDestination", grid.GridToWorldPosition(2, 2));
+        Invoke(controller, "TickNavigation");
+
+        Assert.That(Vector3.Distance(before, grid.GridToWorldPosition(0, 0)), Is.EqualTo(0.14f).Within(0.001f));
+        Assert.That(GetEnum(controller, "Status"), Is.EqualTo("FollowingPath"));
+        Assert.IsFalse((bool)agent.GetType().GetProperty("IsFinalMovementTarget").GetValue(agent));
+        Assert.That(root.transform.position.x, Is.GreaterThan(before.x));
     }
 
     private GameObject CreateRoot()

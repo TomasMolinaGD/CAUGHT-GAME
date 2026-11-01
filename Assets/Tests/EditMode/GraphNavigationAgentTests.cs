@@ -67,6 +67,23 @@ public sealed class GraphNavigationAgentTests
     }
 
     [Test]
+    public void TryMoveTowards_OffsetStartChoosesInitialCellCenterBeforeNextWaypoint()
+    {
+        NavigationGrid grid = CreateGrid(3, 3, new Vector2Int(1, 1));
+        Component provider = CreateProvider(grid);
+        Component agent = CreateAgent(out Type agentType);
+        agent.transform.position = new Vector3(0.1f, 0f, 0.1f);
+        ConfigureGraph(agentType, agent, provider);
+        Vector3 destination = grid.GridToWorldPosition(2, 2);
+
+        Assert.IsTrue(InvokeTryMove(agentType, agent, destination, out bool moving));
+        Assert.IsTrue(moving);
+        Assert.That(GetStatus(agentType, agent), Is.EqualTo("FollowingPath"));
+        Assert.That(GetMovementTarget(agentType, agent), Is.EqualTo(grid.GridToWorldPosition(0, 0)));
+        Assert.That(agent.transform.position, Is.EqualTo(new Vector3(0.1f, 0f, 0.1f)));
+    }
+
+    [Test]
     public void InvalidatePath_RemovesImmediateTargetWithoutMovingAgent()
     {
         NavigationGrid grid = CreateGrid(1, 3);

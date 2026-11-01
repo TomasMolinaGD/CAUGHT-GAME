@@ -10,16 +10,25 @@ public sealed class PredatorNavigationMovementController : MonoBehaviour
     [SerializeField] private GraphNavigationAgent navigationAgent;
     [SerializeField] private PredatorMovement movement;
     [SerializeField] private MonoBehaviour graphProvider;
+    [SerializeField] private bool avoidSafeZones;
+    [SerializeField, Min(0.1f)] private float agentRadius = 0.4f;
+    [SerializeField, Min(0.1f)] private float agentHeight = 1.8f;
     [SerializeField] private bool chase;
     [SerializeField, Min(0f)] private float stoppingDistance = 0.25f;
 
     private bool hasDestination;
     private bool providerConfigured;
+    private bool agentConfigured;
     private Vector3 destination;
 
     public GraphNavigationAgent.NavigationStatus Status =>
         navigationAgent != null ? navigationAgent.Status : GraphNavigationAgent.NavigationStatus.MissingProvider;
     public bool HasDestination => hasDestination;
+    public Vector3 RequestedDestination => destination;
+    public Vector3 MovementTarget => navigationAgent != null ? navigationAgent.MovementTarget : transform.position;
+    public int TickCount { get; private set; }
+    public bool LastTickAccepted { get; private set; }
+    public bool LastTickCommandedMovement { get; private set; }
 
     private void Awake()
     {
@@ -32,6 +41,7 @@ public sealed class PredatorNavigationMovementController : MonoBehaviour
         navigationAgent = agent;
         movement = predatorMovement;
         providerConfigured = false;
+        agentConfigured = false;
         chase = pursue;
         stoppingDistance = Mathf.Max(0f, arrivalDistance);
     }
@@ -66,6 +76,9 @@ public sealed class PredatorNavigationMovementController : MonoBehaviour
 
     public void TickNavigation()
     {
+        TickCount++;
+        LastTickAccepted = false;
+        LastTickCommandedMovement = false;
         ResolveDependencies();
         if (navigationAgent == null || movement == null || !hasDestination)
         {
@@ -75,6 +88,7 @@ public sealed class PredatorNavigationMovementController : MonoBehaviour
 
         bool moving;
         bool accepted = navigationAgent.TryMoveTowards(destination, 0f, stoppingDistance, out moving);
+        LastTickAccepted = accepted;
         GraphNavigationAgent.NavigationStatus status = navigationAgent.Status;
         if (status == GraphNavigationAgent.NavigationStatus.Arrived)
         {
@@ -94,7 +108,13 @@ public sealed class PredatorNavigationMovementController : MonoBehaviour
             status == GraphNavigationAgent.NavigationStatus.FollowingPath)
         {
             if (moving)
-                movement.MoveTowards(navigationAgent.MovementTarget, chase, stoppingDistance);
+            {
+                float movementStoppingDistance = navigationAgent.IsFinalMovementTarget
+                    ? stoppingDistance
+                    : 0f;
+                movement.MoveTowards(navigationAgent.MovementTarget, chase, movementStoppingDistance);
+                LastTickCommandedMovement = true;
+            }
             else
                 movement.Stop();
         }
@@ -109,11 +129,23 @@ public sealed class PredatorNavigationMovementController : MonoBehaviour
     {
         if (navigationAgent == null) navigationAgent = GetComponent<GraphNavigationAgent>();
         if (movement == null) movement = GetComponent<PredatorMovement>();
+        if (!agentConfigured && navigationAgent != null)
+        {
+            navigationAgent.Configure(avoidSafeZones, agentRadius, agentHeight);
+            agentConfigured = true;
+        }
         if (!providerConfigured && navigationAgent != null)
         {
             navigationAgent.ConfigureGraphComponent(graphProvider);
             providerConfigured = true;
         }
+    }
+
+    private void OnValidate()
+    {
+        agentRadius = Mathf.Max(0.1f, agentRadius);
+        agentHeight = Mathf.Max(agentRadius * 2f, agentHeight);
+        stoppingDistance = Mathf.Max(0f, stoppingDistance);
     }
 
     private static bool IsFinite(Vector3 value)

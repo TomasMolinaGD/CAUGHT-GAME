@@ -37,6 +37,7 @@ public sealed class GraphNavigationAgent : MonoBehaviour
     public NavigationStatus Status { get; private set; } = NavigationStatus.Idle;
     public bool HasMovementTarget => pathValid && pathIndex < path.Count;
     public Vector3 MovementTarget => HasMovementTarget ? path[pathIndex] : transform.position;
+    public bool IsFinalMovementTarget => HasMovementTarget && pathIndex == path.Count - 1;
 
     private void Awake() { ResolveGraph(); }
 
@@ -127,7 +128,6 @@ public sealed class GraphNavigationAgent : MonoBehaviour
             {
                 path.Clear();
                 pathValid = graph.TryFindPath(transform.position, destination, avoidSafeZones, path);
-                pathIndex = path.Count > 1 ? 1 : 0;
                 if (!pathValid || path.Count == 0)
                 {
                     hasFailedDestination = true;
@@ -137,12 +137,24 @@ public sealed class GraphNavigationAgent : MonoBehaviour
                     path.Clear();
                     return false;
                 }
+
+                if (!TrySelectInitialWaypoint(out pathIndex))
+                {
+                    hasFailedDestination = true;
+                    failedDestination = destination;
+                    nextReplanTime = Time.realtimeSinceStartup + replanCooldown;
+                    Status = NavigationStatus.NoPath;
+                    pathValid = false;
+                    path.Clear();
+                    return false;
+                }
                 Status = NavigationStatus.FollowingPath;
             }
         }
 
         while (pathIndex < path.Count - 1 &&
-            Vector3.ProjectOnPlane(path[pathIndex] - transform.position, Vector3.up).magnitude <= nodeReachDistance)
+            Vector3.ProjectOnPlane(path[pathIndex] - transform.position, Vector3.up).magnitude <= nodeReachDistance &&
+            IsSegmentSafe(pathIndex == 0 ? transform.position : path[pathIndex], path[pathIndex + 1]))
             pathIndex++;
 
         if (pathIndex >= path.Count)
@@ -162,6 +174,30 @@ public sealed class GraphNavigationAgent : MonoBehaviour
 
         moving = offset.sqrMagnitude > 0.0001f;
         return true;
+    }
+
+    private bool TrySelectInitialWaypoint(out int selectedIndex)
+    {
+        selectedIndex = 0;
+        if (path.Count <= 1) return true;
+
+        float distanceToFirst = Vector3.ProjectOnPlane(path[0] - transform.position, Vector3.up).magnitude;
+        if (distanceToFirst <= nodeReachDistance)
+        {
+            if (IsSegmentSafe(transform.position, path[1]))
+            {
+                selectedIndex = 1;
+            }
+
+            return true;
+        }
+
+        return IsSegmentSafe(transform.position, path[0]);
+    }
+
+    private bool IsSegmentSafe(Vector3 start, Vector3 end)
+    {
+        return graph != null && graph.HasDirectLineOfSight(start, end, agentRadius, agentHeight);
     }
 
     public void InvalidatePath()
