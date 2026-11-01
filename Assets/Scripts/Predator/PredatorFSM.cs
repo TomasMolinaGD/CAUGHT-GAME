@@ -33,6 +33,8 @@ public sealed class PredatorFSM : MonoBehaviour
     private PredatorCombat combat;
     private PredatorAnimationController animationController;
     private PredatorAlertSystem alertSystem;
+    private PredatorNavigationMovementController navigationController;
+    private bool navigationControllerResolved;
 
     public IReadOnlyList<Transform> Waypoints => waypoints;
     public float WaypointCheckDistance => waypointCheckDistance;
@@ -41,6 +43,8 @@ public sealed class PredatorFSM : MonoBehaviour
     public PredatorPerception Perception => perception;
     public PredatorCombat Combat => combat;
     public PredatorAnimationController Animation => animationController;
+    public PredatorNavigationMovementController NavigationController => ResolveNavigationController();
+    public bool HasNavigationController => ResolveNavigationController() != null;
     public bool ReceivedAlert { get; private set; }
     public int AlertsSent { get; private set; }
     public GameObject CurrentTarget { get; private set; }
@@ -98,6 +102,16 @@ public sealed class PredatorFSM : MonoBehaviour
 
     public void SetTarget(GameObject target) { CurrentTarget = target; }
 
+    public void RequestNavigationDestination(Vector3 destination)
+    {
+        ResolveNavigationController()?.RequestDestination(destination);
+    }
+
+    public void CancelNavigation()
+    {
+        ResolveNavigationController()?.CancelDestination();
+    }
+
     private void Awake()
     {
         CacheDependencies();
@@ -115,6 +129,8 @@ public sealed class PredatorFSM : MonoBehaviour
         perception = GetComponent<PredatorPerception>();
         combat = GetComponent<PredatorCombat>();
         animationController = GetComponent<PredatorAnimationController>();
+        navigationController = GetComponent<PredatorNavigationMovementController>();
+        navigationControllerResolved = true;
     }
 
     private void ConfigureComponents()
@@ -134,6 +150,7 @@ public sealed class PredatorFSM : MonoBehaviour
 
     private void Start()
     {
+        ResolveNavigationController();
         movement.Configure(patrolSpeed, chaseSpeed, turnSpeed,
             hunterMaximumSpeed * speedBelowHunterRatio, perception.ObstacleLayers);
     }
@@ -148,6 +165,7 @@ public sealed class PredatorFSM : MonoBehaviour
     private void OnDisable()
     {
         if (alertSystem != null) alertSystem.AlertRaised -= ReceiveAlert;
+        ResolveNavigationController()?.CancelDestination();
         stateMachine?.Stop();
         movement?.Stop();
     }
@@ -258,6 +276,16 @@ public sealed class PredatorFSM : MonoBehaviour
         chaseSpeed = Mathf.Clamp(chaseSpeed, 0.1f, maximumPredatorSpeed);
         float maximumPatrolSpeed = Mathf.Min(chaseSpeed * 0.9f, hunterPatrolSpeed * 0.95f);
         patrolSpeed = Mathf.Clamp(patrolSpeed, 0.1f, maximumPatrolSpeed);
+    }
+
+    private PredatorNavigationMovementController ResolveNavigationController()
+    {
+        if (!navigationControllerResolved)
+        {
+            navigationController = GetComponent<PredatorNavigationMovementController>();
+            navigationControllerResolved = true;
+        }
+        return navigationController;
     }
 
 }
