@@ -107,7 +107,7 @@ public static class PredatorNavigationI23SceneBuilder
         GameObject harnessObject = new GameObject("PredatorNavigationScenario");
         PredatorNavigationTestHarness harness = harnessObject.AddComponent<PredatorNavigationTestHarness>();
         Transform direct = CreateMarker("DirectTarget", new Vector3(4.5f, 0f, -4.5f), Color.green);
-        Transform obstacle = CreateMarker("ObstacleTarget", new Vector3(4.5f, 0f, 4.5f), Color.yellow);
+        Transform obstacle = CreateMarker("ObstacleTarget", new Vector3(4.5f, 0f, 3.5f), Color.yellow);
         Transform alternate = CreateMarker("AlternateTarget", new Vector3(-4.5f, 0f, 4.5f), Color.magenta);
         Transform safe = CreateMarker("SafeZoneTarget", new Vector3(5.5f, 0f, 5.5f), Color.cyan);
         Transform outside = CreateMarker("OutOfGridTarget", new Vector3(20f, 0f, 20f), Color.red);
