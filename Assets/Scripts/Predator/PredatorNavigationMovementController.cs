@@ -80,7 +80,12 @@ public sealed class PredatorNavigationMovementController : MonoBehaviour
         LastTickAccepted = false;
         LastTickCommandedMovement = false;
         ResolveDependencies();
-        if (navigationAgent == null || movement == null || !hasDestination)
+        if (!hasDestination)
+        {
+            return;
+        }
+
+        if (navigationAgent == null || movement == null)
         {
             movement?.Stop();
             return;

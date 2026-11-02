@@ -69,6 +69,23 @@ public sealed class PredatorFSMNavigationIntegrationTests
         Assert.That(tickCountAfter, Is.EqualTo(tickCountBefore));
     }
 
+    [Test]
+    public void AttackStateStopsLegacyMovement()
+    {
+        GameObject root = CreateRoot(true);
+        Component fsm = root.GetComponent(Type.GetType("PredatorFSM, Assembly-CSharp"));
+        Component movement = root.GetComponent(Type.GetType("PredatorMovement, Assembly-CSharp"));
+        InitializeStateMachine(fsm);
+
+        Invoke(movement, "MoveTowards", new Vector3(2f, 0f, 0f), false, 0f);
+        Assert.That(GetVelocity(movement).sqrMagnitude, Is.GreaterThan(0f));
+
+        ChangeState(fsm, "Attack");
+
+        Assert.That(GetVelocity(movement), Is.EqualTo(Vector3.zero));
+        Assert.That(fsm.GetType().GetProperty("CurrentState").GetValue(fsm).ToString(), Is.EqualTo("Attack"));
+    }
+
     private GameObject CreateRoot(bool withNavigationController)
     {
         GameObject root = new GameObject("PredatorFSMNavigationIntegrationTests_Root");
@@ -90,5 +107,27 @@ public sealed class PredatorFSMNavigationIntegrationTests
     {
         component.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.Public)
             .Invoke(component, args);
+    }
+
+    private static void ChangeState(Component fsm, string stateName)
+    {
+        FieldInfo field = fsm.GetType().GetField("stateMachine", BindingFlags.Instance | BindingFlags.NonPublic);
+        object stateMachine = field.GetValue(fsm);
+        Type stateType = fsm.GetType().GetProperty("CurrentState").PropertyType;
+        object state = Enum.Parse(stateType, stateName);
+        stateMachine.GetType().GetMethod("ChangeState").Invoke(stateMachine, new[] { state });
+    }
+
+    private static void InitializeStateMachine(Component fsm)
+    {
+        fsm.GetType().GetMethod("CacheDependencies", BindingFlags.Instance | BindingFlags.NonPublic)
+            .Invoke(fsm, null);
+        fsm.GetType().GetMethod("InitializeStateMachine", BindingFlags.Instance | BindingFlags.NonPublic)
+            .Invoke(fsm, null);
+    }
+
+    private static Vector3 GetVelocity(Component movement)
+    {
+        return (Vector3)movement.GetType().GetProperty("Velocity").GetValue(movement);
     }
 }

@@ -16,6 +16,23 @@ public sealed class PredatorNavigationMovementControllerTests
     }
 
     [Test]
+    public void ControllerWithoutDestinationDoesNotStopLegacyMovement()
+    {
+        GameObject root = CreateRoot();
+        Component controller = Add(root, "PredatorNavigationMovementController");
+        Component movement = root.GetComponent(Type.GetType("PredatorMovement, Assembly-CSharp"));
+
+        Invoke(movement, "MoveTowards", new Vector3(2f, 0f, 0f), false, 0f);
+        Vector3 velocityBeforeTick = GetVelocity(movement);
+        Assert.That(velocityBeforeTick.sqrMagnitude, Is.GreaterThan(0f));
+
+        Invoke(controller, "TickNavigation");
+
+        Assert.That(GetVelocity(movement), Is.EqualTo(velocityBeforeTick));
+        Assert.IsFalse((bool)controller.GetType().GetProperty("HasDestination").GetValue(controller));
+    }
+
+    [Test]
     public void MissingProviderStopsMovementWithoutWritingTransform()
     {
         GameObject root = CreateRoot();
@@ -36,13 +53,18 @@ public sealed class PredatorNavigationMovementControllerTests
     {
         GameObject root = CreateRoot();
         Component controller = Add(root, "PredatorNavigationMovementController");
+        Component movement = root.GetComponent(Type.GetType("PredatorMovement, Assembly-CSharp"));
 
         Invoke(controller, "RequestDestination", new Vector3(2f, 0f, 0f));
+        Invoke(movement, "MoveTowards", new Vector3(2f, 0f, 0f), false, 0f);
+        Assert.That(GetVelocity(movement).sqrMagnitude, Is.GreaterThan(0f));
+        Vector3 positionBeforeCancel = root.transform.position;
         Invoke(controller, "CancelDestination");
 
         Assert.IsFalse((bool)controller.GetType().GetProperty("HasDestination").GetValue(controller));
         Assert.That(GetEnum(controller, "Status"), Is.EqualTo("Idle"));
-        Assert.That(root.transform.position, Is.EqualTo(Vector3.zero));
+        Assert.That(GetVelocity(movement), Is.EqualTo(Vector3.zero));
+        Assert.That(root.transform.position, Is.EqualTo(positionBeforeCancel));
     }
 
     [Test]
@@ -222,6 +244,11 @@ public sealed class PredatorNavigationMovementControllerTests
     private static string GetEnum(Component component, string property)
     {
         return component.GetType().GetProperty(property).GetValue(component).ToString();
+    }
+
+    private static Vector3 GetVelocity(Component movement)
+    {
+        return (Vector3)movement.GetType().GetProperty("Velocity").GetValue(movement);
     }
 
     private static void SetPrivateField(object target, string name, object value)
