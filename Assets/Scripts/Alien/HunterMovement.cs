@@ -204,6 +204,11 @@ public sealed class HunterMovement : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
+        if (boundsPolicy != BoundsPolicy.LegacyRectangle)
+        {
+            return;
+        }
+
         Gizmos.color = new Color(1f, 0.45f, 0f, 0.8f);
         Gizmos.DrawWireCube(
             new Vector3(areaCenter.x, transform.position.y, areaCenter.y),

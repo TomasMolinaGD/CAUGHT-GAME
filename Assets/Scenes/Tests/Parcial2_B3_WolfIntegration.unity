@@ -347,14 +347,15 @@ MonoBehaviour:
   maximumActiveInterests: 5
   spawnInterval: 8
   initialSpawnDelay: 2
-  areaCenter: {x: 484, y: 623}
-  areaHalfExtents: {x: 42, y: 26}
+  areaCenter: {x: 80, y: 120}
+  areaHalfExtents: {x: 77, y: 117}
   spawnHeight: 1.05
   clearanceRadius: 3
   placementAttempts: 16
   blockedLayers:
     serializedVersion: 2
     m_Bits: 6144
+  navigationGrid: {fileID: 2098697243}
   interestRoot: {fileID: 0}
 --- !u!114 &14444186
 MonoBehaviour:
