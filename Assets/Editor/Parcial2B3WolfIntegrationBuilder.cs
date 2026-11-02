@@ -10,11 +10,44 @@ public static class Parcial2B3WolfIntegrationBuilder
 {
     private const string TargetScenePath = "Assets/Scenes/Tests/Parcial2_B3_WolfIntegration.unity";
     private const string PredatorPrefabPath = "Assets/Actors/Predator.prefab";
-    private const int PatrolRow = 25;
-    private const int LeftPatrolColumn = 5;
-    private const int RightPatrolColumn = 33;
+    private const string WolfControllerPath =
+        "Assets/Animations/Predator/Predator_WolfIntegration.controller";
+    private const string ProviderName = "NavigationGridGraphProvider_WolfIntegration";
+    private const string WaypointRootName = "WolfPatrolWaypoints_B3";
+    private const string WolfNamePrefix = "Wolf_Patrol_B3_";
+    private const float PatrolSpeed = 2.85f;
+    private const float NodeReachDistance = 0.1f;
+    private const float StoppingDistance = 0.25f;
 
-    [MenuItem("CAUGHT-GAME/Integrate Wolf Patrol Into B3 Copy")]
+    private sealed class PatrolDefinition
+    {
+        public PatrolDefinition(string id, string regionName, Color color, params Vector3[] waypointPositions)
+        {
+            Id = id;
+            RegionName = regionName;
+            Color = color;
+            WaypointPositions = waypointPositions;
+        }
+
+        public string Id { get; }
+        public string RegionName { get; }
+        public Color Color { get; }
+        public Vector3[] WaypointPositions { get; }
+    }
+
+    private sealed class PatrolSetup
+    {
+        public PatrolSetup(PatrolDefinition definition, Transform[] waypoints)
+        {
+            Definition = definition;
+            Waypoints = waypoints;
+        }
+
+        public PatrolDefinition Definition { get; }
+        public Transform[] Waypoints { get; }
+    }
+
+    [MenuItem("CAUGHT-GAME/Integrate Four Wolf Patrols Into B3 Copy")]
     public static void Build()
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode)
@@ -28,16 +61,16 @@ public static class Parcial2B3WolfIntegrationBuilder
         if (predatorPrefab == null)
             throw new InvalidOperationException($"Missing Predator prefab: {PredatorPrefabPath}");
 
+        RuntimeAnimatorController wolfController =
+            AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(WolfControllerPath);
+        if (wolfController == null)
+            throw new InvalidOperationException($"Missing Wolf Animator Controller: {WolfControllerPath}");
+
         Scene scene = EditorSceneManager.OpenScene(TargetScenePath, OpenSceneMode.Single);
         NavigationGrid grid = RequireSingleSceneComponent<NavigationGrid>(scene, "NavigationGrid");
-
-        if (FindSceneComponents<NavigationGridGraphProvider>(scene).Count != 0)
-            throw new InvalidOperationException("The B3 copy already contains a NavigationGridGraphProvider.");
-        if (FindSceneComponents<PredatorFSM>(scene).Count != 0)
-            throw new InvalidOperationException("The B3 copy already contains a Predator/Wolf FSM.");
         if (!ContainsComponentNamed(scene, "FSMAgent"))
             throw new InvalidOperationException("The copied scene no longer contains the Alien FSM.");
-        if (GameObject.Find("BoidRespawnArea_B3") == null)
+        if (!ContainsGameObjectNamed(scene, "BoidRespawnArea_B3"))
             throw new InvalidOperationException("The copied scene no longer contains BoidRespawnArea_B3.");
 
         int obstacleLayer = LayerMask.NameToLayer("Obstacle");
@@ -45,44 +78,118 @@ public static class Parcial2B3WolfIntegrationBuilder
             throw new InvalidOperationException("The existing Obstacle layer is required.");
         LayerMask obstacleMask = 1 << obstacleLayer;
 
-        NavigationGridGraphProvider provider = CreateProvider(scene, grid, obstacleMask);
-        Transform[] waypoints = CreateWaypoints(scene, grid);
+        RemoveGeneratedWolfPatrols(scene);
+        NavigationGridGraphProvider provider = GetOrCreateProvider(scene, grid, obstacleMask);
+        PatrolSetup[] patrols = CreatePatrols(scene);
         Physics.SyncTransforms();
-        ValidatePatrolRoute(grid, provider, waypoints);
-        CreateWolf(scene, predatorPrefab, provider, waypoints, obstacleMask);
+        ValidatePatrolRoutes(grid, provider, patrols);
 
-        if (FindSceneComponents<PredatorFSM>(scene).Count != 1)
-            throw new InvalidOperationException("The integration must contain exactly one PredatorFSM.");
+        for (int i = 0; i < patrols.Length; i++)
+            CreateWolf(scene, predatorPrefab, wolfController, provider, patrols[i], obstacleMask, i == 0);
+
+        ValidateSceneConfiguration(scene, grid, provider, wolfController, patrols);
 
         EditorSceneManager.MarkSceneDirty(scene);
         if (!EditorSceneManager.SaveScene(scene, TargetScenePath))
             throw new InvalidOperationException("Unity could not save the Wolf integration scene.");
 
         AssetDatabase.SaveAssets();
-        Debug.Log($"Integrated autonomous Wolf patrol into preserved B3 copy: {TargetScenePath}");
+        Debug.Log($"Integrated four regional Wolf patrols into preserved B3 copy: {TargetScenePath}");
     }
 
-    private static NavigationGridGraphProvider CreateProvider(
+    private static PatrolDefinition[] CreatePatrolDefinitions()
+    {
+        return new[]
+        {
+            new PatrolDefinition("L1", "North", Color.green,
+                new Vector3(138.5f, 0f, 34.6f), new Vector3(14f, 0f, 33.9f)),
+            new PatrolDefinition("L2", "West", Color.cyan,
+                new Vector3(10.3f, 0f, 102.3f), new Vector3(25.7f, 0f, 102.1f),
+                new Vector3(26.3f, 0f, 142.7f), new Vector3(10.59f, 0f, 142.1f)),
+            new PatrolDefinition("L3", "South", Color.yellow,
+                new Vector3(138.5f, 0f, 205.4f), new Vector3(14f, 0f, 206.1f)),
+            new PatrolDefinition("L4", "East", Color.magenta,
+                new Vector3(149.7f, 0f, 102.3f), new Vector3(134.3f, 0f, 102.1f),
+                new Vector3(133.7f, 0f, 142.7f), new Vector3(149.41f, 0f, 142.1f))
+        };
+    }
+
+    private static void RemoveGeneratedWolfPatrols(Scene scene)
+    {
+        List<PredatorFSM> wolves = FindSceneComponents<PredatorFSM>(scene);
+        for (int i = 0; i < wolves.Count; i++)
+        {
+            string wolfName = wolves[i].gameObject.name;
+            if (wolfName != "Wolf_Patrol_B3" &&
+                !wolfName.StartsWith(WolfNamePrefix, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    $"Refusing to replace unrelated PredatorFSM object: {wolfName}");
+            }
+        }
+
+        for (int i = wolves.Count - 1; i >= 0; i--)
+            UnityEngine.Object.DestroyImmediate(wolves[i].gameObject);
+
+        GameObject waypointRoot = FindSceneGameObject(scene, WaypointRootName);
+        if (waypointRoot != null)
+            UnityEngine.Object.DestroyImmediate(waypointRoot);
+    }
+
+    private static NavigationGridGraphProvider GetOrCreateProvider(
         Scene scene, NavigationGrid grid, LayerMask obstacleMask)
     {
-        GameObject root = new GameObject("NavigationGridGraphProvider_WolfIntegration");
-        SceneManager.MoveGameObjectToScene(root, scene);
-        NavigationGridGraphProvider provider = root.AddComponent<NavigationGridGraphProvider>();
+        List<NavigationGridGraphProvider> providers =
+            FindSceneComponents<NavigationGridGraphProvider>(scene);
+        if (providers.Count > 1)
+            throw new InvalidOperationException(
+                $"Expected at most one NavigationGridGraphProvider, found {providers.Count}.");
+
+        NavigationGridGraphProvider provider;
+        if (providers.Count == 1)
+        {
+            provider = providers[0];
+            provider.gameObject.name = ProviderName;
+        }
+        else
+        {
+            GameObject root = new GameObject(ProviderName);
+            SceneManager.MoveGameObjectToScene(root, scene);
+            provider = root.AddComponent<NavigationGridGraphProvider>();
+        }
+
         provider.Configure(grid, obstacleMask);
         EditorUtility.SetDirty(provider);
         return provider;
     }
 
-    private static Transform[] CreateWaypoints(Scene scene, NavigationGrid grid)
+    private static PatrolSetup[] CreatePatrols(Scene scene)
     {
-        GameObject root = new GameObject("WolfPatrolWaypoints_B3");
+        PatrolDefinition[] definitions = CreatePatrolDefinitions();
+        var setups = new PatrolSetup[definitions.Length];
+        GameObject root = new GameObject(WaypointRootName);
         SceneManager.MoveGameObjectToScene(root, scene);
 
-        Transform left = CreateWaypoint(
-            "WolfWaypoint_Left", grid.GridToWorldPosition(PatrolRow, LeftPatrolColumn), Color.green, root.transform);
-        Transform right = CreateWaypoint(
-            "WolfWaypoint_Right", grid.GridToWorldPosition(PatrolRow, RightPatrolColumn), Color.yellow, root.transform);
-        return new[] { left, right };
+        for (int i = 0; i < definitions.Length; i++)
+        {
+            PatrolDefinition definition = definitions[i];
+            GameObject patrolRoot = new GameObject($"{definition.Id}_{definition.RegionName}_Waypoints");
+            patrolRoot.transform.SetParent(root.transform, false);
+            var waypoints = new Transform[definition.WaypointPositions.Length];
+
+            for (int waypointIndex = 0; waypointIndex < definition.WaypointPositions.Length; waypointIndex++)
+            {
+                waypoints[waypointIndex] = CreateWaypoint(
+                    $"Wolf_{definition.Id}_Waypoint_{waypointIndex + 1:00}",
+                    definition.WaypointPositions[waypointIndex],
+                    definition.Color,
+                    patrolRoot.transform);
+            }
+
+            setups[i] = new PatrolSetup(definition, waypoints);
+        }
+
+        return setups;
     }
 
     private static Transform CreateWaypoint(string name, Vector3 position, Color color, Transform parent)
@@ -100,65 +207,126 @@ public static class Parcial2B3WolfIntegrationBuilder
         return marker.transform;
     }
 
-    private static void ValidatePatrolRoute(
-        NavigationGrid grid, NavigationGridGraphProvider provider, Transform[] waypoints)
+    private static void ValidatePatrolRoutes(
+        NavigationGrid grid, NavigationGridGraphProvider provider, PatrolSetup[] patrols)
     {
-        for (int i = 0; i < waypoints.Length; i++)
+        var routeOwners = new Dictionary<Vector2Int, string>();
+
+        for (int patrolIndex = 0; patrolIndex < patrols.Length; patrolIndex++)
         {
-            if (!grid.TryWorldToGrid(waypoints[i].position, out int row, out int column) ||
-                !grid.TryGetCell(row, column, out NavigationGridCell cell) ||
-                !cell.Walkable || cell.Zone == NavigationGridZone.SafeZone)
-                throw new InvalidOperationException($"{waypoints[i].name} must be walkable and outside Safe Zones.");
-        }
+            PatrolSetup patrol = patrols[patrolIndex];
+            if (patrol.Waypoints.Length < 2)
+                throw new InvalidOperationException($"{patrol.Definition.Id} requires at least two waypoints.");
 
-        if (provider.HasDirectLineOfSight(waypoints[0].position, waypoints[1].position, 0.4f, 1.8f))
-            throw new InvalidOperationException("The selected Patrol leg does not require A*.");
+            var waypointCells = new HashSet<Vector2Int>();
+            for (int i = 0; i < patrol.Waypoints.Length; i++)
+            {
+                Transform waypoint = patrol.Waypoints[i];
+                if (!grid.TryWorldToGrid(waypoint.position, out int row, out int column) ||
+                    !grid.TryGetCell(row, column, out NavigationGridCell cell) ||
+                    !cell.Walkable || cell.Zone == NavigationGridZone.SafeZone)
+                {
+                    throw new InvalidOperationException(
+                        $"{waypoint.name} must match a walkable non-SafeZone grid cell.");
+                }
 
-        var path = new List<Vector3>();
-        if (!provider.TryFindPath(waypoints[0].position, waypoints[1].position, true, path) || path.Count == 0)
-            throw new InvalidOperationException("No Wolf A* path exists between the selected Patrol waypoints.");
+                Vector2Int waypointCell = new Vector2Int(column, row);
+                if (!waypointCells.Add(waypointCell))
+                    throw new InvalidOperationException(
+                        $"{patrol.Definition.Id} contains duplicate waypoint cell {waypointCell}.");
+            }
 
-        for (int i = 0; i < path.Count; i++)
-        {
-            if (!grid.TryWorldToGrid(path[i], out int row, out int column) ||
-                !grid.TryGetCell(row, column, out NavigationGridCell cell) ||
-                !cell.Walkable || cell.Zone == NavigationGridZone.SafeZone)
-                throw new InvalidOperationException("The selected A* route enters an invalid or Safe Zone cell.");
+            var patrolRouteCells = new HashSet<Vector2Int>();
+            int directSegments = 0;
+            int pathSegments = 0;
+            for (int i = 0; i < patrol.Waypoints.Length; i++)
+            {
+                Transform start = patrol.Waypoints[i];
+                Transform end = patrol.Waypoints[(i + 1) % patrol.Waypoints.Length];
+                if (start.position == end.position)
+                    throw new InvalidOperationException(
+                        $"{patrol.Definition.Id} contains consecutive duplicate waypoints.");
+
+                if (provider.HasDirectLineOfSight(start.position, end.position, 0.4f, 1.8f))
+                    directSegments++;
+                else
+                    pathSegments++;
+
+                var path = new List<Vector3>();
+                if (!provider.TryFindPath(start.position, end.position, true, path) || path.Count == 0)
+                    throw new InvalidOperationException(
+                        $"No Wolf A* path exists for {patrol.Definition.Id}: {start.name} -> {end.name}.");
+
+                for (int pathIndex = 0; pathIndex < path.Count; pathIndex++)
+                {
+                    if (!grid.TryWorldToGrid(path[pathIndex], out int row, out int column) ||
+                        !grid.TryGetCell(row, column, out NavigationGridCell cell) ||
+                        !cell.Walkable || cell.Zone == NavigationGridZone.SafeZone)
+                    {
+                        throw new InvalidOperationException(
+                            $"{patrol.Definition.Id} route enters an invalid or SafeZone cell.");
+                    }
+
+                    patrolRouteCells.Add(new Vector2Int(column, row));
+                }
+            }
+
+            foreach (Vector2Int cell in patrolRouteCells)
+            {
+                if (routeOwners.TryGetValue(cell, out string owner))
+                    throw new InvalidOperationException(
+                        $"Patrol routes {owner} and {patrol.Definition.Id} overlap at grid cell {cell}.");
+                routeOwners.Add(cell, patrol.Definition.Id);
+            }
+
+            Debug.Log(
+                $"Validated {patrol.Definition.Id} {patrol.Definition.RegionName}: " +
+                $"{patrol.Waypoints.Length} waypoints, {directSegments} direct segments, " +
+                $"{pathSegments} A* segments.");
         }
     }
 
     private static void CreateWolf(Scene scene, GameObject prefab,
-        NavigationGridGraphProvider provider, Transform[] waypoints, LayerMask obstacleMask)
+        RuntimeAnimatorController wolfController, NavigationGridGraphProvider provider,
+        PatrolSetup patrol, LayerMask obstacleMask, bool addDiagnostics)
     {
         GameObject wolf = PrefabUtility.InstantiatePrefab(prefab, scene) as GameObject;
         if (wolf == null)
             throw new InvalidOperationException("Could not instantiate the Predator prefab.");
 
-        wolf.name = "Wolf_Patrol_B3";
+        wolf.name = $"{WolfNamePrefix}{patrol.Definition.Id}_{patrol.Definition.RegionName}";
         wolf.SetActive(false);
-        wolf.transform.position = waypoints[0].position;
+        wolf.transform.position = patrol.Waypoints[0].position;
 
-        PredatorMovement movement = EnsureComponent<PredatorMovement>(wolf);
-        PredatorPerception perception = EnsureComponent<PredatorPerception>(wolf);
-        EnsureComponent<PredatorCombat>(wolf);
-        EnsureComponent<PredatorAnimationController>(wolf);
-        EnsureComponent<BoidThreat>(wolf);
-        GraphNavigationAgent agent = EnsureComponent<GraphNavigationAgent>(wolf);
+        Animator animator = wolf.GetComponentInChildren<Animator>(true);
+        if (animator == null)
+            throw new InvalidOperationException($"{wolf.name} has no child Animator.");
+        animator.runtimeAnimatorController = wolfController;
+        animator.applyRootMotion = false;
+
+        PredatorMovement movement = EnsureSingleComponent<PredatorMovement>(wolf);
+        PredatorPerception perception = EnsureSingleComponent<PredatorPerception>(wolf);
+        EnsureSingleComponent<PredatorCombat>(wolf);
+        EnsureSingleComponent<PredatorAnimationController>(wolf);
+        EnsureSingleComponent<BoidThreat>(wolf);
+        GraphNavigationAgent agent = EnsureSingleComponent<GraphNavigationAgent>(wolf);
         PredatorNavigationMovementController controller =
-            EnsureComponent<PredatorNavigationMovementController>(wolf);
-        PredatorFSM fsm = EnsureComponent<PredatorFSM>(wolf);
+            EnsureSingleComponent<PredatorNavigationMovementController>(wolf);
+        PredatorFSM fsm = EnsureSingleComponent<PredatorFSM>(wolf);
 
         ConfigurePerception(perception, obstacleMask);
         ConfigureAgent(agent, obstacleMask);
         ConfigureController(controller, agent, movement, provider);
-        ConfigureFsm(fsm, waypoints);
+        ConfigureFsm(fsm, patrol.Waypoints);
 
-        PredatorDebugFeedback debug = EnsureComponent<PredatorDebugFeedback>(wolf);
+        PredatorDebugFeedback debug = EnsureSingleComponent<PredatorDebugFeedback>(wolf);
         SerializedObject serializedDebug = new SerializedObject(debug);
         serializedDebug.FindProperty("visible").boolValue = false;
         serializedDebug.ApplyModifiedPropertiesWithoutUndo();
-        EnsureComponent<PredatorPatrolI32Diagnostics>(wolf);
+        if (addDiagnostics)
+            EnsureSingleComponent<PredatorPatrolI32Diagnostics>(wolf);
 
+        EditorUtility.SetDirty(animator);
         EditorUtility.SetDirty(wolf);
         wolf.SetActive(true);
     }
@@ -178,7 +346,7 @@ public static class Parcial2B3WolfIntegrationBuilder
         serialized.FindProperty("obstacleLayers").intValue = obstacleMask.value;
         serialized.FindProperty("agentRadius").floatValue = 0.4f;
         serialized.FindProperty("agentHeight").floatValue = 1.8f;
-        serialized.FindProperty("nodeReachDistance").floatValue = 0.1f;
+        serialized.FindProperty("nodeReachDistance").floatValue = NodeReachDistance;
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
@@ -193,7 +361,7 @@ public static class Parcial2B3WolfIntegrationBuilder
         serialized.FindProperty("agentRadius").floatValue = 0.4f;
         serialized.FindProperty("agentHeight").floatValue = 1.8f;
         serialized.FindProperty("chase").boolValue = false;
-        serialized.FindProperty("stoppingDistance").floatValue = 0.25f;
+        serialized.FindProperty("stoppingDistance").floatValue = StoppingDistance;
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
@@ -201,6 +369,7 @@ public static class Parcial2B3WolfIntegrationBuilder
     {
         SerializedObject serialized = new SerializedObject(fsm);
         serialized.FindProperty("targetReference").objectReferenceValue = null;
+        serialized.FindProperty("patrolSpeed").floatValue = PatrolSpeed;
         SerializedProperty waypointList = serialized.FindProperty("waypoints");
         waypointList.arraySize = waypoints.Length;
         for (int i = 0; i < waypoints.Length; i++)
@@ -209,10 +378,99 @@ public static class Parcial2B3WolfIntegrationBuilder
         fsm.enabled = true;
     }
 
-    private static T EnsureComponent<T>(GameObject target) where T : Component
+    private static void ValidateSceneConfiguration(Scene scene, NavigationGrid grid,
+        NavigationGridGraphProvider provider, RuntimeAnimatorController wolfController,
+        PatrolSetup[] patrols)
     {
-        T component = target.GetComponent<T>();
-        return component != null ? component : target.AddComponent<T>();
+        if (FindSceneComponents<NavigationGrid>(scene).Count != 1)
+            throw new InvalidOperationException("The integration scene must contain exactly one NavigationGrid.");
+        if (FindSceneComponents<NavigationGridGraphProvider>(scene).Count != 1)
+            throw new InvalidOperationException(
+                "The integration scene must contain exactly one NavigationGridGraphProvider.");
+
+        SerializedObject serializedProvider = new SerializedObject(provider);
+        if (serializedProvider.FindProperty("navigationGrid").objectReferenceValue != grid)
+            throw new InvalidOperationException("The shared graph provider is not connected to the scene grid.");
+
+        List<PredatorFSM> fsms = FindSceneComponents<PredatorFSM>(scene);
+        List<PredatorNavigationMovementController> controllers =
+            FindSceneComponents<PredatorNavigationMovementController>(scene);
+        List<GraphNavigationAgent> agents = FindSceneComponents<GraphNavigationAgent>(scene);
+        List<PredatorMovement> movements = FindSceneComponents<PredatorMovement>(scene);
+        if (fsms.Count != 4 || controllers.Count != 4 || agents.Count != 4 || movements.Count != 4)
+        {
+            throw new InvalidOperationException(
+                $"Expected four Wolf component sets, found FSM={fsms.Count}, " +
+                $"Controller={controllers.Count}, Agent={agents.Count}, Movement={movements.Count}.");
+        }
+
+        var assignedWaypoints = new HashSet<Transform>();
+        for (int i = 0; i < patrols.Length; i++)
+        {
+            PatrolSetup patrol = patrols[i];
+            string wolfName = $"{WolfNamePrefix}{patrol.Definition.Id}_{patrol.Definition.RegionName}";
+            GameObject wolf = FindSceneGameObject(scene, wolfName);
+            if (wolf == null)
+                throw new InvalidOperationException($"Missing configured Wolf: {wolfName}");
+
+            PredatorFSM fsm = wolf.GetComponent<PredatorFSM>();
+            GraphNavigationAgent agent = wolf.GetComponent<GraphNavigationAgent>();
+            PredatorMovement movement = wolf.GetComponent<PredatorMovement>();
+            PredatorNavigationMovementController controller =
+                wolf.GetComponent<PredatorNavigationMovementController>();
+            PredatorPerception perception = wolf.GetComponent<PredatorPerception>();
+            if (fsm == null || agent == null || movement == null ||
+                controller == null || perception == null)
+            {
+                throw new InvalidOperationException($"{wolfName} is missing a required component.");
+            }
+
+            if (fsm.Waypoints.Count != patrol.Waypoints.Length)
+                throw new InvalidOperationException($"{wolfName} has an invalid waypoint list.");
+            for (int waypointIndex = 0; waypointIndex < fsm.Waypoints.Count; waypointIndex++)
+            {
+                if (fsm.Waypoints[waypointIndex] != patrol.Waypoints[waypointIndex] ||
+                    !assignedWaypoints.Add(fsm.Waypoints[waypointIndex]))
+                {
+                    throw new InvalidOperationException(
+                        $"{wolfName} does not own an independent ordered waypoint list.");
+                }
+            }
+
+            SerializedObject serializedController = new SerializedObject(controller);
+            if (serializedController.FindProperty("navigationAgent").objectReferenceValue != agent ||
+                serializedController.FindProperty("movement").objectReferenceValue != movement ||
+                serializedController.FindProperty("graphProvider").objectReferenceValue != provider)
+            {
+                throw new InvalidOperationException($"{wolfName} navigation references are incomplete.");
+            }
+
+            SerializedObject serializedPerception = new SerializedObject(perception);
+            if (serializedPerception.FindProperty("targetLayers").intValue != 0)
+                throw new InvalidOperationException($"{wolfName} must remain Patrol-only without targets.");
+
+            Animator animator = wolf.GetComponentInChildren<Animator>(true);
+            if (animator == null || animator.runtimeAnimatorController != wolfController ||
+                animator.applyRootMotion)
+            {
+                throw new InvalidOperationException($"{wolfName} Animator is not configured correctly.");
+            }
+        }
+
+        if (!ContainsComponentNamed(scene, "FSMAgent") ||
+            !ContainsGameObjectNamed(scene, "BoidRespawnArea_B3"))
+        {
+            throw new InvalidOperationException("Alien or Boid integration was not preserved.");
+        }
+    }
+
+    private static T EnsureSingleComponent<T>(GameObject target) where T : Component
+    {
+        T[] components = target.GetComponents<T>();
+        if (components.Length > 1)
+            throw new InvalidOperationException(
+                $"{target.name} contains duplicate {typeof(T).Name} components.");
+        return components.Length == 1 ? components[0] : target.AddComponent<T>();
     }
 
     private static T RequireSingleSceneComponent<T>(Scene scene, string label) where T : Component
@@ -230,6 +488,23 @@ public static class Parcial2B3WolfIntegrationBuilder
         for (int i = 0; i < roots.Length; i++)
             result.AddRange(roots[i].GetComponentsInChildren<T>(true));
         return result;
+    }
+
+    private static GameObject FindSceneGameObject(Scene scene, string objectName)
+    {
+        GameObject[] roots = scene.GetRootGameObjects();
+        for (int i = 0; i < roots.Length; i++)
+        {
+            Transform[] transforms = roots[i].GetComponentsInChildren<Transform>(true);
+            for (int j = 0; j < transforms.Length; j++)
+                if (transforms[j].name == objectName) return transforms[j].gameObject;
+        }
+        return null;
+    }
+
+    private static bool ContainsGameObjectNamed(Scene scene, string objectName)
+    {
+        return FindSceneGameObject(scene, objectName) != null;
     }
 
     private static bool ContainsComponentNamed(Scene scene, string typeName)
