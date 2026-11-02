@@ -9,6 +9,9 @@ public sealed class PredatorSearchState : State
     private float searchRadius = 2f;
     private bool reachedSearchPosition;
     private int searchAttempts;
+    private bool navigationRequestIssued;
+    private int navigationRequestTickCount;
+    private Vector3 requestedNavigationDestination;
 
     public PredatorSearchState(PredatorFSM agent, StateMachine stateMachine) : base(stateMachine)
     {
@@ -21,6 +24,8 @@ public sealed class PredatorSearchState : State
         searchAngle = 0f;
         reachedSearchPosition = false;
         searchAttempts = 0;
+        navigationRequestIssued = false;
+        RequestCurrentNavigationDestination();
     }
 
     public override void Update()
@@ -44,8 +49,46 @@ public sealed class PredatorSearchState : State
             searchAngle = 0f;
             reachedSearchPosition = false;
             searchAttempts = 0;
+            CancelNavigationIfOwned();
+            RequestCurrentNavigationDestination();
         }
 
+        if (agent.HasNavigationController)
+        {
+            UpdateNavigationSearch();
+            return;
+        }
+
+        UpdateLegacySearch();
+    }
+
+    public override void Exit()
+    {
+        CancelNavigationIfOwned();
+        if (!agent.HasNavigationController) agent.Movement.Stop();
+    }
+
+    private void UpdateNavigationSearch()
+    {
+        PredatorNavigationMovementController controller = agent.NavigationController;
+        if (controller == null) return;
+        if (controller.TickCount <= navigationRequestTickCount) return;
+
+        GraphNavigationAgent.NavigationStatus status = controller.Status;
+        if (status == GraphNavigationAgent.NavigationStatus.Arrived ||
+            status == GraphNavigationAgent.NavigationStatus.NoPath ||
+            status == GraphNavigationAgent.NavigationStatus.MissingProvider)
+        {
+            CancelNavigationIfOwned();
+            AdvanceSearchDestination();
+            return;
+        }
+
+        RequestCurrentNavigationDestination();
+    }
+
+    private void UpdateLegacySearch()
+    {
         if (!reachedSearchPosition)
         {
             bool movingToLastKnown = agent.Movement.MoveTowards(
@@ -73,5 +116,49 @@ public sealed class PredatorSearchState : State
             agent.ClearTargetAndReturnToPatrol();
     }
 
-    public override void Exit() { agent.Movement.Stop(); }
+    private void AdvanceSearchDestination()
+    {
+        if (!reachedSearchPosition)
+        {
+            reachedSearchPosition = true;
+            RequestCurrentNavigationDestination();
+            return;
+        }
+
+        searchAngle += Mathf.PI * 0.25f;
+        searchAttempts++;
+        if (searchAttempts >= MaximumSearchAttempts)
+        {
+            agent.ClearTargetAndReturnToPatrol();
+            return;
+        }
+
+        RequestCurrentNavigationDestination();
+    }
+
+    private void RequestCurrentNavigationDestination()
+    {
+        if (!agent.HasNavigationController) return;
+
+        Vector3 destination = reachedSearchPosition
+            ? searchCenter + new Vector3(
+                Mathf.Cos(searchAngle) * searchRadius, 0f,
+                Mathf.Sin(searchAngle) * searchRadius)
+            : searchCenter;
+        if (navigationRequestIssued && requestedNavigationDestination == destination) return;
+
+        agent.RequestNavigationDestination(destination);
+        requestedNavigationDestination = destination;
+        navigationRequestIssued = true;
+        navigationRequestTickCount = agent.NavigationController != null
+            ? agent.NavigationController.TickCount
+            : 0;
+    }
+
+    private void CancelNavigationIfOwned()
+    {
+        if (!navigationRequestIssued) return;
+        agent.CancelNavigation();
+        navigationRequestIssued = false;
+    }
 }

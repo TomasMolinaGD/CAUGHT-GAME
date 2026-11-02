@@ -70,6 +70,35 @@ public sealed class PredatorFSMNavigationIntegrationTests
     }
 
     [Test]
+    public void PatrolToSearchTransfersNavigationOwnershipWithoutLegacyMovement()
+    {
+        GameObject root = CreateRoot(true);
+        Component fsm = root.GetComponent(Type.GetType("PredatorFSM, Assembly-CSharp"));
+        Component controller = root.GetComponent(Type.GetType("PredatorNavigationMovementController, Assembly-CSharp"));
+        Component movement = root.GetComponent(Type.GetType("PredatorMovement, Assembly-CSharp"));
+        GameObject waypoint = new GameObject("PatrolToSearch_Waypoint");
+        waypoint.transform.position = new Vector3(4f, 0f, 0f);
+        objects.Add(waypoint);
+        Invoke(fsm, "ConfigureWaypoints", new List<Transform> { waypoint.transform });
+        InitializeStateMachine(fsm);
+
+        fsm.GetType().GetMethod("Update", BindingFlags.Instance | BindingFlags.NonPublic)
+            .Invoke(fsm, null);
+        Assert.IsTrue((bool)controller.GetType().GetProperty("HasDestination").GetValue(controller));
+
+        ChangeState(fsm, "Search");
+        Assert.IsTrue((bool)controller.GetType().GetProperty("HasDestination").GetValue(controller));
+        Assert.That((Vector3)controller.GetType().GetProperty("RequestedDestination").GetValue(controller),
+            Is.EqualTo(root.transform.position));
+        Assert.That(GetVelocity(movement), Is.EqualTo(Vector3.zero));
+
+        Invoke(controller, "TickNavigation");
+
+        Assert.That(GetVelocity(movement), Is.EqualTo(Vector3.zero));
+        Assert.That(fsm.GetType().GetProperty("CurrentState").GetValue(fsm).ToString(), Is.EqualTo("Search"));
+    }
+
+    [Test]
     public void AttackStateStopsLegacyMovement()
     {
         GameObject root = CreateRoot(true);
