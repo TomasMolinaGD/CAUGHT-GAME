@@ -12,11 +12,17 @@ public sealed class PredatorCombat : MonoBehaviour
 
     [SerializeField, Min(0.1f)] private float attackCooldown = 1f;
     private float cooldownRemaining;
+    private PredatorNavigationMovementController navigationController;
 
     public float CooldownRemaining => cooldownRemaining;
     public bool IsAttackReady => cooldownRemaining <= 0f;
     public CaptureAttemptResult LastCaptureAttemptResult { get; private set; }
     public int CaptureAttemptCount { get; private set; }
+
+    private void Awake()
+    {
+        navigationController = GetComponent<PredatorNavigationMovementController>();
+    }
 
     public void Tick(float deltaTime)
     {
@@ -42,12 +48,21 @@ public sealed class PredatorCombat : MonoBehaviour
         bool allowExplicitThreat)
     {
         if (!IsAttackReady || target == null || currentDistance > captureRadius ||
-            SafeZoneVolume.IsPositionSafe(target.transform.position)) return false;
+            IsPositionSafe(target.transform.position)) return false;
 
         bool supportedTarget = PredatorCaptureRegistry.IsSupportedTarget(target);
         bool explicitThreat = allowExplicitThreat && PredatorCaptureRegistry.HasThreatComponent(target);
         return (supportedTarget || explicitThreat) &&
             !PredatorCaptureRegistry.IsCaptured(target, allowExplicitThreat);
+    }
+
+    private bool IsPositionSafe(Vector3 position)
+    {
+        if (SafeZoneVolume.IsPositionSafe(position)) return true;
+        if (navigationController == null)
+            navigationController = GetComponent<PredatorNavigationMovementController>();
+        return navigationController != null &&
+            navigationController.IsPositionInSafeZone(position);
     }
 
     private void OnValidate() { attackCooldown = Mathf.Max(0.1f, attackCooldown); }

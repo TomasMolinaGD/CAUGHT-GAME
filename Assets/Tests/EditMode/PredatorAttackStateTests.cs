@@ -132,6 +132,68 @@ public sealed class PredatorAttackStateTests
             Is.EqualTo(cooldownAfterFailure));
     }
 
+    [Test]
+    public void DirectCaptureFailsInsideNavigationGridSafeZone()
+    {
+        NavigationGrid grid = CreateGridWithSafeZone();
+        AttackFixture fixture = CreateFixture(0.5f, grid);
+        fixture.Target.transform.position = grid.GridToWorldPosition(0, 1);
+
+        bool captured = Invoke<bool>(fixture.Combat, "TryCapture", fixture.Target,
+            0.9f, 0.5f, true);
+
+        Assert.That(captured, Is.False);
+        Assert.That(fixture.Target.activeSelf, Is.True);
+        Assert.That(GetProperty<object>(fixture.Combat, "LastCaptureAttemptResult").ToString(),
+            Is.EqualTo("Failed"));
+    }
+
+    [Test]
+    public void DirectCaptureOutsideNavigationGridSafeZoneUsesNormalRules()
+    {
+        NavigationGrid grid = CreateGridWithSafeZone();
+        AttackFixture fixture = CreateFixture(0.5f, grid);
+        fixture.Target.transform.position = grid.GridToWorldPosition(0, 0);
+
+        bool captured = Invoke<bool>(fixture.Combat, "TryCapture", fixture.Target,
+            0.9f, 0.5f, true);
+
+        Assert.That(captured, Is.True);
+        Assert.That(fixture.Target.activeSelf, Is.False);
+        Assert.That(GetProperty<object>(fixture.Combat, "LastCaptureAttemptResult").ToString(),
+            Is.EqualTo("Succeeded"));
+    }
+
+    [Test]
+    public void DirectCaptureStillFailsInsideSafeZoneVolume()
+    {
+        AttackFixture fixture = CreateFixture(0.5f);
+        GameObject safeZone = CreateObject("DirectCaptureSafeZone", fixture.Target.transform.position);
+        safeZone.transform.localScale = Vector3.one * 2f;
+        safeZone.AddComponent<BoxCollider>();
+        Component safeZoneVolume = Add(safeZone, "SafeZoneVolume");
+        InvokePrivate(safeZoneVolume, "OnEnable");
+        Physics.SyncTransforms();
+
+        bool captured = Invoke<bool>(fixture.Combat, "TryCapture", fixture.Target,
+            0.9f, 0.5f, true);
+
+        Assert.That(captured, Is.False);
+        Assert.That(fixture.Target.activeSelf, Is.True);
+    }
+
+    [Test]
+    public void DirectCaptureWithoutNavigationProviderKeepsLegacyBehavior()
+    {
+        AttackFixture fixture = CreateFixture(0.5f);
+
+        bool captured = Invoke<bool>(fixture.Combat, "TryCapture", fixture.Target,
+            0.9f, 0.5f, true);
+
+        Assert.That(captured, Is.True);
+        Assert.That(fixture.Target.activeSelf, Is.False);
+    }
+
     private AttackFixture CreateFixture(float targetDistance, NavigationGrid grid = null)
     {
         GameObject root = CreateObject("PredatorAttackStateTests_Wolf", Vector3.zero);
