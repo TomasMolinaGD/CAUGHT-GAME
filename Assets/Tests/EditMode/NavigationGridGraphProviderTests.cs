@@ -88,6 +88,22 @@ public sealed class NavigationGridGraphProviderTests
         Assert.IsFalse(visible);
     }
 
+    [Test]
+    public void IsPositionInSafeZone_ReportsGridSafeZoneOnly()
+    {
+        NavigationGrid grid = CreateGrid(1, 2, safeZone: new Vector2Int(0, 1));
+        Component provider = CreateProvider(grid);
+        MethodInfo method = provider.GetType().GetMethod("IsPositionInSafeZone");
+
+        Assert.That(method, Is.Not.Null);
+        Assert.That(method.Invoke(provider, new object[] { grid.GridToWorldPosition(0, 1) }),
+            Is.True);
+        Assert.That(method.Invoke(provider, new object[] { grid.GridToWorldPosition(0, 0) }),
+            Is.False);
+        Assert.That(method.Invoke(provider, new object[] { new Vector3(-1f, 0f, 0f) }),
+            Is.False);
+    }
+
     private NavigationGrid CreateGrid(int rows, int columns,
         Vector2Int? blocked = null, Vector2Int? safeZone = null)
     {

@@ -42,6 +42,12 @@ public sealed class PredatorSearchState : State
             return;
         }
 
+        if (agent.NavigationController != null &&
+            agent.NavigationController.IsRecoveringFromInvalidOrigin)
+        {
+            return;
+        }
+
         if (agent.HasLastKnownPosition && Vector3.ProjectOnPlane(
             agent.LastKnownPosition - searchCenter, Vector3.up).sqrMagnitude > 0.25f)
         {
@@ -72,6 +78,7 @@ public sealed class PredatorSearchState : State
     {
         PredatorNavigationMovementController controller = agent.NavigationController;
         if (controller == null) return;
+        if (controller.IsRecoveringFromInvalidOrigin) return;
         if (controller.TickCount <= navigationRequestTickCount) return;
 
         GraphNavigationAgent.NavigationStatus status = controller.Status;

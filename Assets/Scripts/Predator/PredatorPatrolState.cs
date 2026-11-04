@@ -6,6 +6,7 @@ public sealed class PredatorPatrolState : State
     private int waypointIndex;
     private bool navigationRequestIssued;
     private bool navigationRequestBlocked;
+    private int failedWaypointAttempts;
     private Vector3 requestedNavigationDestination;
 
     public PredatorPatrolState(PredatorFSM agent, StateMachine stateMachine) : base(stateMachine)
@@ -18,6 +19,7 @@ public sealed class PredatorPatrolState : State
         waypointIndex = FindClosestWaypointIndex();
         navigationRequestIssued = false;
         navigationRequestBlocked = false;
+        failedWaypointAttempts = 0;
         RequestNavigationForCurrentWaypoint();
     }
 
@@ -68,6 +70,7 @@ public sealed class PredatorPatrolState : State
     {
         PredatorNavigationMovementController controller = agent.NavigationController;
         if (controller == null) return;
+        if (controller.IsRecoveringFromInvalidOrigin) return;
 
         GraphNavigationAgent.NavigationStatus status = controller.Status;
         if (status == GraphNavigationAgent.NavigationStatus.Arrived)
@@ -75,22 +78,47 @@ public sealed class PredatorPatrolState : State
             waypointIndex = (waypointIndex + 1) % agent.Waypoints.Count;
             navigationRequestIssued = false;
             navigationRequestBlocked = false;
+            failedWaypointAttempts = 0;
             RequestNavigationForCurrentWaypoint();
             return;
         }
 
-        if (status == GraphNavigationAgent.NavigationStatus.NoPath ||
-            status == GraphNavigationAgent.NavigationStatus.MissingProvider)
+        if (status == GraphNavigationAgent.NavigationStatus.MissingProvider)
         {
             if (!navigationRequestBlocked)
             {
-                agent.CancelNavigation();
+                CancelNavigationIfOwned();
                 navigationRequestBlocked = true;
             }
             return;
         }
 
+        if (status == GraphNavigationAgent.NavigationStatus.NoPath)
+        {
+            AdvanceAfterNoPath();
+            return;
+        }
+
         RequestNavigationForCurrentWaypoint(waypoint.position);
+    }
+
+    private void AdvanceAfterNoPath()
+    {
+        if (navigationRequestBlocked) return;
+
+        CancelNavigationIfOwned();
+        failedWaypointAttempts++;
+        if (failedWaypointAttempts >= agent.Waypoints.Count)
+        {
+            navigationRequestBlocked = true;
+            Debug.LogWarning(
+                $"{agent.name}: Patrol stopped because no configured waypoint is reachable.",
+                agent);
+            return;
+        }
+
+        waypointIndex = (waypointIndex + 1) % agent.Waypoints.Count;
+        RequestNavigationForCurrentWaypoint();
     }
 
     private void RequestNavigationForCurrentWaypoint(Vector3? destinationOverride = null)

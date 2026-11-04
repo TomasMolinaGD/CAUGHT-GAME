@@ -241,7 +241,14 @@ public sealed class PredatorFSM : MonoBehaviour
     {
         return perception != null && perception.IsValidTarget(target) && target.activeInHierarchy &&
             !PredatorCaptureRegistry.IsCaptured(target, perception.IsExplicitThreatTarget(target)) &&
-            !SafeZoneVolume.IsPositionSafe(target.transform.position);
+            !IsPositionSafe(target.transform.position);
+    }
+
+    public bool IsPositionSafe(Vector3 position)
+    {
+        if (SafeZoneVolume.IsPositionSafe(position)) return true;
+        PredatorNavigationMovementController controller = ResolveNavigationController();
+        return controller != null && controller.IsPositionInSafeZone(position);
     }
 
     public float HorizontalDistanceTo(Vector3 position)

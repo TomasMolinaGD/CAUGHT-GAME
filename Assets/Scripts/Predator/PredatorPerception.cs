@@ -18,6 +18,7 @@ public sealed class PredatorPerception : MonoBehaviour
     private float refreshTimer;
     private bool wasVisible;
     private GameObject target;
+    private PredatorFSM owner;
 
     public GameObject Target => target;
     public float ViewDistance => viewDistance;
@@ -95,7 +96,7 @@ public sealed class PredatorPerception : MonoBehaviour
     {
         if (alertedTarget == null || !IsValidTarget(alertedTarget) ||
             PredatorCaptureRegistry.IsCaptured(alertedTarget, IsExplicitThreatTarget(alertedTarget)) ||
-            SafeZoneVolume.IsPositionSafe(alertedTarget.transform.position)) return;
+            IsPositionSafe(alertedTarget.transform.position)) return;
         target = alertedTarget;
         LastSeenPosition = position;
         HasLastKnownPosition = true;
@@ -108,7 +109,7 @@ public sealed class PredatorPerception : MonoBehaviour
     {
         return candidate != null && candidate.activeInHierarchy &&
             !PredatorCaptureRegistry.IsCaptured(candidate, IsExplicitThreatTarget(candidate)) &&
-            !SafeZoneVolume.IsPositionSafe(candidate.transform.position) &&
+            !IsPositionSafe(candidate.transform.position) &&
             IsWithinViewDistance(candidate.transform.position) &&
             HasLineOfSight(candidate.transform.position);
     }
@@ -181,7 +182,7 @@ public sealed class PredatorPerception : MonoBehaviour
                 PredatorCaptureRegistry.IsCaptured(candidate, IsExplicitThreatTarget(candidate))) continue;
 
             Vector3 candidatePosition = candidate.transform.position;
-            if (SafeZoneVolume.IsPositionSafe(candidatePosition) ||
+            if (IsPositionSafe(candidatePosition) ||
                 !IsInsideView(candidatePosition) || !HasLineOfSight(candidatePosition))
                 continue;
 
@@ -192,6 +193,14 @@ public sealed class PredatorPerception : MonoBehaviour
             closestDistance = distance;
         }
         return closest;
+    }
+
+    private bool IsPositionSafe(Vector3 position)
+    {
+        if (owner == null) owner = GetComponent<PredatorFSM>();
+        return owner != null
+            ? owner.IsPositionSafe(position)
+            : SafeZoneVolume.IsPositionSafe(position);
     }
 
     private static GameObject GetTargetObject(Collider detectedCollider)

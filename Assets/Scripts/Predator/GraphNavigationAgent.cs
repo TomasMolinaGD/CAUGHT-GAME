@@ -212,6 +212,14 @@ public sealed class GraphNavigationAgent : MonoBehaviour
         Status = NavigationStatus.Idle;
     }
 
+    internal void ResetFailedPath()
+    {
+        hasFailedDestination = false;
+        failedDestination = default;
+        nextReplanTime = 0f;
+        InvalidatePath();
+    }
+
     private void ResolveGraph()
     {
         if (graph != null || graphComponent == null) return;

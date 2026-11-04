@@ -137,6 +137,30 @@ public sealed class PredatorSearchStateTests
         Assert.That(GetCurrentState(fixture.Fsm), Is.EqualTo("Search"));
     }
 
+    [Test]
+    public void SearchDoesNotCancelActiveSafeZoneRecovery()
+    {
+        NavigationGrid grid = CreateGrid(3, 5, safeZone: new Vector2Int(1, 1));
+        Vector3 start = grid.GridToWorldPosition(1, 1);
+        Vector3 lastKnown = grid.GridToWorldPosition(1, 4);
+        SearchFixture fixture = CreateFixture(true, start, lastKnown, grid, true);
+        Invoke(fixture.Controller, "TickNavigation");
+        Assert.That(GetProperty<bool>(fixture.Controller,
+            "IsRecoveringFromInvalidOrigin"), Is.True);
+        Vector3 requestedDestination = GetProperty<Vector3>(fixture.Controller,
+            "RequestedDestination");
+        Invoke(fixture.Perception, "ReceiveAlert", fixture.Target,
+            lastKnown + Vector3.forward * 2f);
+
+        TickStateMachine(fixture.Fsm);
+
+        Assert.That(GetProperty<bool>(fixture.Controller,
+            "IsRecoveringFromInvalidOrigin"), Is.True);
+        Assert.That(GetProperty<bool>(fixture.Controller, "HasDestination"), Is.True);
+        Assert.That(GetProperty<Vector3>(fixture.Controller, "RequestedDestination"),
+            Is.EqualTo(requestedDestination));
+    }
+
     private SearchFixture CreateFixture(bool withController, Vector3 start, Vector3 lastKnown,
         NavigationGrid grid = null, bool avoidSafeZones = false)
     {

@@ -90,6 +90,113 @@ public sealed class PredatorPatrolStateTests
         Assert.IsTrue((bool)controller.GetType().GetProperty("HasDestination").GetValue(controller));
     }
 
+    [Test]
+    public void PatrolUsesAStarToReturnWhenBlockedCellPreventsDirectTravel()
+    {
+        NavigationGrid grid = CreateGrid(3, 3, blocked: new Vector2Int(1, 1));
+        Component provider = CreateProvider(grid);
+        GameObject root = CreateRoot(true);
+        Component fsm = root.GetComponent(Type.GetType("PredatorFSM, Assembly-CSharp"));
+        Component controller = root.GetComponent(Type.GetType(
+            "PredatorNavigationMovementController, Assembly-CSharp"));
+        Invoke(controller, "ConfigureGraphProvider", provider);
+        root.transform.position = grid.GridToWorldPosition(1, 0);
+        GameObject waypoint = CreateWaypoint(grid.GridToWorldPosition(1, 2));
+
+        InitializePatrol(fsm, waypoint.transform);
+        Invoke(controller, "TickNavigation");
+
+        Assert.That(GetEnum(controller, "Status"), Is.EqualTo("FollowingPath"));
+        Assert.That(controller.GetType().GetProperty("MovementTarget").GetValue(controller),
+            Is.Not.EqualTo(waypoint.transform.position));
+    }
+
+    [Test]
+    public void PatrolSkipsNoPathWaypointAndRequestsNextReachableWaypoint()
+    {
+        NavigationGrid grid = CreateGrid(2, 3, safeZones: new[] { new Vector2Int(0, 1) });
+        Component provider = CreateProvider(grid);
+        GameObject root = CreateRoot(true);
+        Component fsm = root.GetComponent(Type.GetType("PredatorFSM, Assembly-CSharp"));
+        Component controller = root.GetComponent(Type.GetType(
+            "PredatorNavigationMovementController, Assembly-CSharp"));
+        Invoke(controller, "ConfigureGraphProvider", provider);
+        root.transform.position = grid.GridToWorldPosition(0, 0);
+        GameObject unreachable = CreateWaypoint(grid.GridToWorldPosition(0, 1));
+        GameObject reachable = CreateWaypoint(grid.GridToWorldPosition(0, 2));
+
+        InitializePatrol(fsm, unreachable.transform, reachable.transform);
+        Invoke(controller, "TickNavigation");
+        Assert.That(GetEnum(controller, "Status"), Is.EqualTo("NoPath"));
+
+        InvokePrivate(fsm, "Update");
+
+        Assert.That(controller.GetType().GetProperty("RequestedDestination").GetValue(controller),
+            Is.EqualTo(reachable.transform.position));
+        Assert.That(controller.GetType().GetProperty("HasDestination").GetValue(controller), Is.True);
+        Invoke(controller, "TickNavigation");
+        Assert.That(GetEnum(controller, "Status"), Is.EqualTo("FollowingPath"));
+    }
+
+    [Test]
+    public void PatrolStopsAfterEveryWaypointReturnsNoPath()
+    {
+        NavigationGrid grid = CreateGrid(1, 3, safeZones: new[]
+        {
+            new Vector2Int(0, 1),
+            new Vector2Int(0, 2)
+        });
+        Component provider = CreateProvider(grid);
+        GameObject root = CreateRoot(true);
+        Component fsm = root.GetComponent(Type.GetType("PredatorFSM, Assembly-CSharp"));
+        Component controller = root.GetComponent(Type.GetType(
+            "PredatorNavigationMovementController, Assembly-CSharp"));
+        Invoke(controller, "ConfigureGraphProvider", provider);
+        root.transform.position = grid.GridToWorldPosition(0, 0);
+        GameObject first = CreateWaypoint(grid.GridToWorldPosition(0, 1));
+        GameObject second = CreateWaypoint(grid.GridToWorldPosition(0, 2));
+
+        InitializePatrol(fsm, first.transform, second.transform);
+        Invoke(controller, "TickNavigation");
+        InvokePrivate(fsm, "Update");
+        Invoke(controller, "TickNavigation");
+        InvokePrivate(fsm, "Update");
+
+        Assert.That(controller.GetType().GetProperty("HasDestination").GetValue(controller), Is.False);
+        Vector3 finalRequest = (Vector3)controller.GetType()
+            .GetProperty("RequestedDestination").GetValue(controller);
+        InvokePrivate(fsm, "Update");
+        Assert.That(controller.GetType().GetProperty("HasDestination").GetValue(controller), Is.False);
+        Assert.That(controller.GetType().GetProperty("RequestedDestination").GetValue(controller),
+            Is.EqualTo(finalRequest));
+    }
+
+    [Test]
+    public void PatrolDoesNotCancelActiveSafeZoneRecovery()
+    {
+        NavigationGrid grid = CreateGrid(3, 5,
+            safeZones: new[] { new Vector2Int(1, 1) });
+        Component provider = CreateProvider(grid);
+        GameObject root = CreateRoot(true);
+        Component fsm = root.GetComponent(Type.GetType("PredatorFSM, Assembly-CSharp"));
+        Component controller = root.GetComponent(Type.GetType(
+            "PredatorNavigationMovementController, Assembly-CSharp"));
+        Invoke(controller, "ConfigureGraphProvider", provider);
+        root.transform.position = grid.GridToWorldPosition(1, 1);
+        GameObject waypoint = CreateWaypoint(grid.GridToWorldPosition(1, 4));
+        InitializePatrol(fsm, waypoint.transform);
+        Invoke(controller, "TickNavigation");
+        Assert.That(controller.GetType().GetProperty("IsRecoveringFromInvalidOrigin")
+            .GetValue(controller), Is.True);
+
+        InvokePrivate(fsm, "Update");
+
+        Assert.That(controller.GetType().GetProperty("IsRecoveringFromInvalidOrigin")
+            .GetValue(controller), Is.True);
+        Assert.That(controller.GetType().GetProperty("HasDestination").GetValue(controller),
+            Is.True);
+    }
+
     private GameObject CreateRoot(bool withNavigationController)
     {
         GameObject root = new GameObject("PredatorPatrolStateTests_Root");
@@ -129,7 +236,8 @@ public sealed class PredatorPatrolStateTests
         return provider;
     }
 
-    private NavigationGrid CreateGrid(int rows, int columns)
+    private NavigationGrid CreateGrid(int rows, int columns,
+        Vector2Int? blocked = null, IReadOnlyCollection<Vector2Int> safeZones = null)
     {
         GameObject root = new GameObject("PredatorPatrolStateTests_Grid");
         objects.Add(root);
@@ -140,9 +248,24 @@ public sealed class PredatorPatrolStateTests
         var cells = new List<NavigationGridCell>(rows * columns);
         for (int row = 0; row < rows; row++)
         for (int column = 0; column < columns; column++)
-            cells.Add(new NavigationGridCell(row, column, true, NavigationGridZone.Normal));
+        {
+            Vector2Int coordinate = new Vector2Int(row, column);
+            bool walkable = !blocked.HasValue || blocked.Value != coordinate;
+            NavigationGridZone zone = Contains(safeZones, coordinate)
+                ? NavigationGridZone.SafeZone
+                : NavigationGridZone.Normal;
+            cells.Add(new NavigationGridCell(row, column, walkable, zone));
+        }
         SetPrivateField(grid, "cells", cells);
         return grid;
+    }
+
+    private static bool Contains(IReadOnlyCollection<Vector2Int> coordinates, Vector2Int value)
+    {
+        if (coordinates == null) return false;
+        foreach (Vector2Int coordinate in coordinates)
+            if (coordinate == value) return true;
+        return false;
     }
 
     private static void SetPrivateField(object target, string name, object value)

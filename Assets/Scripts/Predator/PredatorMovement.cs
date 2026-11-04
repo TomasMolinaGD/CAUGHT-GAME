@@ -11,12 +11,21 @@ public sealed class PredatorMovement : MonoBehaviour
     private float patrolSpeed = 2f;
     private float chaseSpeed = 2.5f;
     private PredatorAnimationController agentAnimation;
+    private PredatorNavigationMovementController navigationController;
     public Vector3 Velocity { get; private set; }
     public bool WasBlocked { get; private set; }
+    internal float CollisionRadius => Mathf.Max(0.05f, collisionRadius);
+    internal float CollisionHeight => Mathf.Max(CollisionRadius * 2f, collisionHeight);
 
     private void Awake()
     {
         agentAnimation = GetComponent<PredatorAnimationController>();
+        navigationController = GetComponent<PredatorNavigationMovementController>();
+    }
+
+    internal void ConfigureNavigationController(PredatorNavigationMovementController controller)
+    {
+        navigationController = controller;
     }
 
     public void Configure(float newPatrolSpeed, float newChaseSpeed, float newTurnSpeed,
@@ -32,6 +41,17 @@ public sealed class PredatorMovement : MonoBehaviour
 
     public bool MoveTowards(Vector3 destination, bool chase, float stoppingDistance)
     {
+        return MoveTowardsInternal(destination, chase, stoppingDistance, false);
+    }
+
+    internal bool MoveTowardsSafeZoneRecovery(Vector3 destination, float stoppingDistance)
+    {
+        return MoveTowardsInternal(destination, false, stoppingDistance, true);
+    }
+
+    private bool MoveTowardsInternal(Vector3 destination, bool chase, float stoppingDistance,
+        bool safeZoneRecovery)
+    {
         WasBlocked = false;
         Vector3 offset = Vector3.ProjectOnPlane(destination - transform.position, Vector3.up);
         float distance = offset.magnitude;
@@ -46,7 +66,7 @@ public sealed class PredatorMovement : MonoBehaviour
         float speed = chase ? chaseSpeed : patrolSpeed;
         float travelDistance = Mathf.Min(speed * Time.deltaTime, distance - stopDistance);
         Vector3 movement = direction * travelDistance;
-        if (!CanMove(movement))
+        if (!CanMoveInternal(movement, safeZoneRecovery))
         {
             WasBlocked = true;
             Stop();
@@ -82,11 +102,26 @@ public sealed class PredatorMovement : MonoBehaviour
 
     private bool CanMove(Vector3 movement)
     {
+        return CanMoveInternal(movement, false);
+    }
+
+    private bool CanMoveInternal(Vector3 movement, bool safeZoneRecovery)
+    {
         float distance = movement.magnitude;
         if (distance <= 0f) return true;
         Vector3 direction = movement / distance;
         float sampleSpacing = Mathf.Max(0.1f, collisionRadius * 0.5f);
         float radius = Mathf.Max(0.05f, collisionRadius);
+        if (navigationController != null)
+        {
+            bool gridAllowsMovement = safeZoneRecovery
+                ? navigationController.IsWolfRecoverySegmentTraversable(
+                    transform.position, movement, radius)
+                : navigationController.IsWolfMovementSegmentTraversable(
+                    transform.position, movement, radius);
+            if (!gridAllowsMovement) return false;
+        }
+
         int sampleCount = Mathf.CeilToInt(distance / sampleSpacing);
         for (int i = 1; i <= sampleCount; i++)
         {
