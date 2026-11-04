@@ -33,7 +33,7 @@ public sealed class PursuitState : State
         if (target == null || !target.IsAlive || !agent.Perception.IsLivingBoidDetected(target))
         {
             agent.SetCurrentTarget(null);
-            StateMachine.ChangeState(PoliceState.Patrol);
+            StateMachine.ChangeState(agent.EngagementReturnState);
             return;
         }
 

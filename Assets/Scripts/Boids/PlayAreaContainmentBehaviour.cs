@@ -221,7 +221,7 @@ public sealed class PlayAreaContainmentBehaviour : SteeringBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (HasHuntingGroundRegion)
+        if (!ShouldDrawLegacyBounds())
         {
             return;
         }
@@ -237,5 +237,11 @@ public sealed class PlayAreaContainmentBehaviour : SteeringBehaviour
         Gizmos.DrawWireCube(areaCenter, outerSize);
         Gizmos.color = new Color(0.1f, 1f, 0.45f, 0.8f);
         Gizmos.DrawWireCube(areaCenter, safeSize);
+    }
+
+    private bool ShouldDrawLegacyBounds()
+    {
+        BoidAgent resolvedOwner = owner != null ? owner : GetComponent<BoidAgent>();
+        return resolvedOwner == null || !resolvedOwner.RequiresHuntingGround;
     }
 }

@@ -139,8 +139,9 @@ public sealed class BoidAgent : MonoBehaviour
     }
 
     /// <summary>
-    /// Resolves the configured required region only when all B1 references and the current
-    /// capsule configuration are valid. Legacy agents deliberately return false.
+    /// Resolves the configured required region from persistent semantic configuration.
+    /// Physical capsule validity is checked by the movement and respawn consumers, so a
+    /// temporarily unavailable collider cannot hide an otherwise valid required region.
     /// </summary>
     public bool TryGetRequiredHuntingGroundRegion(out HuntingGroundRegion region)
     {
@@ -154,9 +155,7 @@ public sealed class BoidAgent : MonoBehaviour
             float.IsNaN(containmentRegion.SourceGrid.CellSize) ||
             float.IsInfinity(containmentRegion.SourceGrid.CellSize) ||
             containmentRegion.SourceGrid.CellSize <= 0f ||
-            !IsSupportedGridTransform(containmentRegion.SourceGrid.transform) ||
-            !TryGetWorldCapsule(body != null ? body.position : transform.position,
-                body != null ? body.rotation : transform.rotation, out _))
+            !IsSupportedGridTransform(containmentRegion.SourceGrid.transform))
         {
             return false;
         }
@@ -205,6 +204,8 @@ public sealed class BoidAgent : MonoBehaviour
         Vector3 startPosition = body.position;
         Vector3 resolvedPosition = startPosition;
         Vector3 remaining = desiredDisplacement;
+        Vector3 blockingNormal = Vector3.zero;
+        bool collided = false;
 
         for (int iteration = 0; iteration < maximumSlideIterations; iteration++)
         {
@@ -236,6 +237,7 @@ public sealed class BoidAgent : MonoBehaviour
                 break;
             }
 
+            collided = true;
             float travelDistance = Mathf.Clamp(hit.distance - collisionSkin, 0f, distance);
             Vector3 travelled = direction * travelDistance;
             resolvedPosition += travelled;
@@ -248,8 +250,19 @@ public sealed class BoidAgent : MonoBehaviour
             }
 
             surfaceNormal.Normalize();
+            blockingNormal += surfaceNormal;
             resolvedPosition += surfaceNormal * collisionSkin;
             remaining = Vector3.ProjectOnPlane(remaining - travelled, surfaceNormal);
+        }
+
+        if (collided && blockingNormal.sqrMagnitude > 0.0001f)
+        {
+            blockingNormal.Normalize();
+            float penetratingSpeed = Vector3.Dot(Velocity, blockingNormal);
+            if (penetratingSpeed < 0f)
+            {
+                Velocity -= blockingNormal * penetratingSpeed;
+            }
         }
 
         if (!ResolveEnvironmentOverlaps(ref resolvedPosition) && RequiresHuntingGround)
@@ -304,11 +317,11 @@ public sealed class BoidAgent : MonoBehaviour
                     resolvedPosition = startPosition;
                 }
 
-                Vector3 blockingNormal = sweep.Normal;
-                float outwardSpeed = Vector3.Dot(Velocity, blockingNormal);
+                Vector3 regionBlockingNormal = sweep.Normal;
+                float outwardSpeed = Vector3.Dot(Velocity, regionBlockingNormal);
                 if (outwardSpeed > 0f)
                 {
-                    Velocity -= blockingNormal * outwardSpeed;
+                    Velocity -= regionBlockingNormal * outwardSpeed;
                 }
             }
 

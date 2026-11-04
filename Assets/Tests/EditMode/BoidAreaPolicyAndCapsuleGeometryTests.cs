@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using CaughtGame.Navigation;
 using NUnit.Framework;
@@ -340,6 +341,25 @@ public sealed class BoidAreaPolicyAndCapsuleGeometryTests
     }
 
     [Test]
+    public void RequiredPolicy_ResolvesPersistentRegionWhileContainmentIsDisabledAndCapsuleIsInvalid()
+    {
+        ConfigureRequiredRegion();
+        Component agent = boidObject.GetComponent(boidAgentType);
+        Component containment = boidObject.GetComponent(containmentType);
+        Behaviour containmentBehaviour = containment as Behaviour;
+        Assert.That(containmentBehaviour, Is.Not.Null);
+        containmentBehaviour.enabled = false;
+        boidObject.GetComponent<CapsuleCollider>().direction = 0;
+
+        object[] arguments = { null };
+        bool configured = (bool)boidAgentType.GetMethod("TryGetRequiredHuntingGroundRegion")
+            .Invoke(agent, arguments);
+
+        Assert.That(configured, Is.True);
+        Assert.That(arguments[0], Is.SameAs(regionObject.GetComponent(typeof(HuntingGroundRegion))));
+    }
+
+    [Test]
     public void RequiredPolicy_RejectsSmallGridTilt()
     {
         ConfigureRequiredRegion();
@@ -506,6 +526,39 @@ public sealed class BoidAreaPolicyAndCapsuleGeometryTests
         Assert.That((bool)method.Invoke(null, arguments), Is.False);
     }
 
+    [Test]
+    public void CapsuleGeometry_DiagnosticIdentifiesUnsupportedDirection()
+    {
+        CapsuleCollider capsule = boidObject.GetComponent<CapsuleCollider>();
+        capsule.direction = 0;
+
+        Type geometryType = FindProjectType("BoidCapsuleGeometry");
+        MethodInfo diagnosticMethod = geometryType.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Single(method => method.Name == "TryGetWorldCapsule" && method.GetParameters().Length == 5);
+        object[] arguments =
+        {
+            boidObject.GetComponent<Rigidbody>(), Vector3.zero, Quaternion.identity, null, null
+        };
+
+        Assert.That((bool)diagnosticMethod.Invoke(null, arguments), Is.False);
+        Assert.That(arguments[4], Is.EqualTo("CapsuleDirectionUnsupported"));
+    }
+
+    [Test]
+    public void CapsuleGeometry_AcceptsValidGeometryWhenColliderIsDisabled()
+    {
+        CapsuleCollider capsule = boidObject.GetComponent<CapsuleCollider>();
+        capsule.enabled = false;
+
+        MethodInfo method = FindCapsuleGeometryMethod();
+        object[] arguments =
+        {
+            boidObject.GetComponent<Rigidbody>(), Vector3.zero, Quaternion.identity, null
+        };
+
+        Assert.That((bool)method.Invoke(null, arguments), Is.True);
+    }
+
     private void SetPolicy(Component agent, string value)
     {
         SetPrivateField(agent, "areaPolicy", Enum.Parse(areaPolicyType, value));
@@ -618,7 +671,8 @@ public sealed class BoidAreaPolicyAndCapsuleGeometryTests
     private static MethodInfo FindCapsuleGeometryMethod()
     {
         Type geometryType = FindProjectType("BoidCapsuleGeometry");
-        MethodInfo method = geometryType.GetMethod("TryGetWorldCapsule", BindingFlags.Public | BindingFlags.Static);
+        MethodInfo method = geometryType.GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .Single(candidate => candidate.Name == "TryGetWorldCapsule" && candidate.GetParameters().Length == 4);
         Assert.That(method, Is.Not.Null);
         return method;
     }

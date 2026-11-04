@@ -166,6 +166,25 @@ public sealed class HuntingGroundContainmentWanderTests
     }
 
     [Test]
+    public void LegacyBoundsGizmoBeforeAwake_IsHiddenForRequiredHuntingGround()
+    {
+        SetRequiredPolicy();
+        SetSerializedObjectReference(containment, "huntingGroundRegion", region);
+        SetPrivateField(containment, "owner", null);
+
+        Assert.That(ShouldDrawLegacyBounds(), Is.False);
+    }
+
+    [Test]
+    public void LegacyBoundsGizmoBeforeAwake_RemainsVisibleForLegacyPolicy()
+    {
+        SetSerializedObjectReference(containment, "huntingGroundRegion", region);
+        SetPrivateField(containment, "owner", null);
+
+        Assert.That(ShouldDrawLegacyBounds(), Is.True);
+    }
+
+    [Test]
     public void WanderWithRegion_SelectsTargetsInsideCotoWithCapsuleClearance()
     {
         SetAllCells(NavigationGridZone.HuntingGround, true);
@@ -201,6 +220,15 @@ public sealed class HuntingGroundContainmentWanderTests
     {
         wanderType.GetMethod("SelectLocalTarget", BindingFlags.Instance | BindingFlags.NonPublic)
             .Invoke(wander, null);
+    }
+
+    private bool ShouldDrawLegacyBounds()
+    {
+        MethodInfo method = containmentType.GetMethod(
+            "ShouldDrawLegacyBounds",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        Assert.That(method, Is.Not.Null);
+        return (bool)method.Invoke(containment, null);
     }
 
     private void SetRequiredPolicy()
