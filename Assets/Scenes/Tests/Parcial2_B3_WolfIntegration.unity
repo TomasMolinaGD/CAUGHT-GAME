@@ -147,6 +147,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hunter_Parcial2
       objectReference: {fileID: 0}
+    - target: {fileID: 5155268316855032545, guid: 17aedbf2fd516284196fe775751152fa, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6016029998112976370, guid: 17aedbf2fd516284196fe775751152fa, type: 3}
       propertyPath: m_LocalScale.x
       value: 2.1
@@ -3211,6 +3215,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Wolf_Patrol_B3_L1_North
       objectReference: {fileID: 0}
+    - target: {fileID: 6060216260674496696, guid: 1d0819691eda1524487088609d8822ec, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8911273034458217010, guid: 1d0819691eda1524487088609d8822ec, type: 3}
       propertyPath: m_LocalPosition.x
       value: 138.5
@@ -3332,7 +3340,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6105d0af98412bc4aa761ebeed1f2a48, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PredatorFSM
-  targetReference: {fileID: 0}
+  targetReference: {fileID: 14444180}
   waypoints:
   - {fileID: 176049544}
   - {fileID: 2106412158}

@@ -18,6 +18,9 @@ public static class Parcial2B3WolfIntegrationBuilder
     private const float PatrolSpeed = 2.85f;
     private const float NodeReachDistance = 0.1f;
     private const float StoppingDistance = 0.25f;
+    private const float ViewDistance = 18f;
+    private const float FieldOfView = 120f;
+    private const string HunterName = "Hunter_Parcial2";
 
     private sealed class PatrolDefinition
     {
@@ -68,8 +71,10 @@ public static class Parcial2B3WolfIntegrationBuilder
 
         Scene scene = EditorSceneManager.OpenScene(TargetScenePath, OpenSceneMode.Single);
         NavigationGrid grid = RequireSingleSceneComponent<NavigationGrid>(scene, "NavigationGrid");
-        if (!ContainsComponentNamed(scene, "FSMAgent"))
-            throw new InvalidOperationException("The copied scene no longer contains the Alien FSM.");
+        GameObject hunterTarget = FindSceneGameObject(scene, HunterName);
+        if (hunterTarget == null || hunterTarget.GetComponent<BoidThreat>() == null)
+            throw new InvalidOperationException(
+                $"The copied scene requires {HunterName} with BoidThreat before configuring L1.");
         if (!ContainsGameObjectNamed(scene, "BoidRespawnArea_B3"))
             throw new InvalidOperationException("The copied scene no longer contains BoidRespawnArea_B3.");
 
@@ -85,9 +90,14 @@ public static class Parcial2B3WolfIntegrationBuilder
         ValidatePatrolRoutes(grid, provider, patrols);
 
         for (int i = 0; i < patrols.Length; i++)
-            CreateWolf(scene, predatorPrefab, wolfController, provider, patrols[i], obstacleMask, i == 0);
+        {
+            GameObject targetReference = patrols[i].Definition.Id == "L1" ? hunterTarget : null;
+            CreateWolf(scene, predatorPrefab, wolfController, provider, patrols[i], obstacleMask,
+                targetReference, i == 0);
+        }
 
-        ValidateSceneConfiguration(scene, grid, provider, wolfController, patrols);
+        ValidateSceneConfiguration(scene, grid, provider, wolfController, patrols, hunterTarget,
+            obstacleMask);
 
         EditorSceneManager.MarkSceneDirty(scene);
         if (!EditorSceneManager.SaveScene(scene, TargetScenePath))
@@ -288,7 +298,8 @@ public static class Parcial2B3WolfIntegrationBuilder
 
     private static void CreateWolf(Scene scene, GameObject prefab,
         RuntimeAnimatorController wolfController, NavigationGridGraphProvider provider,
-        PatrolSetup patrol, LayerMask obstacleMask, bool addDiagnostics)
+        PatrolSetup patrol, LayerMask obstacleMask, GameObject targetReference,
+        bool addDiagnostics)
     {
         GameObject wolf = PrefabUtility.InstantiatePrefab(prefab, scene) as GameObject;
         if (wolf == null)
@@ -317,7 +328,7 @@ public static class Parcial2B3WolfIntegrationBuilder
         ConfigurePerception(perception, obstacleMask);
         ConfigureAgent(agent, obstacleMask);
         ConfigureController(controller, agent, movement, provider);
-        ConfigureFsm(fsm, patrol.Waypoints);
+        ConfigureFsm(fsm, patrol.Waypoints, targetReference);
 
         PredatorDebugFeedback debug = EnsureSingleComponent<PredatorDebugFeedback>(wolf);
         SerializedObject serializedDebug = new SerializedObject(debug);
@@ -334,6 +345,8 @@ public static class Parcial2B3WolfIntegrationBuilder
     private static void ConfigurePerception(PredatorPerception perception, LayerMask obstacleMask)
     {
         SerializedObject serialized = new SerializedObject(perception);
+        serialized.FindProperty("viewDistance").floatValue = ViewDistance;
+        serialized.FindProperty("fieldOfView").floatValue = FieldOfView;
         serialized.FindProperty("targetLayers").intValue = 0;
         serialized.FindProperty("obstacleLayers").intValue = obstacleMask.value;
         serialized.ApplyModifiedPropertiesWithoutUndo();
@@ -365,10 +378,11 @@ public static class Parcial2B3WolfIntegrationBuilder
         serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
-    private static void ConfigureFsm(PredatorFSM fsm, Transform[] waypoints)
+    private static void ConfigureFsm(PredatorFSM fsm, Transform[] waypoints,
+        GameObject targetReference)
     {
         SerializedObject serialized = new SerializedObject(fsm);
-        serialized.FindProperty("targetReference").objectReferenceValue = null;
+        serialized.FindProperty("targetReference").objectReferenceValue = targetReference;
         serialized.FindProperty("patrolSpeed").floatValue = PatrolSpeed;
         SerializedProperty waypointList = serialized.FindProperty("waypoints");
         waypointList.arraySize = waypoints.Length;
@@ -380,7 +394,7 @@ public static class Parcial2B3WolfIntegrationBuilder
 
     private static void ValidateSceneConfiguration(Scene scene, NavigationGrid grid,
         NavigationGridGraphProvider provider, RuntimeAnimatorController wolfController,
-        PatrolSetup[] patrols)
+        PatrolSetup[] patrols, GameObject hunterTarget, LayerMask obstacleMask)
     {
         if (FindSceneComponents<NavigationGrid>(scene).Count != 1)
             throw new InvalidOperationException("The integration scene must contain exactly one NavigationGrid.");
@@ -446,8 +460,18 @@ public static class Parcial2B3WolfIntegrationBuilder
             }
 
             SerializedObject serializedPerception = new SerializedObject(perception);
-            if (serializedPerception.FindProperty("targetLayers").intValue != 0)
-                throw new InvalidOperationException($"{wolfName} must remain Patrol-only without targets.");
+            if (serializedPerception.FindProperty("targetLayers").intValue != 0 ||
+                serializedPerception.FindProperty("viewDistance").floatValue != ViewDistance ||
+                serializedPerception.FindProperty("fieldOfView").floatValue != FieldOfView ||
+                serializedPerception.FindProperty("obstacleLayers").intValue != obstacleMask.value)
+            {
+                throw new InvalidOperationException($"{wolfName} perception settings are invalid.");
+            }
+
+            SerializedObject serializedFsm = new SerializedObject(fsm);
+            GameObject expectedTarget = patrol.Definition.Id == "L1" ? hunterTarget : null;
+            if (serializedFsm.FindProperty("targetReference").objectReferenceValue != expectedTarget)
+                throw new InvalidOperationException($"{wolfName} has an invalid perception target.");
 
             Animator animator = wolf.GetComponentInChildren<Animator>(true);
             if (animator == null || animator.runtimeAnimatorController != wolfController ||
