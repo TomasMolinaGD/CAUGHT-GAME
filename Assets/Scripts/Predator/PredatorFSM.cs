@@ -23,6 +23,8 @@ public sealed class PredatorFSM : MonoBehaviour
     [SerializeField, Min(0.1f)] private float hunterMaximumSpeed = 6f;
     [SerializeField, Min(0.1f)] private float turnSpeed = 8f;
     [SerializeField, Range(0.1f, 1f)] private float captureRadius = 0.9f;
+    [SerializeField, Min(0.01f)] private float chaseDestinationRefreshDistance = 0.5f;
+    [SerializeField, Min(0.02f)] private float chaseDestinationRefreshInterval = 0.1f;
     [SerializeField, Range(0.1f, 0.99f)] private float speedBelowHunterRatio = 0.9f;
     [SerializeField] private AudioSource howlSource;
     [SerializeField] private AudioClip howlClip;
@@ -39,6 +41,8 @@ public sealed class PredatorFSM : MonoBehaviour
     public IReadOnlyList<Transform> Waypoints => waypoints;
     public float WaypointCheckDistance => waypointCheckDistance;
     public float CaptureRadius => captureRadius;
+    public float ChaseDestinationRefreshDistance => chaseDestinationRefreshDistance;
+    public float ChaseDestinationRefreshInterval => chaseDestinationRefreshInterval;
     public PredatorMovement Movement => movement;
     public PredatorPerception Perception => perception;
     public PredatorCombat Combat => combat;
@@ -270,6 +274,8 @@ public sealed class PredatorFSM : MonoBehaviour
         turnSpeed = Mathf.Max(0.1f, turnSpeed);
         waypointCheckDistance = Mathf.Max(0.1f, waypointCheckDistance);
         captureRadius = Mathf.Clamp(captureRadius, 0.1f, 1f);
+        chaseDestinationRefreshDistance = Mathf.Max(0.01f, chaseDestinationRefreshDistance);
+        chaseDestinationRefreshInterval = Mathf.Max(0.02f, chaseDestinationRefreshInterval);
         hunterPatrolSpeed = Mathf.Max(0.1f, hunterPatrolSpeed);
         speedBelowHunterRatio = Mathf.Clamp(speedBelowHunterRatio, 0.1f, 0.99f);
     }

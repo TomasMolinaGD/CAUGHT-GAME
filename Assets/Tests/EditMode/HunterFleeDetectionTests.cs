@@ -35,6 +35,65 @@ public sealed class HunterFleeDetectionTests
     }
 
     [Test]
+    public void TickBeforeRefreshIntervalKeepsCachedWolfUntilExplicitRepositionRefresh()
+    {
+        bool previousAutoSyncTransforms = Physics.autoSyncTransforms;
+        Physics.autoSyncTransforms = false;
+        try
+        {
+            Component perception = CreatePerception(5f);
+            Component wolf = CreateWolf(new Vector3(2f, 0f, 0f));
+            Invoke(perception, "ForceRefresh");
+            Assert.That(GetProperty<object>(perception, "ClosestWolf"), Is.SameAs(wolf));
+
+            wolf.transform.position = new Vector3(8f, 0f, 0f);
+            Invoke(perception, "Tick", 0f);
+
+            Assert.That(GetProperty<object>(perception, "ClosestWolf"), Is.SameAs(wolf),
+                "Tick(0) must preserve the cached result until the normal interval expires.");
+
+            Invoke(perception, "ForceRefresh");
+
+            Assert.That(GetProperty<object>(perception, "ClosestWolf"), Is.Null,
+                "An explicit refresh after repositioning must synchronize physics and discard stale range data.");
+        }
+        finally
+        {
+            Physics.autoSyncTransforms = previousAutoSyncTransforms;
+            Physics.SyncTransforms();
+        }
+    }
+
+    [Test]
+    public void ExplicitRepositionRefreshDetectsNewLineOfSightBlockerBeforeIntervalExpires()
+    {
+        bool previousAutoSyncTransforms = Physics.autoSyncTransforms;
+        Physics.autoSyncTransforms = false;
+        try
+        {
+            Component perception = CreatePerception(5f);
+            Component wolf = CreateWolf(new Vector3(4f, 0f, 0f));
+            Invoke(perception, "ForceRefresh");
+            Assert.That(GetProperty<object>(perception, "ClosestWolf"), Is.SameAs(wolf));
+
+            CreateObstacleBetweenHunterAndWolf();
+            Invoke(perception, "Tick", 0f);
+
+            Assert.That(GetProperty<object>(perception, "ClosestWolf"), Is.SameAs(wolf));
+
+            Invoke(perception, "ForceRefresh");
+
+            Assert.That(GetProperty<object>(perception, "ClosestWolf"), Is.Null,
+                "The explicit reposition refresh must synchronize the new blocker before evaluating LOS.");
+        }
+        finally
+        {
+            Physics.autoSyncTransforms = previousAutoSyncTransforms;
+            Physics.SyncTransforms();
+        }
+    }
+
+    [Test]
     public void WolfOutsideDetectionRadiusIsNotDetected()
     {
         Component perception = CreatePerception(3f);

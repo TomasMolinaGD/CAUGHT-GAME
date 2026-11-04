@@ -31,6 +31,8 @@ public sealed class PredatorNavigationMovementController : MonoBehaviour
     public bool HasDestination => hasDestination;
     public Vector3 RequestedDestination => destination;
     public Vector3 MovementTarget => navigationAgent != null ? navigationAgent.MovementTarget : transform.position;
+    public bool UsesChaseMovement => chase;
+    public float StoppingDistance => stoppingDistance;
     public int TickCount { get; private set; }
     public bool LastTickAccepted { get; private set; }
     public bool LastTickCommandedMovement { get; private set; }
@@ -48,6 +50,11 @@ public sealed class PredatorNavigationMovementController : MonoBehaviour
         movement = predatorMovement;
         providerConfigured = false;
         agentConfigured = false;
+        ConfigureMovement(pursue, arrivalDistance);
+    }
+
+    public void ConfigureMovement(bool pursue, float arrivalDistance)
+    {
         chase = pursue;
         stoppingDistance = Mathf.Max(0f, arrivalDistance);
     }
