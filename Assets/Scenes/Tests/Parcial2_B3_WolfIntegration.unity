@@ -375,13 +375,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HunterPerception
   livingBoidDetectionRadius: 14
   deadBoidDetectionRadius: 18
+  wolfDetectionRadius: 18
   boidLayerMask:
     serializedVersion: 2
     m_Bits: 512
+  wolfLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 4096
   refreshInterval: 0.1
+  wolfLossGraceDuration: 0.3
+  showWolfLineOfSightDebug: 1
 --- !u!114 &14444187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3297,6 +3303,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6060216260674496696, guid: 1d0819691eda1524487088609d8822ec, type: 3}
       insertIndex: -1
       addedObject: {fileID: 805467655}
+    - targetCorrespondingSourceObject: {fileID: 6060216260674496696, guid: 1d0819691eda1524487088609d8822ec, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 805467666}
   m_SourcePrefab: {fileID: 100100000, guid: 1d0819691eda1524487088609d8822ec, type: 3}
 --- !u!1 &805467654 stripped
 GameObject:
@@ -3478,6 +3487,29 @@ MonoBehaviour:
   obstacleLayers:
     serializedVersion: 2
     m_Bits: 4096
+--- !u!136 &805467666
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 805467654}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.35
+  m_Height: 1.6
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.8, z: 0}
 --- !u!1 &902636884
 GameObject:
   m_ObjectHideFlags: 0

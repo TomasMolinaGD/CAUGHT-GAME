@@ -20,6 +20,8 @@ public static class Parcial2B3WolfIntegrationBuilder
     private const float StoppingDistance = 0.25f;
     private const float ViewDistance = 18f;
     private const float FieldOfView = 120f;
+    private const float L1ThreatColliderRadius = 0.35f;
+    private const float L1ThreatColliderHeight = 1.6f;
     private const string HunterName = "Hunter_Parcial2";
 
     private sealed class PatrolDefinition
@@ -325,6 +327,9 @@ public static class Parcial2B3WolfIntegrationBuilder
             EnsureSingleComponent<PredatorNavigationMovementController>(wolf);
         PredatorFSM fsm = EnsureSingleComponent<PredatorFSM>(wolf);
 
+        if (patrol.Definition.Id == "L1")
+            ConfigureL1ThreatCollider(EnsureSingleComponent<CapsuleCollider>(wolf));
+
         ConfigurePerception(perception, obstacleMask);
         ConfigureAgent(agent, obstacleMask);
         ConfigureController(controller, agent, movement, provider);
@@ -340,6 +345,14 @@ public static class Parcial2B3WolfIntegrationBuilder
         EditorUtility.SetDirty(animator);
         EditorUtility.SetDirty(wolf);
         wolf.SetActive(true);
+    }
+
+    private static void ConfigureL1ThreatCollider(CapsuleCollider collider)
+    {
+        collider.isTrigger = true;
+        collider.radius = L1ThreatColliderRadius;
+        collider.height = L1ThreatColliderHeight;
+        collider.center = new Vector3(0f, 0.8f, 0f);
     }
 
     private static void ConfigurePerception(PredatorPerception perception, LayerMask obstacleMask)
@@ -472,6 +485,19 @@ public static class Parcial2B3WolfIntegrationBuilder
             GameObject expectedTarget = patrol.Definition.Id == "L1" ? hunterTarget : null;
             if (serializedFsm.FindProperty("targetReference").objectReferenceValue != expectedTarget)
                 throw new InvalidOperationException($"{wolfName} has an invalid perception target.");
+
+            if (patrol.Definition.Id == "L1")
+            {
+                CapsuleCollider[] threatColliders = wolf.GetComponents<CapsuleCollider>();
+                if (threatColliders.Length != 1 || !threatColliders[0].isTrigger ||
+                    !Mathf.Approximately(threatColliders[0].radius, L1ThreatColliderRadius) ||
+                    !Mathf.Approximately(threatColliders[0].height, L1ThreatColliderHeight) ||
+                    threatColliders[0].center != new Vector3(0f, 0.8f, 0f))
+                {
+                    throw new InvalidOperationException(
+                        $"{wolfName} Hunter threat collider is not configured correctly.");
+                }
+            }
 
             Animator animator = wolf.GetComponentInChildren<Animator>(true);
             if (animator == null || animator.runtimeAnimatorController != wolfController ||

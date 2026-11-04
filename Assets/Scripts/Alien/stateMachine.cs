@@ -9,7 +9,9 @@ public enum PoliceState
     Pursuit,
     Attack,
     Gather,
-    Exit
+    Exit,
+    Flee,
+    Dead
 }
 
 public class StateMachine

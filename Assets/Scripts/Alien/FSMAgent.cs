@@ -78,6 +78,7 @@ public class FSMAgent : MonoBehaviour
     private void Update()
     {
         TickAgentSystems();
+        TryEnterFlee();
         movement?.BeginMovementFrame();
         navigationController?.Tick();
         ExecuteNavigationMovement();
@@ -119,6 +120,7 @@ public class FSMAgent : MonoBehaviour
         stateMachine.RegisterState(PoliceState.Pursuit, new PursuitState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Attack, new AttackState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Gather, new GatherState(this, stateMachine));
+        stateMachine.RegisterState(PoliceState.Flee, new FleeState(this, stateMachine));
         exitState = new ExitState(this, stateMachine);
         stateMachine.RegisterState(PoliceState.Exit, exitState);
         stateMachine.ChangeState(enableGridNavigation ? PoliceState.Search : PoliceState.Patrol);
@@ -130,6 +132,18 @@ public class FSMAgent : MonoBehaviour
         // available to the FSM between physics queries.
         perception?.Tick(Time.deltaTime);
         combat?.Tick(Time.deltaTime);
+    }
+
+    private void TryEnterFlee()
+    {
+        if (perception == null || perception.ClosestWolf == null ||
+            Equals(stateMachine?.CurrentStateKey, PoliceState.Flee) ||
+            Equals(stateMachine?.CurrentStateKey, PoliceState.Dead))
+        {
+            return;
+        }
+
+        stateMachine?.ChangeState(PoliceState.Flee);
     }
 
     private void OnDisable()
