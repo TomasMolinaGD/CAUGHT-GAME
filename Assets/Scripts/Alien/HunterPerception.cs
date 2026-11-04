@@ -59,8 +59,10 @@ public sealed class HunterPerception : MonoBehaviour
         refreshTimer = refreshInterval;
     }
 
+    [ContextMenu("Force Perception Refresh")]
     public void ForceRefresh()
     {
+        Physics.SyncTransforms();
         RefreshDetections();
         refreshTimer = refreshInterval;
     }

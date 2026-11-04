@@ -112,16 +112,25 @@ public sealed class PredatorSearchStateTests
     }
 
     [Test]
-    public void VisibleTargetTransitionsToPursuitAndCancelsOwnedNavigation()
+    public void VisibleTargetTransfersNavigationOwnershipFromSearchToPursuit()
     {
         SearchFixture fixture = CreateFixture(true, Vector3.zero, new Vector3(4f, 0f, 0f));
+        Vector3 searchDestination = GetProperty<Vector3>(fixture.Controller, "RequestedDestination");
         SetPrivateField(fixture.Perception, "target", fixture.Target);
         SetBackingField(fixture.Perception, "CanSeeTarget", true);
 
         TickStateMachine(fixture.Fsm);
 
         Assert.That(GetCurrentState(fixture.Fsm), Is.EqualTo("Pursuit"));
-        Assert.That(GetProperty<bool>(fixture.Controller, "HasDestination"), Is.False);
+        Assert.That(GetPrivateField<bool>(GetRegisteredState(fixture.Fsm, "Search"),
+            "navigationRequestIssued"), Is.False,
+            "Search must release its own navigation request before Pursuit enters.");
+        Assert.That(GetProperty<bool>(fixture.Controller, "HasDestination"), Is.True);
+        Assert.That(GetProperty<Vector3>(fixture.Controller, "RequestedDestination"),
+            Is.EqualTo(fixture.Target.transform.position));
+        Assert.That(GetProperty<Vector3>(fixture.Controller, "RequestedDestination"),
+            Is.Not.EqualTo(searchDestination));
+        Assert.That(GetProperty<bool>(fixture.Controller, "UsesChaseMovement"), Is.True);
         Assert.That(GetVelocity(fixture.Movement), Is.EqualTo(Vector3.zero));
     }
 
@@ -247,6 +256,15 @@ public sealed class PredatorSearchStateTests
     private static string GetCurrentState(Component fsm)
     {
         return fsm.GetType().GetProperty("CurrentState").GetValue(fsm).ToString();
+    }
+
+    private static object GetRegisteredState(Component fsm, string stateName)
+    {
+        object stateMachine = GetPrivateField<object>(fsm, "stateMachine");
+        object states = GetPrivateField<object>(stateMachine, "states");
+        Type stateType = fsm.GetType().GetProperty("CurrentState").PropertyType;
+        object state = Enum.Parse(stateType, stateName);
+        return states.GetType().GetProperty("Item").GetValue(states, new[] { state });
     }
 
     private static Component Add(GameObject root, string typeName)
