@@ -40,11 +40,6 @@ public sealed class PredatorAttackState : State
         Vector3 offset = Vector3.ProjectOnPlane(
             target.transform.position - agent.transform.position, Vector3.up);
         agent.Movement.FaceDirection(offset);
-        if (offset.magnitude > agent.CaptureRadius)
-        {
-            StateMachine.ChangeState(PredatorStateId.Pursuit);
-            return;
-        }
 
         attackElapsedTime += Time.deltaTime;
         if (!agent.Animation.IsAttackFinished(attackElapsedTime, ref attackStateObserved))

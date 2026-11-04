@@ -3,11 +3,20 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class PredatorCombat : MonoBehaviour
 {
+    public enum CaptureAttemptResult
+    {
+        None,
+        Succeeded,
+        Failed
+    }
+
     [SerializeField, Min(0.1f)] private float attackCooldown = 1f;
     private float cooldownRemaining;
 
     public float CooldownRemaining => cooldownRemaining;
     public bool IsAttackReady => cooldownRemaining <= 0f;
+    public CaptureAttemptResult LastCaptureAttemptResult { get; private set; }
+    public int CaptureAttemptCount { get; private set; }
 
     public void Tick(float deltaTime)
     {
@@ -17,15 +26,16 @@ public sealed class PredatorCombat : MonoBehaviour
     public bool TryCapture(GameObject target, float captureRadius, float currentDistance,
         bool allowExplicitThreat = false)
     {
-        if (!CanCapture(target, captureRadius, currentDistance, allowExplicitThreat)) return false;
+        if (!IsAttackReady) return false;
 
-        if (!PredatorCaptureRegistry.TryCapture(target, allowExplicitThreat))
-        {
-            cooldownRemaining = attackCooldown;
-            return false;
-        }
+        bool captured = CanCapture(target, captureRadius, currentDistance, allowExplicitThreat) &&
+            PredatorCaptureRegistry.TryCapture(target, allowExplicitThreat);
         cooldownRemaining = attackCooldown;
-        return true;
+        CaptureAttemptCount++;
+        LastCaptureAttemptResult = captured
+            ? CaptureAttemptResult.Succeeded
+            : CaptureAttemptResult.Failed;
+        return captured;
     }
 
     private bool CanCapture(GameObject target, float captureRadius, float currentDistance,
