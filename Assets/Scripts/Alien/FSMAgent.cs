@@ -23,6 +23,8 @@ public class FSMAgent : MonoBehaviour
     [SerializeField] private NavigationGrid navigationGrid;
     [SerializeField] private HuntingGroundRegion huntingGroundRegion;
     [SerializeField] private bool enableGridNavigation;
+    [Header("Flee")]
+    [SerializeField, Min(0f)] private float safeZoneWaitTime = 3f;
     [Header("Search Exploration")]
     [SerializeField] private int searchRandomSeed = 417;
     [SerializeField, Min(0f)] private float searchMinimumDistanceMultiplier = 0.75f;
@@ -53,6 +55,7 @@ public class FSMAgent : MonoBehaviour
     public NavigationGrid NavigationGrid => navigationGrid;
     public HuntingGroundRegion HuntingGroundRegion => huntingGroundRegion;
     public bool GridNavigationEnabled => enableGridNavigation;
+    public float SafeZoneWaitTime => safeZoneWaitTime;
     public float PursuitSpeedMultiplier => pursuitSpeedMultiplier;
     public float CollectionDistance => collectionDistance;
     public float CollectionDuration => collectionDuration;
@@ -138,12 +141,21 @@ public class FSMAgent : MonoBehaviour
     {
         if (perception == null || perception.ClosestWolf == null ||
             Equals(stateMachine?.CurrentStateKey, PoliceState.Flee) ||
-            Equals(stateMachine?.CurrentStateKey, PoliceState.Dead))
+            Equals(stateMachine?.CurrentStateKey, PoliceState.Dead) ||
+            IsInsideNavigationSafeZone(transform.position))
         {
             return;
         }
 
         stateMachine?.ChangeState(PoliceState.Flee);
+    }
+
+    internal bool IsInsideNavigationSafeZone(Vector3 worldPosition)
+    {
+        return navigationGrid != null &&
+            navigationGrid.TryWorldToGrid(worldPosition, out int row, out int column) &&
+            navigationGrid.TryGetCell(row, column, out NavigationGridCell cell) &&
+            cell.Walkable && cell.Zone == NavigationGridZone.SafeZone;
     }
 
     private void OnDisable()
@@ -336,6 +348,7 @@ public class FSMAgent : MonoBehaviour
         collectionDistance = Mathf.Max(0.1f, collectionDistance);
         collectionDuration = Mathf.Max(0.1f, collectionDuration);
         requiredGathers = Mathf.Max(1, requiredGathers);
+        safeZoneWaitTime = Mathf.Max(0f, safeZoneWaitTime);
         searchMinimumDistanceMultiplier = Mathf.Max(0f, searchMinimumDistanceMultiplier);
         searchMaximumDistanceMultiplier = Mathf.Max(0.1f, searchMaximumDistanceMultiplier);
         searchSelectionAttempts = Mathf.Max(1, searchSelectionAttempts);

@@ -309,6 +309,183 @@ public sealed class HunterFleeDetectionTests
     }
 
     [Test]
+    public void FleeArrivalStartsConfiguredSafeZoneWait()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(
+            true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+
+        object fleeState = ArriveInSafeZone(hunter);
+
+        Assert.That(GetPrivateField(fleeState, "isWaitingInSafeZone"), Is.True);
+        Assert.That(GetPrivateField(fleeState, "safeZoneWaitRemaining"), Is.EqualTo(5f));
+        Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Flee"));
+        Assert.That(GetProperty<Vector3>(GetProperty<object>(hunter, "Movement"), "Velocity"),
+            Is.EqualTo(Vector3.zero));
+    }
+
+    [Test]
+    public void FleeRemainsProtectedUntilConfiguredWaitElapses()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(
+            true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+        object fleeState = ArriveInSafeZone(hunter);
+
+        InvokePrivate(fleeState, "UpdateSafeZoneWait", 4f);
+
+        Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Flee"));
+        Assert.That(GetPrivateField(fleeState, "safeZoneWaitRemaining"), Is.EqualTo(1f));
+        Assert.That(GetProperty<Vector3>(GetProperty<object>(hunter, "Movement"), "Velocity"),
+            Is.EqualTo(Vector3.zero));
+    }
+
+    [Test]
+    public void CompletedSafeZoneWaitReturnsToSearch()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(
+            true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+        object fleeState = ArriveInSafeZone(hunter);
+
+        InvokePrivate(fleeState, "UpdateSafeZoneWait", 5f);
+        InvokePrivate(hunter, "Update");
+
+        Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Search"));
+    }
+
+    [Test]
+    public void VisibleWolfDoesNotReenterFleeWhileHunterRemainsInSafeZone()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(
+            true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+        CreateWolf(grid.GridToWorldPosition(2, 4) + Vector3.left * 2f);
+        Component perception = (Component)GetProperty<object>(hunter, "Perception");
+        Physics.SyncTransforms();
+        Invoke(perception, "ForceRefresh");
+        object fleeState = ArriveInSafeZone(hunter);
+        Physics.SyncTransforms();
+        Invoke(perception, "ForceRefresh");
+
+        InvokePrivate(fleeState, "UpdateSafeZoneWait", 5f);
+        InvokePrivate(hunter, "Update");
+
+        Assert.That(GetProperty<object>(perception, "ClosestWolf"), Is.Not.Null);
+        Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Search"));
+    }
+
+    [Test]
+    public void VisibleWolfCanTriggerFleeAgainAfterHunterLeavesSafeZone()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(
+            true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+        CreateWolf(grid.GridToWorldPosition(2, 4) + Vector3.left * 2f);
+        Component perception = (Component)GetProperty<object>(hunter, "Perception");
+        Physics.SyncTransforms();
+        Invoke(perception, "ForceRefresh");
+        object fleeState = ArriveInSafeZone(hunter);
+        InvokePrivate(fleeState, "UpdateSafeZoneWait", 5f);
+        hunter.transform.position = grid.GridToWorldPosition(2, 3);
+        Physics.SyncTransforms();
+        Invoke(perception, "ForceRefresh");
+
+        InvokePrivate(hunter, "Update");
+
+        Assert.That(GetProperty<object>(perception, "ClosestWolf"), Is.Not.Null);
+        Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Flee"));
+    }
+
+    [Test]
+    public void CompletedSafeZoneWaitUsesExistingExitCondition()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(
+            true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+        SetPrivateField(hunter, "requiredGathers", 0);
+        object fleeState = ArriveInSafeZone(hunter);
+
+        InvokePrivate(fleeState, "UpdateSafeZoneWait", 5f);
+
+        Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Exit"));
+    }
+
+    [Test]
+    public void LeavingSafeZoneRestartsEscapeWithoutExitingFlee()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(
+            true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+        object fleeState = ArriveInSafeZone(hunter);
+        SetPrivateField(fleeState, "safeZoneWaitRemaining", 0f);
+        hunter.transform.position = grid.GridToWorldPosition(2, 3);
+        Physics.SyncTransforms();
+
+        InvokePrivate(hunter, "Update");
+
+        Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Flee"));
+        Assert.That(GetPrivateField(fleeState, "isWaitingInSafeZone"), Is.False);
+        Assert.That(GetPrivateField(fleeState, "safeZoneWaitRemaining"), Is.EqualTo(0f));
+        Assert.That(GetProperty<bool>(GetProperty<object>(hunter, "NavigationIntent"),
+            "HasActiveRequest"), Is.True);
+        Assert.That(GetProperty<Vector3>(GetProperty<object>(hunter, "Movement"), "Velocity"),
+            Is.EqualTo(Vector3.zero));
+    }
+
+    [Test]
+    public void EnteringFleeAgainResetsSafeZoneWaitState()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(
+            true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+        object fleeState = ArriveInSafeZone(hunter);
+        SetPrivateField(fleeState, "safeZoneWaitRemaining", 1f);
+
+        ChangeState(hunter, "Search");
+        ChangeState(hunter, "Flee");
+
+        Assert.That(GetPrivateField(fleeState, "isWaitingInSafeZone"), Is.False);
+        Assert.That(GetPrivateField(fleeState, "safeZoneWaitRemaining"), Is.EqualTo(0f));
+
+        // The Hunter is already inside the selected Safe Zone. One update reports
+        // arrival and starts the new wait; no subsequent frame time is consumed.
+        InvokePrivate(hunter, "Update");
+        InvokePrivate(fleeState, "UpdateSafeZoneWait", 0f);
+
+        Assert.That(GetPrivateField(fleeState, "isWaitingInSafeZone"), Is.True);
+        Assert.That(GetPrivateField(fleeState, "safeZoneWaitRemaining"), Is.EqualTo(5f));
+    }
+
+    [Test]
+    public void DeadInterruptsAndClearsActiveSafeZoneWait()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(
+            true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+        object machine = GetPrivateField(hunter, "stateMachine");
+        object replacementDeadState = GetProperty<object>(machine, "CurrentState");
+        object fleeState = ArriveInSafeZone(hunter);
+        Type policeState = FindProjectType("PoliceState");
+        Invoke(machine, "RegisterState", Enum.Parse(policeState, "Dead"), replacementDeadState);
+
+        Assert.That((bool)Invoke(machine, "ChangeState", Enum.Parse(policeState, "Dead")), Is.True);
+
+        Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Dead"));
+        Assert.That(GetPrivateField(fleeState, "isWaitingInSafeZone"), Is.False);
+        Assert.That(GetPrivateField(fleeState, "safeZoneWaitRemaining"), Is.EqualTo(0f));
+    }
+
+    [Test]
     public void FleeNoPathCancelsOnceWithoutRetrying()
     {
         NavigationGrid grid = CreateGrid();
@@ -380,7 +557,8 @@ public sealed class HunterFleeDetectionTests
         bool gridNavigation = false,
         float lossGraceDuration = 0.3f,
         NavigationGrid grid = null,
-        Vector3? position = null)
+        Vector3? position = null,
+        float safeZoneWaitTime = 3f)
     {
         GameObject hunter = CreateObject(
             "HunterFleeDetectionTests.Agent", position ?? Vector3.zero);
@@ -388,12 +566,30 @@ public sealed class HunterFleeDetectionTests
         Component agent = (Component)hunter.AddComponent(FindProjectType("FSMAgent"));
         SetPrivateField(agent, "enableGridNavigation", gridNavigation);
         SetPrivateField(agent, "navigationGrid", grid);
+        SetPrivateField(agent, "safeZoneWaitTime", safeZoneWaitTime);
         InvokePrivate(agent, "Awake");
         Component perception = (Component)GetProperty<object>(agent, "Perception");
         SetPrivateField(perception, "wolfDetectionRadius", 5f);
         SetPrivateField(perception, "wolfLossGraceDuration", lossGraceDuration);
         SetPrivateField(perception, "wolfLayerMask", (LayerMask)~0);
         return agent;
+    }
+
+    private static object ArriveInSafeZone(Component hunter)
+    {
+        ChangeState(hunter, "Flee");
+        CompleteFleeNavigationToSafeZone(hunter);
+        return GetProperty<object>(GetPrivateField(hunter, "stateMachine"), "CurrentState");
+    }
+
+    private static void CompleteFleeNavigationToSafeZone(Component hunter)
+    {
+        Vector3 destination = GetProperty<Vector3>(
+            GetActiveNavigationRequest(hunter), "Destination");
+        InvokePrivate(hunter, "Update");
+        hunter.transform.position = destination;
+        Physics.SyncTransforms();
+        InvokePrivate(hunter, "Update");
     }
 
     private NavigationGrid CreateGrid()
@@ -469,12 +665,12 @@ public sealed class HunterFleeDetectionTests
         return method.Invoke(target, arguments);
     }
 
-    private static object InvokePrivate(object target, string methodName)
+    private static object InvokePrivate(object target, string methodName, params object[] arguments)
     {
         MethodInfo method = target.GetType().GetMethod(
             methodName, BindingFlags.Instance | BindingFlags.NonPublic);
         Assert.That(method, Is.Not.Null, "Missing method " + methodName + ".");
-        return method.Invoke(target, null);
+        return method.Invoke(target, arguments);
     }
 
     private static T GetProperty<T>(object target, string propertyName)

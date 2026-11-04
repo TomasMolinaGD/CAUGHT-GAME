@@ -7,6 +7,8 @@ public sealed class FleeState : State
     private ulong ownedRequestId;
     private bool ownsRequest;
     private bool failureReported;
+    private bool isWaitingInSafeZone;
+    private float safeZoneWaitRemaining;
 
     public FleeState(FSMAgent agent, StateMachine stateMachine) : base(stateMachine)
     {
@@ -18,9 +20,15 @@ public sealed class FleeState : State
         agent.NavigationIntent.CancelAll();
         ownsRequest = false;
         failureReported = false;
+        ResetSafeZoneWait();
         agent.SetCurrentTarget(null);
         StopMovement();
 
+        TryRequestSafeZoneNavigation();
+    }
+
+    private void TryRequestSafeZoneNavigation()
+    {
         NavigationGrid grid = agent.NavigationGrid;
         if (!agent.GridNavigationEnabled || agent.NavigationController == null || grid == null)
         {
@@ -43,6 +51,12 @@ public sealed class FleeState : State
 
     public override void Update()
     {
+        if (isWaitingInSafeZone)
+        {
+            UpdateSafeZoneWait(Time.deltaTime);
+            return;
+        }
+
         if (!ownsRequest)
         {
             StopMovement();
@@ -74,10 +88,9 @@ public sealed class FleeState : State
                 agent.Animation.SetMoving(true);
                 break;
             case HunterNavigationControllerStatus.DestinationReached:
-                if (IsInsideSafeZone(agent.NavigationGrid, agent.transform.position))
+                if (agent.IsInsideNavigationSafeZone(agent.transform.position))
                 {
-                    CancelOwnedRequest();
-                    StopMovement();
+                    BeginSafeZoneWait();
                 }
                 else
                 {
@@ -101,8 +114,45 @@ public sealed class FleeState : State
 
     public override void Exit()
     {
+        ResetSafeZoneWait();
         CancelOwnedRequest();
         StopMovement();
+    }
+
+    private void BeginSafeZoneWait()
+    {
+        CancelOwnedRequest();
+        StopMovement();
+        isWaitingInSafeZone = true;
+        safeZoneWaitRemaining = agent.SafeZoneWaitTime;
+    }
+
+    private void UpdateSafeZoneWait(float deltaTime)
+    {
+        StopMovement();
+        if (!agent.IsInsideNavigationSafeZone(agent.transform.position))
+        {
+            ResetSafeZoneWait();
+            TryRequestSafeZoneNavigation();
+            return;
+        }
+
+        safeZoneWaitRemaining = Mathf.Max(0f, safeZoneWaitRemaining - Mathf.Max(0f, deltaTime));
+        if (safeZoneWaitRemaining > 0f)
+        {
+            return;
+        }
+
+        PoliceState nextState = agent.GridNavigationEnabled && agent.HasReachedRequiredGathers
+            ? PoliceState.Exit
+            : agent.EngagementReturnState;
+        StateMachine.ChangeState(nextState);
+    }
+
+    private void ResetSafeZoneWait()
+    {
+        isWaitingInSafeZone = false;
+        safeZoneWaitRemaining = 0f;
     }
 
     private void CancelOwnedRequest()
@@ -135,11 +185,4 @@ public sealed class FleeState : State
         Debug.LogWarning($"Hunter Flee stopped: {reason}", agent);
     }
 
-    private static bool IsInsideSafeZone(NavigationGrid grid, Vector3 worldPosition)
-    {
-        return grid != null &&
-            grid.TryWorldToGrid(worldPosition, out int row, out int column) &&
-            grid.TryGetCell(row, column, out NavigationGridCell cell) &&
-            cell.Walkable && cell.Zone == NavigationGridZone.SafeZone;
-    }
 }
