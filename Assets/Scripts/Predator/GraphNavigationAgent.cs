@@ -131,12 +131,13 @@ public sealed class GraphNavigationAgent : MonoBehaviour
             {
                 path.Clear();
                 pathValid = graph.TryFindPath(transform.position, destination, avoidSafeZones, path);
-                if (!pathValid || path.Count == 0)
+                if (!pathValid || path.Count == 0 || !TryAppendExactDestination())
                 {
                     hasFailedDestination = true;
                     failedDestination = destination;
                     nextReplanTime = Time.realtimeSinceStartup + replanCooldown;
                     Status = NavigationStatus.NoPath;
+                    pathValid = false;
                     path.Clear();
                     return false;
                 }
@@ -157,7 +158,7 @@ public sealed class GraphNavigationAgent : MonoBehaviour
 
         while (pathIndex < path.Count - 1 &&
             Vector3.ProjectOnPlane(path[pathIndex] - transform.position, Vector3.up).magnitude <= nodeReachDistance &&
-            IsSegmentSafe(pathIndex == 0 ? transform.position : path[pathIndex], path[pathIndex + 1]))
+            IsSegmentSafe(transform.position, path[pathIndex + 1]))
             pathIndex++;
 
         if (pathIndex >= path.Count)
@@ -196,6 +197,23 @@ public sealed class GraphNavigationAgent : MonoBehaviour
         }
 
         return IsSegmentSafe(transform.position, path[0]);
+    }
+
+    private bool TryAppendExactDestination()
+    {
+        int lastIndex = path.Count - 1;
+        Vector3 lastWaypoint = path[lastIndex];
+        Vector3 terminalOffset = Vector3.ProjectOnPlane(requestedDestination - lastWaypoint, Vector3.up);
+        if (terminalOffset.sqrMagnitude <= DistanceTolerance * DistanceTolerance)
+        {
+            path[lastIndex] = requestedDestination;
+            return true;
+        }
+
+        if (!IsSegmentSafe(lastWaypoint, requestedDestination)) return false;
+
+        path.Add(requestedDestination);
+        return true;
     }
 
     private bool IsSegmentSafe(Vector3 start, Vector3 end)

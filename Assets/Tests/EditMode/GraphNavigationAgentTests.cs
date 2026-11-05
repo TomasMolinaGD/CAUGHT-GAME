@@ -105,6 +105,59 @@ public sealed class GraphNavigationAgentTests
     }
 
     [Test]
+    public void AStarRouteContinuesToStationaryHunterNearCellEdgeAfterLastCellCenter()
+    {
+        NavigationGrid grid = CreateGrid(3, 3, new Vector2Int(1, 1), 3f);
+        Component provider = CreateProvider(grid, 1 << 12);
+        Component agent = CreateAgent(out Type agentType);
+        Vector3 hunterPosition = grid.GridToWorldPosition(2, 2) +
+            Vector3.right * 0.95f + Vector3.forward * 0.95f;
+        Vector3 lastCellCenter = grid.GridToWorldPosition(2, 2);
+        agent.transform.position = grid.GridToWorldPosition(0, 0);
+        agentType.GetMethod("Configure").Invoke(agent, new object[] { false, 0.1f, 0.2f });
+        ConfigureGraph(agentType, agent, provider);
+
+        GameObject offCenterBlocker = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        objects.Add(offCenterBlocker);
+        offCenterBlocker.layer = 12;
+        offCenterBlocker.transform.position = lastCellCenter + new Vector3(0.65f, 1f, 0.3f);
+        offCenterBlocker.transform.localScale = new Vector3(0.1f, 2f, 0.1f);
+        Physics.SyncTransforms();
+
+        Assert.IsTrue(InvokeTryMove(agentType, agent, hunterPosition, 0.315f, out bool moving));
+        Assert.IsTrue(moving);
+        Assert.That(GetStatus(agentType, agent), Is.EqualTo("FollowingPath"));
+
+        for (int attempt = 0; attempt < 12; attempt++)
+        {
+            Vector3 nextWaypoint = GetMovementTarget(agentType, agent);
+            if (nextWaypoint == lastCellCenter) break;
+
+            agent.transform.position = nextWaypoint;
+            Assert.IsTrue(InvokeTryMove(agentType, agent, hunterPosition, 0.315f, out _));
+        }
+
+        Assert.That(GetMovementTarget(agentType, agent), Is.EqualTo(lastCellCenter));
+        Assert.That(Vector3.Distance(lastCellCenter, hunterPosition), Is.GreaterThan(0.9f));
+
+        // From an off-center position, do not cut across the blocked final approach.
+        agent.transform.position = lastCellCenter + new Vector3(0.35f, 0f, -0.35f);
+        Assert.IsTrue(InvokeTryMove(agentType, agent, hunterPosition, 0.315f, out moving));
+
+        Assert.IsTrue(moving);
+        Assert.That(GetStatus(agentType, agent), Is.EqualTo("FollowingPath"));
+        Assert.That(GetMovementTarget(agentType, agent), Is.EqualTo(lastCellCenter));
+
+        // The Hunter remains stationary while the Wolf reaches the final A* cell center.
+        agent.transform.position = lastCellCenter;
+        Assert.IsTrue(InvokeTryMove(agentType, agent, hunterPosition, 0.315f, out moving));
+
+        Assert.IsTrue(moving);
+        Assert.That(GetStatus(agentType, agent), Is.EqualTo("FollowingPath"));
+        Assert.That(GetMovementTarget(agentType, agent), Is.EqualTo(hunterPosition));
+    }
+
+    [Test]
     public void TryMoveTowards_OffsetStartChoosesInitialCellCenterBeforeNextWaypoint()
     {
         NavigationGrid grid = CreateGrid(3, 3, new Vector2Int(1, 1));
@@ -164,7 +217,7 @@ public sealed class GraphNavigationAgentTests
         return root.AddComponent(agentType);
     }
 
-    private Component CreateProvider(NavigationGrid grid)
+    private Component CreateProvider(NavigationGrid grid, int obstacleLayerMask = 0)
     {
         GameObject root = new GameObject("GraphNavigationAgentTests_Provider");
         objects.Add(root);
@@ -172,18 +225,18 @@ public sealed class GraphNavigationAgentTests
         Assert.IsNotNull(providerType);
         Component provider = root.AddComponent(providerType);
         providerType.GetMethod("Configure", BindingFlags.Public | BindingFlags.Instance)
-            .Invoke(provider, new object[] { grid, (LayerMask)0 });
+            .Invoke(provider, new object[] { grid, (LayerMask)obstacleLayerMask });
         return provider;
     }
 
-    private NavigationGrid CreateGrid(int rows, int columns, Vector2Int? blocked = null)
+    private NavigationGrid CreateGrid(int rows, int columns, Vector2Int? blocked = null, float cellSize = 1f)
     {
         GameObject root = new GameObject("GraphNavigationAgentTests_Grid");
         objects.Add(root);
         NavigationGrid grid = root.AddComponent<NavigationGrid>();
         SetPrivateField(grid, "rows", rows);
         SetPrivateField(grid, "columns", columns);
-        SetPrivateField(grid, "cellSize", 1f);
+        SetPrivateField(grid, "cellSize", cellSize);
         var cells = new List<NavigationGridCell>(rows * columns);
         for (int row = 0; row < rows; row++)
         for (int column = 0; column < columns; column++)
