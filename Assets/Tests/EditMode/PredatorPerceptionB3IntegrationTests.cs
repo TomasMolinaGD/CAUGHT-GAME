@@ -177,7 +177,7 @@ public sealed class PredatorPerceptionB3IntegrationTests
     }
 
     [Test]
-    public void IntegrationSceneEnablesPerceptionOnlyForL1()
+    public void IntegrationSceneEnablesPerceptionForAllWolves()
     {
         Scene scene = EditorSceneManager.OpenScene(IntegrationScenePath, OpenSceneMode.Additive);
         try
@@ -187,9 +187,105 @@ public sealed class PredatorPerceptionB3IntegrationTests
             Assert.That(hunter.GetComponent(Type.GetType("BoidThreat, Assembly-CSharp")), Is.Not.Null);
 
             AssertWolfTarget(scene, "Wolf_Patrol_B3_L1_North", hunter);
-            AssertWolfTarget(scene, "Wolf_Patrol_B3_L2_West", null);
-            AssertWolfTarget(scene, "Wolf_Patrol_B3_L3_South", null);
-            AssertWolfTarget(scene, "Wolf_Patrol_B3_L4_East", null);
+            AssertWolfTarget(scene, "Wolf_Patrol_B3_L2_West", hunter);
+            AssertWolfTarget(scene, "Wolf_Patrol_B3_L3_South", hunter);
+            AssertWolfTarget(scene, "Wolf_Patrol_B3_L4_East", hunter);
+        }
+        finally
+        {
+            EditorSceneManager.CloseScene(scene, true);
+        }
+    }
+
+    [Test]
+    public void IntegrationSceneKeepsIndependentPerceptionAndNavigationComponents()
+    {
+        Scene scene = EditorSceneManager.OpenScene(IntegrationScenePath, OpenSceneMode.Additive);
+        try
+        {
+            string[] wolfNames =
+            {
+                "Wolf_Patrol_B3_L1_North",
+                "Wolf_Patrol_B3_L2_West",
+                "Wolf_Patrol_B3_L3_South",
+                "Wolf_Patrol_B3_L4_East"
+            };
+            Type fsmType = Type.GetType("PredatorFSM, Assembly-CSharp");
+            Type perceptionType = Type.GetType("PredatorPerception, Assembly-CSharp");
+            Type controllerType = Type.GetType(
+                "PredatorNavigationMovementController, Assembly-CSharp");
+            Type agentType = Type.GetType("GraphNavigationAgent, Assembly-CSharp");
+            var fsms = new HashSet<Component>();
+            var perceptions = new HashSet<Component>();
+            var controllers = new HashSet<Component>();
+            var agents = new HashSet<Component>();
+
+            foreach (string wolfName in wolfNames)
+            {
+                GameObject wolf = FindSceneObject(scene, wolfName);
+                Assert.That(wolf, Is.Not.Null, $"Missing {wolfName}.");
+                Component fsm = wolf.GetComponent(fsmType);
+                Component perception = wolf.GetComponent(perceptionType);
+                Component controller = wolf.GetComponent(controllerType);
+                Component agent = wolf.GetComponent(agentType);
+                Assert.That(fsm, Is.Not.Null, $"{wolfName} is missing PredatorFSM.");
+                Assert.That(perception, Is.Not.Null, $"{wolfName} is missing PredatorPerception.");
+                Assert.That(controller, Is.Not.Null,
+                    $"{wolfName} is missing PredatorNavigationMovementController.");
+                Assert.That(agent, Is.Not.Null, $"{wolfName} is missing GraphNavigationAgent.");
+                Assert.That(fsms.Add(fsm), Is.True);
+                Assert.That(perceptions.Add(perception), Is.True);
+                Assert.That(controllers.Add(controller), Is.True);
+                Assert.That(agents.Add(agent), Is.True);
+            }
+        }
+        finally
+        {
+            EditorSceneManager.CloseScene(scene, true);
+        }
+    }
+
+    [Test]
+    public void HunterPerceptionIdentifiesEachWolfThroughItsThreatCollider()
+    {
+        Scene scene = EditorSceneManager.OpenScene(IntegrationScenePath, OpenSceneMode.Additive);
+        string[] wolfNames =
+        {
+            "Wolf_Patrol_B3_L1_North",
+            "Wolf_Patrol_B3_L2_West",
+            "Wolf_Patrol_B3_L3_South",
+            "Wolf_Patrol_B3_L4_East"
+        };
+        try
+        {
+            GameObject hunter = FindSceneObject(scene, "Hunter_Parcial2");
+            Component perception = hunter.GetComponent(Type.GetType("HunterPerception, Assembly-CSharp"));
+            Assert.That(perception, Is.Not.Null);
+
+            var wolves = new List<GameObject>();
+            foreach (string wolfName in wolfNames)
+            {
+                GameObject wolf = FindSceneObject(scene, wolfName);
+                Assert.That(wolf, Is.Not.Null, $"Missing {wolfName}.");
+                wolves.Add(wolf);
+            }
+
+            foreach (GameObject wolf in wolves)
+                wolf.SetActive(false);
+
+            foreach (GameObject wolf in wolves)
+            {
+                wolf.SetActive(true);
+                hunter.transform.position = FindVisibleHunterPosition(wolf.transform.position);
+                Physics.SyncTransforms();
+                Invoke(perception, "ForceRefresh");
+
+                Assert.That(GetProperty<Component>(perception, "ClosestWolf"),
+                    Is.EqualTo(wolf.GetComponent(Type.GetType("PredatorFSM, Assembly-CSharp"))),
+                    $"HunterPerception did not identify {wolf.name} through its trigger collider.");
+
+                wolf.SetActive(false);
+            }
         }
         finally
         {
@@ -294,6 +390,14 @@ public sealed class PredatorPerceptionB3IntegrationTests
         Assert.That(serializedPerception.FindProperty("fieldOfView").floatValue, Is.EqualTo(120f));
         Assert.That(serializedPerception.FindProperty("obstacleLayers").intValue,
             Is.EqualTo(1 << ObstacleLayer));
+
+        CapsuleCollider[] threatColliders = wolf.GetComponents<CapsuleCollider>();
+        Assert.That(threatColliders, Has.Length.EqualTo(1));
+        Assert.That(threatColliders[0].isTrigger, Is.True);
+        Assert.That(threatColliders[0].enabled, Is.True);
+        Assert.That(threatColliders[0].radius, Is.EqualTo(0.35f).Within(0.0001f));
+        Assert.That(threatColliders[0].height, Is.EqualTo(1.6f).Within(0.0001f));
+        Assert.That(threatColliders[0].center, Is.EqualTo(new Vector3(0f, 0.8f, 0f)));
     }
 
     private static GameObject FindSceneObject(Scene scene, string name)
@@ -305,6 +409,29 @@ public sealed class PredatorPerceptionB3IntegrationTests
                 if (transforms[i].name == name) return transforms[i].gameObject;
         }
         return null;
+    }
+
+    private static Vector3 FindVisibleHunterPosition(Vector3 wolfPosition)
+    {
+        Vector3[] offsets =
+        {
+            Vector3.right * 2f,
+            Vector3.left * 2f,
+            Vector3.forward * 2f,
+            Vector3.back * 2f
+        };
+
+        for (int i = 0; i < offsets.Length; i++)
+        {
+            Vector3 candidate = wolfPosition + offsets[i];
+            if (!Physics.Linecast(candidate + Vector3.up, wolfPosition + Vector3.up,
+                    1 << ObstacleLayer, QueryTriggerInteraction.Ignore))
+            {
+                return candidate;
+            }
+        }
+
+        return wolfPosition + Vector3.right * 2f;
     }
 
     private static MethodInfo FindMethod(Type type, string name, int parameterCount)
