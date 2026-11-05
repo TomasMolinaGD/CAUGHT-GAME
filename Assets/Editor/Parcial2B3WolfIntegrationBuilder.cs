@@ -20,8 +20,8 @@ public static class Parcial2B3WolfIntegrationBuilder
     private const float StoppingDistance = 0.25f;
     private const float ViewDistance = 18f;
     private const float FieldOfView = 120f;
-    private const float L1ThreatColliderRadius = 0.35f;
-    private const float L1ThreatColliderHeight = 1.6f;
+    private const float ThreatColliderRadius = 0.35f;
+    private const float ThreatColliderHeight = 1.6f;
     private const string HunterName = "Hunter_Parcial2";
 
     private sealed class PatrolDefinition
@@ -93,7 +93,7 @@ public static class Parcial2B3WolfIntegrationBuilder
 
         for (int i = 0; i < patrols.Length; i++)
         {
-            GameObject targetReference = patrols[i].Definition.Id == "L1" ? hunterTarget : null;
+            GameObject targetReference = hunterTarget;
             CreateWolf(scene, predatorPrefab, wolfController, provider, patrols[i], obstacleMask,
                 targetReference, i == 0);
         }
@@ -327,8 +327,7 @@ public static class Parcial2B3WolfIntegrationBuilder
             EnsureSingleComponent<PredatorNavigationMovementController>(wolf);
         PredatorFSM fsm = EnsureSingleComponent<PredatorFSM>(wolf);
 
-        if (patrol.Definition.Id == "L1")
-            ConfigureL1ThreatCollider(EnsureSingleComponent<CapsuleCollider>(wolf));
+        ConfigureThreatCollider(EnsureSingleComponent<CapsuleCollider>(wolf));
 
         ConfigurePerception(perception, obstacleMask);
         ConfigureAgent(agent, obstacleMask);
@@ -347,11 +346,11 @@ public static class Parcial2B3WolfIntegrationBuilder
         wolf.SetActive(true);
     }
 
-    private static void ConfigureL1ThreatCollider(CapsuleCollider collider)
+    private static void ConfigureThreatCollider(CapsuleCollider collider)
     {
         collider.isTrigger = true;
-        collider.radius = L1ThreatColliderRadius;
-        collider.height = L1ThreatColliderHeight;
+        collider.radius = ThreatColliderRadius;
+        collider.height = ThreatColliderHeight;
         collider.center = new Vector3(0f, 0.8f, 0f);
     }
 
@@ -482,16 +481,15 @@ public static class Parcial2B3WolfIntegrationBuilder
             }
 
             SerializedObject serializedFsm = new SerializedObject(fsm);
-            GameObject expectedTarget = patrol.Definition.Id == "L1" ? hunterTarget : null;
+            GameObject expectedTarget = hunterTarget;
             if (serializedFsm.FindProperty("targetReference").objectReferenceValue != expectedTarget)
                 throw new InvalidOperationException($"{wolfName} has an invalid perception target.");
 
-            if (patrol.Definition.Id == "L1")
             {
                 CapsuleCollider[] threatColliders = wolf.GetComponents<CapsuleCollider>();
                 if (threatColliders.Length != 1 || !threatColliders[0].isTrigger ||
-                    !Mathf.Approximately(threatColliders[0].radius, L1ThreatColliderRadius) ||
-                    !Mathf.Approximately(threatColliders[0].height, L1ThreatColliderHeight) ||
+                    !Mathf.Approximately(threatColliders[0].radius, ThreatColliderRadius) ||
+                    !Mathf.Approximately(threatColliders[0].height, ThreatColliderHeight) ||
                     threatColliders[0].center != new Vector3(0f, 0.8f, 0f))
                 {
                     throw new InvalidOperationException(
