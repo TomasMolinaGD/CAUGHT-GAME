@@ -13,6 +13,7 @@ public static class Parcial2B3WolfIntegrationBuilder
     private const string WolfControllerPath =
         "Assets/Animations/Predator/Predator_WolfIntegration.controller";
     private const string ProviderName = "NavigationGridGraphProvider_WolfIntegration";
+    private const string AlertBootstrapName = "PredatorAlertSystem_B3";
     private const string WaypointRootName = "WolfPatrolWaypoints_B3";
     private const string WolfNamePrefix = "Wolf_Patrol_B3_";
     private const float PatrolSpeed = 2.85f;
@@ -98,6 +99,8 @@ public static class Parcial2B3WolfIntegrationBuilder
                 targetReference, i == 0);
         }
 
+        ConfigureAlertBootstrap(scene, patrols);
+
         ValidateSceneConfiguration(scene, grid, provider, wolfController, patrols, hunterTarget,
             obstacleMask);
 
@@ -107,6 +110,33 @@ public static class Parcial2B3WolfIntegrationBuilder
 
         AssetDatabase.SaveAssets();
         Debug.Log($"Integrated four regional Wolf patrols into preserved B3 copy: {TargetScenePath}");
+    }
+
+    private static void ConfigureAlertBootstrap(Scene scene, PatrolSetup[] patrols)
+    {
+        GameObject bootstrapObject = FindSceneGameObject(scene, AlertBootstrapName);
+        if (bootstrapObject == null)
+        {
+            bootstrapObject = new GameObject(AlertBootstrapName);
+            SceneManager.MoveGameObjectToScene(bootstrapObject, scene);
+        }
+
+        PredatorAlertSystem alertSystem = EnsureSingleComponent<PredatorAlertSystem>(bootstrapObject);
+        PredatorAlertBootstrap bootstrap = EnsureSingleComponent<PredatorAlertBootstrap>(bootstrapObject);
+        SerializedObject serialized = new SerializedObject(bootstrap);
+        serialized.FindProperty("alertSystem").objectReferenceValue = alertSystem;
+        SerializedProperty wolves = serialized.FindProperty("wolves");
+        wolves.arraySize = patrols.Length;
+        for (int i = 0; i < patrols.Length; i++)
+        {
+            string wolfName = $"{WolfNamePrefix}{patrols[i].Definition.Id}_{patrols[i].Definition.RegionName}";
+            PredatorFSM fsm = FindSceneGameObject(scene, wolfName)?.GetComponent<PredatorFSM>();
+            if (fsm == null)
+                throw new InvalidOperationException($"Missing Wolf FSM for alert registration: {wolfName}");
+            wolves.GetArrayElementAtIndex(i).objectReferenceValue = fsm;
+        }
+        serialized.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(bootstrapObject);
     }
 
     private static PatrolDefinition[] CreatePatrolDefinitions()
@@ -413,6 +443,10 @@ public static class Parcial2B3WolfIntegrationBuilder
         if (FindSceneComponents<NavigationGridGraphProvider>(scene).Count != 1)
             throw new InvalidOperationException(
                 "The integration scene must contain exactly one NavigationGridGraphProvider.");
+        List<PredatorAlertSystem> alertSystems = FindSceneComponents<PredatorAlertSystem>(scene);
+        List<PredatorAlertBootstrap> alertBootstraps = FindSceneComponents<PredatorAlertBootstrap>(scene);
+        if (alertSystems.Count != 1 || alertBootstraps.Count != 1)
+            throw new InvalidOperationException("The integration scene must share one alert system and bootstrap.");
 
         SerializedObject serializedProvider = new SerializedObject(provider);
         if (serializedProvider.FindProperty("navigationGrid").objectReferenceValue != grid)
@@ -484,6 +518,14 @@ public static class Parcial2B3WolfIntegrationBuilder
             GameObject expectedTarget = hunterTarget;
             if (serializedFsm.FindProperty("targetReference").objectReferenceValue != expectedTarget)
                 throw new InvalidOperationException($"{wolfName} has an invalid perception target.");
+
+            SerializedObject serializedBootstrap = new SerializedObject(alertBootstraps[0]);
+            SerializedProperty registeredWolves = serializedBootstrap.FindProperty("wolves");
+            if (registeredWolves.arraySize != patrols.Length ||
+                serializedBootstrap.FindProperty("alertSystem").objectReferenceValue != alertSystems[0])
+                throw new InvalidOperationException("The shared Wolf alert registration is incomplete.");
+            if (registeredWolves.GetArrayElementAtIndex(i).objectReferenceValue != fsm)
+                throw new InvalidOperationException($"{wolfName} is not registered with the shared alert system.");
 
             {
                 CapsuleCollider[] threatColliders = wolf.GetComponents<CapsuleCollider>();
