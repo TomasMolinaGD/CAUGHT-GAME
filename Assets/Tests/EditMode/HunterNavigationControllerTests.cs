@@ -551,6 +551,25 @@ public sealed class HunterNavigationControllerTests
     }
 
     [Test]
+    public void StopAndPlaceOnKinematicBodyDoesNotWriteUnsupportedVelocities()
+    {
+        Component movement = hunterObject.AddComponent(FindProjectType("HunterMovement"));
+        Rigidbody body = hunterObject.AddComponent<Rigidbody>();
+        body.isKinematic = true;
+        Type boundsPolicyType = movement.GetType().GetNestedType(
+            "BoundsPolicy", BindingFlags.Public | BindingFlags.NonPublic);
+        SetPrivateField(movement, "boundsPolicy", Enum.Parse(boundsPolicyType, "NavigationGrid"));
+        Vector3 spawnPosition = new Vector3(3f, 0.05f, 4f);
+
+        object result = Invoke(movement, "TryStopAndPlace", spawnPosition);
+
+        LogAssert.NoUnexpectedReceived();
+        Assert.That(result.ToString(), Is.EqualTo("Placed"));
+        Assert.That(hunterObject.transform.position, Is.EqualTo(spawnPosition));
+        Assert.That(body.position, Is.EqualTo(spawnPosition));
+    }
+
+    [Test]
     public void SearchTransitionsToGatherBeforeAttackWhenBothTargetsAreDetected()
     {
         Component fsm = CreateSearchAgent();
@@ -735,6 +754,34 @@ public sealed class HunterNavigationControllerTests
         Assert.That(GetProperty<Vector3>(movement, "Velocity"), Is.EqualTo(Vector3.zero));
         Assert.That(GetProperty<bool>(GetProperty<object>(fsm, "NavigationIntent"), "HasActiveRequest"), Is.True);
         Assert.That(GetActiveRequestId(GetProperty<object>(fsm, "NavigationIntent")), Is.GreaterThan(previousRequestId));
+
+        object navigationController = GetProperty<object>(fsm, "NavigationController");
+        int calculationsAfterRestart = GetProperty<int>(navigationController, "PathCalculationCount");
+        Invoke(navigationController, "Tick");
+
+        Assert.That(GetProperty<Enum>(navigationController, "Status").ToString(), Is.EqualTo("InProgress"));
+        Assert.That(GetProperty<int>(navigationController, "PathCalculationCount"),
+            Is.EqualTo(calculationsAfterRestart + 1));
+        NavigationPathResult searchRoute = (NavigationPathResult)GetProperty<object>(navigationController, "CurrentPath");
+        Assert.That(searchRoute, Is.Not.Null);
+        Assert.That(searchRoute.Cells[0], Is.EqualTo(new Vector2Int(0, 0)),
+            "The fresh Search route must begin in the Hunter Spawn cell.");
+
+        float previousCaptureDeltaTime = Time.captureDeltaTime;
+        try
+        {
+            Time.captureDeltaTime = 0.1f;
+            Invoke(movement, "BeginMovementFrame");
+            Vector3 positionAtSpawn = fsm.transform.position;
+            InvokePrivate(fsm, "ExecuteNavigationMovement");
+
+            Assert.That(fsm.transform.position, Is.Not.EqualTo(positionAtSpawn),
+                "Hunter must resume physical movement from Spawn.");
+        }
+        finally
+        {
+            Time.captureDeltaTime = previousCaptureDeltaTime;
+        }
     }
 
     [Test]

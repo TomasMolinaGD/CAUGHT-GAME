@@ -333,6 +333,8 @@ public class FSMAgent : MonoBehaviour, ICapturableTarget
             return;
         }
 
+        Physics.SyncTransforms();
+
         SetCurrentTarget(null);
         ResetGatherProgress();
         movement.Stop();
@@ -342,7 +344,10 @@ public class FSMAgent : MonoBehaviour, ICapturableTarget
         navigationController?.SetEnabled(true);
         exitRestartDiagnosticReported = false;
         SetVisualsVisible(true);
-        stateMachine.ChangeState(PoliceState.Search);
+        if (stateMachine.ChangeState(PoliceState.Search))
+        {
+            navigationController?.RequestRepath();
+        }
     }
 
     private void ReportExitRestartFailure(string message)
