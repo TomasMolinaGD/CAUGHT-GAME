@@ -93,6 +93,8 @@ public sealed class NavigationGridPathfinderTests
         }
 
         NavigationPathResult hunterRoute = Find(2, 0, 2, 4, NavigationAgentType.Hunter);
+        Assert.That(grid.SetZone(2, 1, NavigationGridZone.HuntingGround), Is.True);
+        Assert.That(Find(2, 0, 2, 1, NavigationAgentType.Wolf).Status, Is.EqualTo(NavigationPathStatus.Success));
         NavigationPathResult wolfRoute = Find(2, 0, 2, 4, NavigationAgentType.Wolf);
         NavigationPathResult wolfSafeDestination = Find(2, 0, 2, 2, NavigationAgentType.Wolf);
         NavigationPathResult wolfSafeStart = Find(2, 2, 2, 4, NavigationAgentType.Wolf);

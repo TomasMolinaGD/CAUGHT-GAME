@@ -15,6 +15,12 @@ namespace CaughtGame.Navigation
         public static NavigationPathResult FindPath(NavigationGrid grid,
             int startRow, int startColumn, int destinationRow, int destinationColumn,
             NavigationAgentType agentType)
+            => FindPath(grid, startRow, startColumn, destinationRow, destinationColumn, agentType, null);
+
+        // Per-query edge exclusions only. Costs, admissible heuristic and grid data are unchanged.
+        internal static NavigationPathResult FindPath(NavigationGrid grid,
+            int startRow, int startColumn, int destinationRow, int destinationColumn,
+            NavigationAgentType agentType, Func<bool, Vector3, Vector3, bool> allowEdge)
         {
             if (!HasValidData(grid))
             {
@@ -110,6 +116,8 @@ namespace CaughtGame.Navigation
                     }
 
                     Vector3 neighborPosition = grid.GridToWorldPosition(neighborRow, neighborColumn);
+                    if (allowEdge != null && !allowEdge(currentIndex == startIndex, currentPosition, neighborPosition))
+                        continue;
                     float candidateCost = costs[currentIndex] + Vector3.Distance(currentPosition, neighborPosition);
                     if (candidateCost >= costs[neighborIndex])
                     {

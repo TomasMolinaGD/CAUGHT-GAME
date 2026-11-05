@@ -143,6 +143,15 @@ public sealed class HunterNavigationController
         {
             CalculateRoute(request);
         }
+        else if (Status == HunterNavigationControllerStatus.InProgress && currentPath != null &&
+            (!IsWalkable(currentPath.Cells[currentPath.Cells.Count - 1]) ||
+             (nextWaypointIndex < currentPath.Cells.Count && !IsWalkable(currentPath.Cells[nextWaypointIndex]))))
+        {
+            // Never hand movement a step that became blocked after the plan was accepted.
+            currentPath = null;
+            hasTerminalDestination = false;
+            Status = HunterNavigationControllerStatus.NoPath;
+        }
         else if (currentPath != null && HasReachedDestination(request))
         {
             Status = HunterNavigationControllerStatus.DestinationReached;
@@ -209,8 +218,17 @@ public sealed class HunterNavigationController
             return;
         }
 
-        currentPath = NavigationGridPathfinder.FindPath(
-            grid, startRow, startColumn, destinationRow, destinationColumn, NavigationAgentType.Hunter);
+        currentPath = request.PlannedPath != null
+            ? ValidatePlannedPath(request.PlannedPath, startRow, startColumn,
+                destinationRow, destinationColumn)
+            : NavigationGridPathfinder.FindPath(
+                grid, startRow, startColumn, destinationRow, destinationColumn,
+                NavigationAgentType.Hunter);
+        if (currentPath == null)
+        {
+            Status = HunterNavigationControllerStatus.NoPath;
+            return;
+        }
         Status = MapStatus(currentPath.Status);
         if (Status != HunterNavigationControllerStatus.InProgress)
         {
@@ -232,6 +250,36 @@ public sealed class HunterNavigationController
             Status = HunterNavigationControllerStatus.DestinationReached;
         }
     }
+
+    private NavigationPathResult ValidatePlannedPath(
+        NavigationPathResult plannedPath,
+        int startRow,
+        int startColumn,
+        int destinationRow,
+        int destinationColumn)
+    {
+        if (plannedPath.Status != NavigationPathStatus.Success ||
+            plannedPath.Cells.Count == 0 || plannedPath.Waypoints.Count == 0 ||
+            plannedPath.Cells[0] != new Vector2Int(startColumn, startRow) ||
+            plannedPath.Cells[plannedPath.Cells.Count - 1] !=
+                new Vector2Int(destinationColumn, destinationRow))
+        {
+            return null;
+        }
+
+        for (int i = 0; i < plannedPath.Cells.Count; i++)
+        {
+            if (!IsWalkable(plannedPath.Cells[i]))
+            {
+                return null;
+            }
+        }
+
+        return plannedPath;
+    }
+
+    private bool IsWalkable(Vector2Int cellPosition) =>
+        grid != null && grid.TryGetCell(cellPosition.y, cellPosition.x, out NavigationGridCell cell) && cell.Walkable;
 
     private bool HasReachedDestination(HunterNavigationRequest request)
     {

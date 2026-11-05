@@ -1,4 +1,5 @@
 using System;
+using CaughtGame.Navigation;
 using UnityEngine;
 
 public readonly struct HunterNavigationRequest
@@ -7,13 +8,16 @@ public readonly struct HunterNavigationRequest
     public Vector3 Destination { get; }
     public float StoppingDistance { get; }
     public float SpeedMultiplier { get; }
+    public NavigationPathResult PlannedPath { get; }
 
-    internal HunterNavigationRequest(ulong id, Vector3 destination, float stoppingDistance, float speedMultiplier)
+    internal HunterNavigationRequest(ulong id, Vector3 destination, float stoppingDistance,
+        float speedMultiplier, NavigationPathResult plannedPath)
     {
         Id = id;
         Destination = destination;
         StoppingDistance = stoppingDistance;
         SpeedMultiplier = speedMultiplier;
+        PlannedPath = plannedPath;
     }
 }
 
@@ -24,11 +28,13 @@ public sealed class HunterNavigationIntent
 
     public bool HasActiveRequest => activeRequest.HasValue;
 
-    public ulong RequestNavigation(Vector3 destination, float stoppingDistance, float speedMultiplier = 1f)
+    public ulong RequestNavigation(Vector3 destination, float stoppingDistance,
+        float speedMultiplier = 1f, NavigationPathResult plannedPath = null)
     {
         Validate(destination, stoppingDistance, speedMultiplier);
         ulong id = ++nextRequestId;
-        activeRequest = new HunterNavigationRequest(id, destination, stoppingDistance, speedMultiplier);
+        activeRequest = new HunterNavigationRequest(
+            id, destination, stoppingDistance, speedMultiplier, plannedPath);
         return id;
     }
 
@@ -37,7 +43,8 @@ public sealed class HunterNavigationIntent
         Vector3 destination,
         float stoppingDistance,
         float speedMultiplier,
-        out ulong newId)
+        out ulong newId,
+        NavigationPathResult plannedPath = null)
     {
         newId = 0;
         if (!activeRequest.HasValue || activeRequest.Value.Id != expectedId)
@@ -47,7 +54,8 @@ public sealed class HunterNavigationIntent
 
         Validate(destination, stoppingDistance, speedMultiplier);
         newId = ++nextRequestId;
-        activeRequest = new HunterNavigationRequest(newId, destination, stoppingDistance, speedMultiplier);
+        activeRequest = new HunterNavigationRequest(
+            newId, destination, stoppingDistance, speedMultiplier, plannedPath);
         return true;
     }
 

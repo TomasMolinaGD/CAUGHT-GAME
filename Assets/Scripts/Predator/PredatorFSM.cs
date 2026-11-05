@@ -205,6 +205,7 @@ public sealed class PredatorFSM : MonoBehaviour
     private bool DiscardUnavailableTarget()
     {
         if (CurrentTarget == null || IsTargetAvailable(CurrentTarget)) return false;
+        if (CurrentState == PredatorStateId.Attack) return false;
         ClearTargetAndReturnToPatrol();
         return true;
     }

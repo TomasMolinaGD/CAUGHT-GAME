@@ -59,7 +59,7 @@ public sealed class HunterNavigationControllerTests
     [Test]
     public void ChangedRequestCalculatesOneHunterRouteAndExposesWaypoint()
     {
-        Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+        Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
 
@@ -71,7 +71,7 @@ public sealed class HunterNavigationControllerTests
     [Test]
     public void RepeatedTicksDoNotRecalculateUnchangedRequest()
     {
-        Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+        Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
@@ -81,12 +81,28 @@ public sealed class HunterNavigationControllerTests
     }
 
     [Test]
-    public void ReplacementDropsOldRouteAndCalculatesNewRequest()
+    public void CachedRouteReportsBlockedNextStepWithoutRecalculating()
     {
-        ulong firstId = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+        Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
-        object[] replacement = { firstId, new Vector3(0f, 0f, 8f), 0.1f, 1f, null };
+        Assert.That(GetProperty<Enum>(controller, "Status").ToString(), Is.EqualTo("InProgress"));
+        Assert.That((bool)Invoke(gridObject.GetComponent(gridType), "SetWalkable", 0, 1, false), Is.True);
+        Invoke(controller, "Tick");
+        Invoke(controller, "Tick");
+
+        Assert.That(GetProperty<Enum>(controller, "Status").ToString(), Is.EqualTo("NoPath"));
+        Assert.That((bool)Invoke(controller, "TryGetNextWaypoint", new object[] { null }), Is.False);
+        Assert.That(GetProperty<int>(controller, "PathCalculationCount"), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void ReplacementDropsOldRouteAndCalculatesNewRequest()
+    {
+        ulong firstId = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
+        Invoke(controller, "SetEnabled", true);
+        Invoke(controller, "Tick");
+        object[] replacement = { firstId, new Vector3(0f, 0f, 8f), 0.1f, 1f, null, null };
         Assert.That((bool)Invoke(intent, "ReplaceNavigation", replacement), Is.True);
         Assert.That(GetProperty<object>(controller, "CurrentPath"), Is.Null);
         Invoke(controller, "Tick");
@@ -98,7 +114,7 @@ public sealed class HunterNavigationControllerTests
     [Test]
     public void CancellationClearsCachedRoute()
     {
-        ulong id = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+        ulong id = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
         Assert.That((bool)Invoke(intent, "CancelNavigation", id), Is.True);
@@ -112,7 +128,7 @@ public sealed class HunterNavigationControllerTests
     [Test]
     public void BlockedDestinationIsReportedWithoutDirectVisibilityShortcut()
     {
-        ulong id = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+        ulong id = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
         Component grid = (Component)gridObject.GetComponent(gridType);
         Invoke(grid, "SetWalkable", 0, 2, false);
         Invoke(controller, "SetEnabled", true);
@@ -131,7 +147,7 @@ public sealed class HunterNavigationControllerTests
             Invoke(gridObject.GetComponent(gridType), "SetWalkable", 1, column, false);
         }
 
-        Invoke(intent, "RequestNavigation", new Vector3(0f, 0f, 8f), 0.1f, 1f);
+        Invoke(intent, "RequestNavigation", new Vector3(0f, 0f, 8f), 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
 
@@ -142,7 +158,7 @@ public sealed class HunterNavigationControllerTests
     [Test]
     public void DestinationOutsideGridIsReportedAsInvalid()
     {
-        Invoke(intent, "RequestNavigation", new Vector3(-1f, 0f, -1f), 0.1f, 1f);
+        Invoke(intent, "RequestNavigation", new Vector3(-1f, 0f, -1f), 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
 
@@ -154,7 +170,7 @@ public sealed class HunterNavigationControllerTests
     public void DestinationAtGridCellCenterDoesNotCreateDuplicateTerminalWaypoint()
     {
         Vector3 destination = new Vector3(10f, 0f, 2f);
-        ulong requestId = (ulong)Invoke(intent, "RequestNavigation", destination, 0.1f, 1f);
+        ulong requestId = (ulong)Invoke(intent, "RequestNavigation", destination, 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
 
@@ -167,7 +183,7 @@ public sealed class HunterNavigationControllerTests
     public void DescenteredDestinationIsExposedAsTerminalSegment()
     {
         Vector3 destination = new Vector3(9f, 0f, 2f);
-        ulong requestId = (ulong)Invoke(intent, "RequestNavigation", destination, 0.1f, 1f);
+        ulong requestId = (ulong)Invoke(intent, "RequestNavigation", destination, 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
 
@@ -182,12 +198,12 @@ public sealed class HunterNavigationControllerTests
     public void ReplacedRequestInvalidatesThePreviousTerminalSegment()
     {
         Vector3 firstDestination = new Vector3(9f, 0f, 2f);
-        ulong firstId = (ulong)Invoke(intent, "RequestNavigation", firstDestination, 0.1f, 1f);
+        ulong firstId = (ulong)Invoke(intent, "RequestNavigation", firstDestination, 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
         ulong oldVersion = GetProperty<ulong>(controller, "CurrentRouteVersion");
 
-        object[] replacement = { firstId, new Vector3(10f, 0f, 2f), 0.1f, 1f, null };
+        object[] replacement = { firstId, new Vector3(10f, 0f, 2f), 0.1f, 1f, null, null };
         Assert.That((bool)Invoke(intent, "ReplaceNavigation", replacement), Is.True);
         object[] oldTerminal = { firstId, oldVersion, null };
         Assert.That((bool)Invoke(controller, "TryGetTerminalDestination", oldTerminal), Is.False);
@@ -199,7 +215,7 @@ public sealed class HunterNavigationControllerTests
     [Test]
     public void WaypointsAdvanceInOrderAndReachTheDestination()
     {
-        ulong requestId = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+        ulong requestId = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
         ulong version = GetProperty<ulong>(controller, "CurrentRouteVersion");
@@ -220,7 +236,7 @@ public sealed class HunterNavigationControllerTests
     [Test]
     public void RecalculationVersionRejectsCallbacksForThePreviousRoute()
     {
-        ulong requestId = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+        ulong requestId = (ulong)Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
         ulong oldVersion = GetProperty<ulong>(controller, "CurrentRouteVersion");
@@ -239,7 +255,7 @@ public sealed class HunterNavigationControllerTests
     {
         hunterObject.transform.position = new Vector3(2f, 3f, 2f);
         Vector3 beforeTick = hunterObject.transform.position;
-        Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+        Invoke(intent, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
         Invoke(controller, "SetEnabled", true);
         Invoke(controller, "Tick");
 
@@ -260,7 +276,7 @@ public sealed class HunterNavigationControllerTests
         Assert.That(configuredController, Is.Not.Null);
         Assert.That(GetProperty<bool>(fsm, "GridNavigationEnabled"), Is.True);
 
-        Invoke(fsm, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f);
+        Invoke(fsm, "RequestNavigation", new Vector3(8f, 0f, 0f), 0.1f, 1f, null);
         Invoke(configuredController, "Tick");
         Assert.That(GetProperty<Enum>(configuredController, "Status").ToString(), Is.EqualTo("InProgress"));
     }

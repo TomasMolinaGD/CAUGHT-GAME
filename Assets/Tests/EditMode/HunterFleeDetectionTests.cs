@@ -312,7 +312,7 @@ public sealed class HunterFleeDetectionTests
         Component hunter = CreateHunterAgent(true, 0.3f, grid, grid.GridToWorldPosition(2, 0));
 
         ulong searchRequestId = (ulong)Invoke(
-            hunter, "RequestNavigation", grid.GridToWorldPosition(4, 4), 0.25f, 1f);
+            hunter, "RequestNavigation", grid.GridToWorldPosition(4, 4), 0.25f, 1f, null);
         ChangeState(hunter, "Flee");
         object request = GetActiveNavigationRequest(hunter);
 
@@ -340,6 +340,252 @@ public sealed class HunterFleeDetectionTests
         Assert.That(GetProperty<int>(
             GetProperty<object>(hunter, "NavigationController"), "PathCalculationCount"),
             Is.EqualTo(calculationCount));
+    }
+
+    [Test]
+    public void FleeControllerExecutesExactThreatScoredPath()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "SafeZone_A");
+        Component hunter = CreateHunterAgent(true, 0f, grid, grid.GridToWorldPosition(2, 0));
+        CreateWolf(hunter.transform.position + Vector3.right * 2f);
+        Component perception = (Component)GetProperty<object>(hunter, "Perception");
+        Physics.SyncTransforms();
+        Invoke(perception, "ForceRefresh");
+
+        ChangeState(hunter, "Flee");
+        object request = GetActiveNavigationRequest(hunter);
+        object plannedPath = GetProperty<object>(request, "PlannedPath");
+        InvokePrivate(hunter, "Update");
+        object controller = GetProperty<object>(hunter, "NavigationController");
+
+        Assert.That(plannedPath, Is.Not.Null);
+        Assert.That(GetProperty<object>(controller, "CurrentPath"), Is.SameAs(plannedPath));
+        Assert.That(GetProperty<int>(controller, "PathCalculationCount"), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void StableThreatDoesNotReplaceFleeRequestOrReplanEveryFrame()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 0, 4, "SafeZone_A");
+        SetSafeZone(grid, 4, 4, "SafeZone_B");
+        Component hunter = CreateHunterAgent(true, 0f, grid, grid.GridToWorldPosition(2, 0));
+        CreateWolf(hunter.transform.position + Vector3.right * 2f);
+        Component perception = (Component)GetProperty<object>(hunter, "Perception");
+        Physics.SyncTransforms();
+        Invoke(perception, "ForceRefresh");
+        ChangeState(hunter, "Flee");
+        ulong requestId = GetProperty<ulong>(GetActiveNavigationRequest(hunter), "Id");
+        object fleeState = GetProperty<object>(GetPrivateField(hunter, "stateMachine"),
+            "CurrentState");
+        InvokePrivate(hunter, "Update");
+        object controller = GetProperty<object>(hunter, "NavigationController");
+        int calculationCount = GetProperty<int>(controller, "PathCalculationCount");
+
+        InvokePrivate(fleeState, "Tick", 1f);
+        InvokePrivate(fleeState, "Tick", 1f);
+
+        Assert.That(GetProperty<ulong>(GetActiveNavigationRequest(hunter), "Id"),
+            Is.EqualTo(requestId));
+        Assert.That(GetProperty<int>(controller, "PathCalculationCount"),
+            Is.EqualTo(calculationCount));
+    }
+
+    [TestCase("SafeZone_East", "SafeZone_West")]
+    [TestCase("SafeZone_A", "SafeZone_A")]
+    public void SignificantThreatMovementReplansAfterCooldownWithoutOscillatingBetweenTiedDestinations(
+        string eastZone, string westZone)
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, eastZone);
+        SetSafeZone(grid, 2, 0, westZone);
+        Vector3 hunterStart = grid.GridToWorldPosition(2, 2);
+        Component hunter = CreateHunterAgent(true, 0f, grid, hunterStart);
+        Vector3 eastRouteThreat = Vector3.Lerp(
+            hunterStart, grid.GridToWorldPosition(2, 3), 0.5f);
+        Vector3 westRouteThreat = Vector3.Lerp(
+            hunterStart, grid.GridToWorldPosition(2, 1), 0.5f);
+        Component wolf = CreateWolf(eastRouteThreat);
+        Component perception = (Component)GetProperty<object>(hunter, "Perception");
+        SetPrivateField(perception, "<ClosestWolf>k__BackingField", wolf);
+        ChangeState(hunter, "Flee");
+        object initialRequest = GetActiveNavigationRequest(hunter);
+        ulong initialRequestId = GetProperty<ulong>(initialRequest, "Id");
+        Assert.That(GetProperty<Vector3>(initialRequest, "Destination"),
+            Is.EqualTo(grid.GridToWorldPosition(2, 0)));
+        object fleeState = GetProperty<object>(GetPrivateField(hunter, "stateMachine"),
+            "CurrentState");
+
+        wolf.transform.position = westRouteThreat;
+        InvokePrivate(fleeState, "Tick", 0.5f);
+        Assert.That(GetProperty<ulong>(GetActiveNavigationRequest(hunter), "Id"),
+            Is.EqualTo(initialRequestId));
+
+        InvokePrivate(fleeState, "Tick", 0.3f);
+        object replacementRequest = GetActiveNavigationRequest(hunter);
+
+        Assert.That(GetProperty<ulong>(replacementRequest, "Id"),
+            Is.Not.EqualTo(initialRequestId));
+        Assert.That(GetProperty<Vector3>(replacementRequest, "Destination"),
+            Is.EqualTo(grid.GridToWorldPosition(2, 0)));
+        wolf.transform.position = eastRouteThreat;
+        InvokePrivate(fleeState, "Tick", 1f);
+        Assert.That(GetProperty<Vector3>(GetActiveNavigationRequest(hunter), "Destination"),
+            Is.EqualTo(grid.GridToWorldPosition(2, 0)));
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public void FleeRouteDiagnosticsOnlyEmitsDecisionsAndDoesNotChangeRequests(bool trace)
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "East");
+        SetSafeZone(grid, 2, 0, "West");
+        Vector3 start = grid.GridToWorldPosition(2, 2);
+        Component hunter = CreateHunterAgent(true, 0f, grid, start);
+        if (trace) SetPrivateField(hunter, "logFleeRouteDecisions", true);
+        Component wolf = CreateWolf(start + Vector3.right * 2f);
+        SetPrivateField(GetProperty<object>(hunter, "Perception"), "<ClosestWolf>k__BackingField", wolf);
+        var lines = new List<string>();
+        void Collect(string line, string stack, LogType type)
+        {
+            if (line.StartsWith("[FleeRoute]")) lines.Add(line);
+        }
+        Application.logMessageReceived += Collect;
+        try
+        {
+            ChangeState(hunter, "Flee");
+            ulong initialId = GetProperty<ulong>(GetActiveNavigationRequest(hunter), "Id");
+            object flee = GetProperty<object>(GetPrivateField(hunter, "stateMachine"), "CurrentState");
+            object controller = GetProperty<object>(hunter, "NavigationController");
+            Invoke(controller, "SetEnabled", true);
+            Invoke(controller, "Tick");
+            InvokePrivate(flee, "Tick", 1f); // Stable Wolf: no decision.
+            wolf.transform.position = start + Vector3.right * 4f;
+            InvokePrivate(flee, "Tick", 1f); // West still wins.
+            Assert.That(GetProperty<ulong>(GetActiveNavigationRequest(hunter), "Id"), Is.EqualTo(initialId));
+            wolf.transform.position = start + Vector3.left * 2f;
+            InvokePrivate(flee, "Tick", 1f);
+            ulong newId = GetProperty<ulong>(GetActiveNavigationRequest(hunter), "Id");
+            Assert.That(newId, Is.Not.EqualTo(initialId));
+            Assert.That(lines.Count, Is.EqualTo(trace ? 3 : 0));
+            if (trace)
+            {
+                Assert.That(lines[0], Does.Contain("event=initial").And.Contain("active=[none]")
+                    .And.Contain("candidate=[zone=West").And.Contain("InitialApproach="));
+                Assert.That(lines[1], Does.Contain("event=replace").And.Contain("decision=keep/same-destination")
+                    .And.Contain($"requestAfter={initialId}"));
+                Assert.That(lines[2], Does.Contain("decision=replace-accepted").And.Contain("active=[zone=West")
+                    .And.Contain("candidate=[zone=West").And.Contain($"requestAfter={newId}"));
+            }
+        }
+        finally { Application.logMessageReceived -= Collect; }
+    }
+
+    [Test]
+    public void ReplanFromNewCellAdoptsShorterReachablePathEvenWhenItIsRiskier()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 0, "West");
+        SetSafeZone(grid, 2, 4, "East");
+        Vector3 start = grid.GridToWorldPosition(2, 2);
+        Component hunter = CreateHunterAgent(true, 0f, grid, start);
+        Component wolf = CreateWolf(start + Vector3.right * 2f);
+        SetPrivateField(GetProperty<object>(hunter, "Perception"), "<ClosestWolf>k__BackingField", wolf);
+        ChangeState(hunter, "Flee");
+        object initial = GetActiveNavigationRequest(hunter);
+        Assert.That(GetProperty<Vector3>(initial, "Destination"), Is.EqualTo(grid.GridToWorldPosition(2, 0)));
+        object controller = GetProperty<object>(hunter, "NavigationController");
+        Invoke(controller, "Tick");
+
+        // Controlled change of origin: East now costs 4, West costs 12.
+        hunter.transform.position = grid.GridToWorldPosition(2, 3);
+        wolf.transform.position = hunter.transform.position + Vector3.right * 2f;
+        object flee = GetProperty<object>(GetPrivateField(hunter, "stateMachine"), "CurrentState");
+        InvokePrivate(flee, "Tick", 1f);
+        object replacement = GetActiveNavigationRequest(hunter);
+        Assert.That(GetProperty<ulong>(replacement, "Id"), Is.Not.EqualTo(GetProperty<ulong>(initial, "Id")));
+        Assert.That(GetProperty<Vector3>(replacement, "Destination"), Is.EqualTo(grid.GridToWorldPosition(2, 4)));
+        var planned = GetProperty<NavigationPathResult>(replacement, "PlannedPath");
+        Assert.That(planned.TotalCost, Is.GreaterThan(4f), "The nearest destination admits a detour around the Wolf.");
+        Assert.That(SafeZonePathSelector.EvaluateThreat(planned, hunter.transform.position,
+            wolf.transform.position, 0.9f, 0.35f, 1).CrossesCaptureRadius, Is.False);
+        Invoke(controller, "Tick");
+        Assert.That(GetProperty<object>(controller, "CurrentPath"), Is.SameAs(planned));
+    }
+
+    [Test]
+    public void DefaultFleeRequestUsesSixMetersPerSecondAtHunterBaseSpeed()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "East");
+        Component hunter = CreateHunterAgent(true, 0f, grid, grid.GridToWorldPosition(2, 0));
+        SetPrivateField(hunter, "pursuitSpeedMultiplier", 1.25f);
+        ChangeState(hunter, "Flee");
+
+        float multiplier = GetProperty<float>(GetActiveNavigationRequest(hunter), "SpeedMultiplier");
+        float baseSpeed = (float)GetPrivateField(GetProperty<object>(hunter, "Movement"), "speed");
+        Assert.That(baseSpeed, Is.EqualTo(3f));
+        Assert.That(multiplier, Is.EqualTo(2f));
+        Assert.That(baseSpeed * multiplier, Is.EqualTo(6f));
+        Assert.That(GetProperty<float>(hunter, "PursuitSpeedMultiplier"), Is.EqualTo(1.25f));
+    }
+
+    [Test]
+    public void MovingWolfCanReplaceDangerousPathToSameCellOnlyAfterCooldown()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 2, 4, "East");
+        Vector3 start = grid.GridToWorldPosition(2, 2);
+        Component hunter = CreateHunterAgent(true, 0f, grid, start);
+        const float configuredFleeMultiplier = 1.9f;
+        SetPrivateField(hunter, "fleeSpeedMultiplier", configuredFleeMultiplier);
+        Component wolf = CreateWolf(start + Vector3.left * 2f);
+        SetPrivateField(GetProperty<object>(hunter, "Perception"), "<ClosestWolf>k__BackingField", wolf);
+        ChangeState(hunter, "Flee");
+        object original = GetActiveNavigationRequest(hunter);
+        Assert.That(GetProperty<float>(original, "SpeedMultiplier"), Is.EqualTo(configuredFleeMultiplier));
+        ulong id = GetProperty<ulong>(original, "Id");
+        object controller = GetProperty<object>(hunter, "NavigationController");
+        object flee = GetProperty<object>(GetPrivateField(hunter, "stateMachine"), "CurrentState");
+        Invoke(controller, "Tick");
+        wolf.transform.position = start + Vector3.right * 2f;
+        InvokePrivate(flee, "Tick", 0.5f);
+        Assert.That(GetProperty<ulong>(GetActiveNavigationRequest(hunter), "Id"), Is.EqualTo(id));
+        InvokePrivate(flee, "Tick", 0.3f);
+        object replacement = GetActiveNavigationRequest(hunter);
+        Assert.That(GetProperty<float>(replacement, "SpeedMultiplier"), Is.EqualTo(configuredFleeMultiplier));
+        ulong newId = GetProperty<ulong>(replacement, "Id");
+        Assert.That(newId, Is.Not.EqualTo(id));
+        Assert.That(GetProperty<Vector3>(replacement, "Destination"), Is.EqualTo(GetProperty<Vector3>(original, "Destination")));
+        var route = GetProperty<NavigationPathResult>(replacement, "PlannedPath");
+        Assert.That(route.Cells, Is.Not.EqualTo(GetProperty<NavigationPathResult>(original, "PlannedPath").Cells));
+        Assert.That(SafeZonePathSelector.EvaluateThreat(route, start, wolf.transform.position, 0.9f, 0.35f, 1)
+            .CrossesCaptureRadius, Is.False);
+        Invoke(controller, "Tick");
+        Assert.That(GetProperty<object>(controller, "CurrentPath"), Is.SameAs(route));
+        InvokePrivate(flee, "Tick", 1f);
+        Assert.That(GetProperty<ulong>(GetActiveNavigationRequest(hunter), "Id"), Is.EqualTo(newId));
+    }
+
+    [Test]
+    public void FleeWithoutDetectedWolfPreservesLeastCostSelection()
+    {
+        NavigationGrid grid = CreateGrid();
+        SetSafeZone(grid, 0, 4, "SafeZone_A");
+        SetSafeZone(grid, 2, 2, "SafeZone_B");
+        Assert.That(grid.SetWalkable(2, 1, false), Is.True);
+        Assert.That(grid.SetWalkable(1, 2, false), Is.True);
+        Assert.That(grid.SetWalkable(3, 2, false), Is.True);
+        Component hunter = CreateHunterAgent(true, 0f, grid, grid.GridToWorldPosition(2, 0));
+
+        ChangeState(hunter, "Flee");
+        object request = GetActiveNavigationRequest(hunter);
+
+        Assert.That(GetProperty<Vector3>(request, "Destination"),
+            Is.EqualTo(grid.GridToWorldPosition(0, 4)));
+        Assert.That(GetProperty<object>(request, "PlannedPath"), Is.Not.Null);
     }
 
     [Test]
@@ -402,18 +648,22 @@ public sealed class HunterFleeDetectionTests
     }
 
     [Test]
-    public void CompletedSafeZoneWaitReturnsToSearch()
+    public void CompletedSafeZoneWaitWithPartialGatherProgressReturnsToSearch()
     {
         NavigationGrid grid = CreateGrid();
         SetSafeZone(grid, 2, 4, "SafeZone_A");
         Component hunter = CreateHunterAgent(
             true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
+        SetPrivateField(hunter, "requiredGathers", 2);
+        InvokePrivate(hunter, "RegisterGatherCompletion");
         object fleeState = ArriveInSafeZone(hunter);
+        Assert.That(GetProperty<bool>(GetProperty<object>(hunter, "NavigationIntent"), "HasActiveRequest"), Is.False);
 
         InvokePrivate(fleeState, "UpdateSafeZoneWait", 5f);
         InvokePrivate(hunter, "Update");
 
         Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Search"));
+        Assert.That(GetProperty<int>(hunter, "CompletedGathers"), Is.EqualTo(1));
     }
 
     [Test]
@@ -468,10 +718,14 @@ public sealed class HunterFleeDetectionTests
         SetSafeZone(grid, 2, 4, "SafeZone_A");
         Component hunter = CreateHunterAgent(
             true, 0.3f, grid, grid.GridToWorldPosition(2, 0), 5f);
-        SetPrivateField(hunter, "requiredGathers", 0);
+        SetPrivateField(hunter, "requiredGathers", 1);
+        InvokePrivate(hunter, "RegisterGatherCompletion");
         object fleeState = ArriveInSafeZone(hunter);
 
-        InvokePrivate(fleeState, "UpdateSafeZoneWait", 5f);
+        InvokePrivate(fleeState, "UpdateSafeZoneWait", 4f);
+        Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Flee"));
+        Assert.That(GetProperty<int>(hunter, "CompletedGathers"), Is.EqualTo(1));
+        InvokePrivate(fleeState, "UpdateSafeZoneWait", 1f);
 
         Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Exit"));
     }
@@ -542,6 +796,45 @@ public sealed class HunterFleeDetectionTests
         Assert.That(GetProperty<Enum>(hunter, "CurrentState").ToString(), Is.EqualTo("Dead"));
         Assert.That(GetPrivateField(fleeState, "isWaitingInSafeZone"), Is.False);
         Assert.That(GetPrivateField(fleeState, "safeZoneWaitRemaining"), Is.EqualTo(0f));
+    }
+
+    [Test]
+    public void BlockedActiveCorridorSwitchesToReachableAlternativeWithoutAWolfRefresh()
+    {
+        NavigationGrid grid = CreateGrid();
+        // A costs 8 along the row. B costs 12 via the west branch.
+        for (int r = 0; r < 5; r++)
+            for (int c = 0; c < 5; c++)
+                grid.SetWalkable(r, c, r == 2 || (c == 1 && r >= 2));
+        SetSafeZone(grid, 2, 4, "A");
+        SetSafeZone(grid, 4, 1, "B");
+        Component hunter = CreateHunterAgent(true, 0f, grid, grid.GridToWorldPosition(2, 2));
+        ChangeState(hunter, "Flee");
+        object controller = GetProperty<object>(hunter, "NavigationController");
+        Invoke(controller, "Tick");
+        Assert.That(GetProperty<object>(controller, "CurrentPath"), Is.Not.Null);
+        Assert.That(GetProperty<Vector3>(GetActiveNavigationRequest(hunter), "Destination"),
+            Is.EqualTo(grid.GridToWorldPosition(2, 4)));
+
+        grid.SetWalkable(2, 3, false); // Block the next step after A's path was adopted.
+        Vector3 before = hunter.transform.position;
+        InvokePrivate(hunter, "Update");
+        Assert.That(hunter.transform.position, Is.EqualTo(before));
+        object alternative = GetActiveNavigationRequest(hunter);
+        Assert.That(GetProperty<Vector3>(alternative, "Destination"), Is.EqualTo(grid.GridToWorldPosition(4, 1)));
+        Invoke(controller, "Tick");
+        Assert.That(GetProperty<object>(controller, "CurrentPath"),
+            Is.SameAs(GetProperty<object>(alternative, "PlannedPath")));
+
+        // B is now in progress; a later, independent obstruction must not exhaust
+        // the retry budget that applied to the earlier failed route.
+        object flee = GetProperty<object>(GetPrivateField(hunter, "stateMachine"), "CurrentState");
+        InvokePrivate(flee, "Tick", 0f);
+        grid.SetWalkable(2, 3, true);
+        grid.SetWalkable(2, 1, false);
+        InvokePrivate(hunter, "Update");
+        Assert.That(GetProperty<Vector3>(GetActiveNavigationRequest(hunter), "Destination"),
+            Is.EqualTo(grid.GridToWorldPosition(2, 4)));
     }
 
     [Test]

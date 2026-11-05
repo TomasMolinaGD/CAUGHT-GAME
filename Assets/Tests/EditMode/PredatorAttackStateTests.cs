@@ -21,6 +21,8 @@ public sealed class PredatorAttackStateTests
     {
         AttackFixture fixture = CreateFixture(0.5f);
         fixture.Target.transform.position = Vector3.forward * 1.2f;
+        Invoke(fixture.Fsm.GetComponent(Type.GetType(
+            "PredatorAnimationController, Assembly-CSharp")), "ConfigureAttackDuration", 10f);
 
         TickStateMachine(fixture.Fsm);
 
@@ -55,6 +57,133 @@ public sealed class PredatorAttackStateTests
         Assert.That(GetProperty<object>(fixture.Combat, "LastCaptureAttemptResult").ToString(),
             Is.EqualTo("Succeeded"));
         Assert.That(GetProperty<int>(fixture.Combat, "CaptureAttemptCount"), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void ValidImpactCapturesOnceAndWaitsForAnimationCompletion()
+    {
+        AttackFixture fixture = CreateFixture(0.5f);
+
+        ReachAttackImpact(fixture);
+
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Attack"));
+        Assert.That(fixture.Target.activeSelf, Is.False);
+        Assert.That(GetProperty<int>(fixture.Combat, "CaptureAttemptCount"), Is.EqualTo(1));
+        Assert.That(InvokePrivate<bool>(fixture.Fsm, "DiscardUnavailableTarget"), Is.False);
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Attack"));
+
+        TickAttackState(fixture, 0f);
+        Assert.That(GetProperty<int>(fixture.Combat, "CaptureAttemptCount"), Is.EqualTo(1));
+
+        FinishAttackAnimation(fixture);
+
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Patrol"));
+    }
+
+    [Test]
+    public void TargetEscapingBeforeImpactFailsAtCurrentDistance()
+    {
+        AttackFixture fixture = CreateFixture(0.5f);
+        fixture.Target.transform.position = Vector3.forward * 1.2f;
+
+        ReachAttackImpact(fixture);
+
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Attack"));
+        Assert.That(fixture.Target.activeSelf, Is.True);
+        Assert.That(GetProperty<object>(fixture.Combat, "LastCaptureAttemptResult").ToString(),
+            Is.EqualTo("Failed"));
+        Assert.That(GetProperty<int>(fixture.Combat, "CaptureAttemptCount"), Is.EqualTo(1));
+
+        FinishAttackAnimation(fixture);
+
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Pursuit"));
+    }
+
+    [Test]
+    public void FailedImpactIsNotRetriedDuringSameAnimation()
+    {
+        AttackFixture fixture = CreateFixture(0.5f);
+        fixture.Target.transform.position = Vector3.forward * 1.2f;
+
+        ReachAttackImpact(fixture);
+        TickAttackState(fixture, 0f);
+
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Attack"));
+        Assert.That(GetProperty<int>(fixture.Combat, "CaptureAttemptCount"), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void WindupApproachesTargetWithoutCreatingNavigationRequest()
+    {
+        AttackFixture fixture = CreateFixture(0.8f, null, true);
+        Invoke(fixture.Fsm.GetComponent(Type.GetType(
+            "PredatorAnimationController, Assembly-CSharp")), "ConfigureAttackDuration", 10f);
+        float initialZ = fixture.Fsm.transform.position.z;
+
+        TickAttackState(fixture, 0.05f);
+
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Attack"));
+        Assert.That(fixture.Fsm.transform.position.z, Is.GreaterThan(initialZ));
+        Assert.That(GetProperty<bool>(fixture.NavigationController, "HasDestination"), Is.False);
+        Assert.That(GetProperty<int>(fixture.Combat, "CaptureAttemptCount"), Is.Zero);
+    }
+
+    [Test]
+    public void BlockedWindupCancelsAttackWithoutCapture()
+    {
+        AttackFixture fixture = CreateFixture(0.8f);
+        Invoke(fixture.Fsm.GetComponent(Type.GetType(
+            "PredatorAnimationController, Assembly-CSharp")), "ConfigureAttackDuration", 10f);
+        GameObject obstacle = CreateObject("AttackImpactObstacle",
+            Vector3.right * 0.38f + Vector3.forward * 0.18f + Vector3.up * 1.5f);
+        obstacle.layer = 12;
+        obstacle.transform.localScale = new Vector3(0.1f, 3f, 0.1f);
+        obstacle.AddComponent<BoxCollider>();
+        Physics.SyncTransforms();
+
+        TickAttackState(fixture, 0.05f);
+
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Pursuit"));
+        Assert.That(fixture.Target.activeSelf, Is.True);
+        Assert.That(GetProperty<int>(fixture.Combat, "CaptureAttemptCount"), Is.Zero);
+    }
+
+    [Test]
+    public void SafeZoneCrossingDuringWindupCancelsAttackWithoutMovement()
+    {
+        AttackFixture fixture = CreateFixture(0.8f);
+        Invoke(fixture.Fsm.GetComponent(Type.GetType(
+            "PredatorAnimationController, Assembly-CSharp")), "ConfigureAttackDuration", 10f);
+        GameObject safeZone = CreateObject("AttackWindupSafeZone",
+            Vector3.forward * 0.125f + Vector3.up);
+        safeZone.transform.localScale = new Vector3(2f, 2f, 0.04f);
+        safeZone.AddComponent<BoxCollider>();
+        Component safeZoneVolume = Add(safeZone, "SafeZoneVolume");
+        InvokePrivate(safeZoneVolume, "OnEnable");
+        Physics.SyncTransforms();
+
+        TickAttackState(fixture, 0.05f);
+
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Pursuit"));
+        Assert.That(fixture.Fsm.transform.position, Is.EqualTo(Vector3.zero));
+        Assert.That(GetProperty<int>(fixture.Combat, "CaptureAttemptCount"), Is.Zero);
+    }
+
+    [Test]
+    public void ObstacleBlockingLineOfSightDuringWindupTransitionsToSearch()
+    {
+        AttackFixture fixture = CreateFixture(0.8f);
+        GameObject obstacle = CreateObject("AttackWindupLosObstacle",
+            Vector3.forward * 0.4f + Vector3.up * 1.5f);
+        obstacle.layer = 12;
+        obstacle.transform.localScale = new Vector3(1f, 3f, 0.1f);
+        obstacle.AddComponent<BoxCollider>();
+        Physics.SyncTransforms();
+
+        TickAttackState(fixture, 0f);
+
+        Assert.That(GetState(fixture.Fsm), Is.EqualTo("Search"));
+        Assert.That(GetProperty<int>(fixture.Combat, "CaptureAttemptCount"), Is.Zero);
     }
 
     [Test]
@@ -194,11 +323,12 @@ public sealed class PredatorAttackStateTests
         Assert.That(fixture.Target.activeSelf, Is.False);
     }
 
-    private AttackFixture CreateFixture(float targetDistance, NavigationGrid grid = null)
+    private AttackFixture CreateFixture(float targetDistance, NavigationGrid grid = null,
+        bool includeNavigationController = false)
     {
         GameObject root = CreateObject("PredatorAttackStateTests_Wolf", Vector3.zero);
         Component controller = null;
-        if (grid != null)
+        if (grid != null || includeNavigationController)
             controller = Add(root, "PredatorNavigationMovementController");
         Component fsm = Add(root, "PredatorFSM");
         Component perception = root.GetComponent(Type.GetType("PredatorPerception, Assembly-CSharp"));
@@ -207,6 +337,7 @@ public sealed class PredatorAttackStateTests
         InvokePrivate(fsm, "CacheDependencies");
         InvokePrivate(fsm, "InitializeStateMachine");
         Invoke(animation, "ConfigureAttackDuration", 0.1f);
+        Invoke(animation, "ConfigureAttackImpactNormalizedTime", 0.5f);
 
         GameObject target = CreateObject("PredatorAttackStateTests_Target",
             Vector3.forward * targetDistance);
@@ -227,7 +358,7 @@ public sealed class PredatorAttackStateTests
         SetBackingField(perception, "HasLastKnownPosition", true);
         ChangeState(fsm, "Attack");
 
-        return new AttackFixture(fsm, perception, combat, target);
+        return new AttackFixture(fsm, perception, combat, controller, target);
     }
 
     private NavigationGrid CreateGridWithSafeZone()
@@ -247,10 +378,34 @@ public sealed class PredatorAttackStateTests
 
     private void CompleteAttack(AttackFixture fixture)
     {
-        object attackState = GetStateMachine(fixture.Fsm).GetType()
-            .GetProperty("CurrentState").GetValue(GetStateMachine(fixture.Fsm));
-        SetPrivateField(attackState, "attackElapsedTime", 1f);
-        TickStateMachine(fixture.Fsm);
+        ReachAttackImpact(fixture);
+        if (GetState(fixture.Fsm) == "Attack")
+            FinishAttackAnimation(fixture);
+    }
+
+    private void ReachAttackImpact(AttackFixture fixture)
+    {
+        object attackState = GetCurrentState(fixture.Fsm);
+        SetPrivateField(attackState, "attackElapsedTime", 0.05f);
+        TickAttackState(fixture, 0f);
+    }
+
+    private void FinishAttackAnimation(AttackFixture fixture)
+    {
+        object attackState = GetCurrentState(fixture.Fsm);
+        SetPrivateField(attackState, "attackElapsedTime", 0.1f);
+        TickAttackState(fixture, 0f);
+    }
+
+    private static void TickAttackState(AttackFixture fixture, float deltaTime)
+    {
+        InvokePrivate(GetCurrentState(fixture.Fsm), "Tick", deltaTime);
+    }
+
+    private static object GetCurrentState(Component fsm)
+    {
+        object stateMachine = GetStateMachine(fsm);
+        return stateMachine.GetType().GetProperty("CurrentState").GetValue(stateMachine);
     }
 
     private GameObject CreateObject(string name, Vector3 position)
@@ -310,6 +465,18 @@ public sealed class PredatorAttackStateTests
             .Invoke(component, null);
     }
 
+    private static T InvokePrivate<T>(Component component, string method)
+    {
+        return (T)component.GetType().GetMethod(method,
+            BindingFlags.Instance | BindingFlags.NonPublic).Invoke(component, null);
+    }
+
+    private static void InvokePrivate(object target, string method, params object[] arguments)
+    {
+        target.GetType().GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic)
+            .Invoke(target, arguments);
+    }
+
     private static T GetProperty<T>(Component component, string name)
     {
         return (T)component.GetType().GetProperty(name).GetValue(component);
@@ -334,17 +501,20 @@ public sealed class PredatorAttackStateTests
 
     private readonly struct AttackFixture
     {
-        public AttackFixture(Component fsm, Component perception, Component combat, GameObject target)
+        public AttackFixture(Component fsm, Component perception, Component combat,
+            Component navigationController, GameObject target)
         {
             Fsm = fsm;
             Perception = perception;
             Combat = combat;
+            NavigationController = navigationController;
             Target = target;
         }
 
         public Component Fsm { get; }
         public Component Perception { get; }
         public Component Combat { get; }
+        public Component NavigationController { get; }
         public GameObject Target { get; }
     }
 }

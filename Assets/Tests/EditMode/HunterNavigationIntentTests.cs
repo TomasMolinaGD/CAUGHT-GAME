@@ -20,7 +20,7 @@ public sealed class HunterNavigationIntentTests
     [Test]
     public void RequestNavigationCreatesInspectableActiveRequest()
     {
-        ulong id = (ulong)Invoke("RequestNavigation", new Vector3(4f, 0f, 8f), 0.5f, 2f);
+        ulong id = (ulong)Invoke("RequestNavigation", new Vector3(4f, 0f, 8f), 0.5f, 2f, null);
 
         Assert.That(GetProperty<bool>("HasActiveRequest"), Is.True);
         object request = GetCurrentRequest(out bool available);
@@ -34,15 +34,15 @@ public sealed class HunterNavigationIntentTests
     [Test]
     public void ReplaceNavigationRequiresCurrentRequestId()
     {
-        ulong firstId = (ulong)Invoke("RequestNavigation", Vector3.right, 0.5f, 1f);
-        object[] arguments = { firstId, Vector3.forward, 1f, 1.5f, null };
+        ulong firstId = (ulong)Invoke("RequestNavigation", Vector3.right, 0.5f, 1f, null);
+        object[] arguments = { firstId, Vector3.forward, 1f, 1.5f, null, null };
         bool replaced = (bool)Invoke("ReplaceNavigation", arguments);
 
         Assert.That(replaced, Is.True);
         ulong secondId = (ulong)arguments[4];
         Assert.That(secondId, Is.Not.EqualTo(firstId));
 
-        object[] staleArguments = { firstId, Vector3.left, 1f, 1f, null };
+        object[] staleArguments = { firstId, Vector3.left, 1f, 1f, null, null };
         Assert.That((bool)Invoke("ReplaceNavigation", staleArguments), Is.False);
         object current = GetCurrentRequest(out bool available);
         Assert.That(available, Is.True);
@@ -53,8 +53,8 @@ public sealed class HunterNavigationIntentTests
     [Test]
     public void CancelNavigationCannotCancelAReplacedRequestWithAnOldId()
     {
-        ulong firstId = (ulong)Invoke("RequestNavigation", Vector3.right, 0.5f, 1f);
-        object[] replaceArguments = { firstId, Vector3.forward, 0.5f, 1f, null };
+        ulong firstId = (ulong)Invoke("RequestNavigation", Vector3.right, 0.5f, 1f, null);
+        object[] replaceArguments = { firstId, Vector3.forward, 0.5f, 1f, null, null };
         Assert.That((bool)Invoke("ReplaceNavigation", replaceArguments), Is.True);
         ulong currentId = (ulong)replaceArguments[4];
 
@@ -67,7 +67,7 @@ public sealed class HunterNavigationIntentTests
     [Test]
     public void CancelAllClearsTheCurrentIntent()
     {
-        Invoke("RequestNavigation", Vector3.right, 0f, 1f);
+        Invoke("RequestNavigation", Vector3.right, 0f, 1f, null);
 
         Invoke("CancelAll");
 

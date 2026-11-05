@@ -15,13 +15,13 @@ public static class PredatorCaptureRegistry
         if (target == null || !target.activeInHierarchy) return true;
         BoidLife life = GetLifeComponent(target);
         if (life != null) return !life.IsAlive;
-        if (CapturedTargets.Contains(target)) return true;
         FSMAgent hunter = GetHunterAgent(target);
         if (hunter != null)
         {
             ICapturableTarget receiver = GetCaptureReceiver(target);
-            return receiver != null && !receiver.IsCaptureAvailable;
+            return receiver == null || !receiver.IsCaptureAvailable;
         }
+        if (CapturedTargets.Contains(target)) return true;
         return !allowExplicitThreat || GetThreatComponent(target) == null;
     }
 
@@ -41,7 +41,6 @@ public static class PredatorCaptureRegistry
             if (receiver != null)
             {
                 if (!receiver.IsCaptureAvailable || !receiver.TryCapture()) return false;
-                CapturedTargets.Add(target);
                 return true;
             }
         }
