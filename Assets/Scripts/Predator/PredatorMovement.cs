@@ -41,16 +41,24 @@ public sealed class PredatorMovement : MonoBehaviour
 
     public bool MoveTowards(Vector3 destination, bool chase, float stoppingDistance)
     {
-        return MoveTowardsInternal(destination, chase, stoppingDistance, false);
+        return MoveTowardsInternal(
+            destination, chase, stoppingDistance, false, Time.deltaTime);
+    }
+
+    internal bool MoveTowards(Vector3 destination, bool chase, float stoppingDistance,
+        float deltaTime)
+    {
+        return MoveTowardsInternal(destination, chase, stoppingDistance, false, deltaTime);
     }
 
     internal bool MoveTowardsSafeZoneRecovery(Vector3 destination, float stoppingDistance)
     {
-        return MoveTowardsInternal(destination, false, stoppingDistance, true);
+        return MoveTowardsInternal(
+            destination, false, stoppingDistance, true, Time.deltaTime);
     }
 
     private bool MoveTowardsInternal(Vector3 destination, bool chase, float stoppingDistance,
-        bool safeZoneRecovery)
+        bool safeZoneRecovery, float deltaTime)
     {
         WasBlocked = false;
         Vector3 offset = Vector3.ProjectOnPlane(destination - transform.position, Vector3.up);
@@ -64,7 +72,8 @@ public sealed class PredatorMovement : MonoBehaviour
 
         Vector3 direction = offset.normalized;
         float speed = chase ? chaseSpeed : patrolSpeed;
-        float travelDistance = Mathf.Min(speed * Time.deltaTime, distance - stopDistance);
+        float stepDeltaTime = Mathf.Max(0f, deltaTime);
+        float travelDistance = Mathf.Min(speed * stepDeltaTime, distance - stopDistance);
         Vector3 movement = direction * travelDistance;
         if (!CanMoveInternal(movement, safeZoneRecovery))
         {
@@ -73,7 +82,9 @@ public sealed class PredatorMovement : MonoBehaviour
             return false;
         }
         transform.position += movement;
-        Velocity = Time.deltaTime > 0f ? direction * (travelDistance / Time.deltaTime) : Vector3.zero;
+        Velocity = stepDeltaTime > 0f
+            ? direction * (travelDistance / stepDeltaTime)
+            : Vector3.zero;
         FaceDirection(direction);
         agentAnimation?.SetMovementVelocity(Velocity);
         return Velocity.sqrMagnitude > 0.0001f;

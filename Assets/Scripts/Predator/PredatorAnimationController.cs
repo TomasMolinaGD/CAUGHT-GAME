@@ -10,6 +10,7 @@ public sealed class PredatorAnimationController : MonoBehaviour
         Animator.StringToHash("LocomotionPlayback");
 
     [SerializeField, Min(0.1f)] private float attackDurationFallback = 1.5f;
+    [SerializeField, Range(0.05f, 0.95f)] private float attackImpactNormalizedTime = 0.2f;
     [SerializeField, Min(0.01f)] private float locomotionReferenceSpeed = 5.4f;
     [SerializeField, Min(0f)] private float locomotionPlaybackDamping = 0.1f;
     [SerializeField, Min(0.01f)] private float minimumLocomotionPlayback = 0.35f;
@@ -37,6 +38,11 @@ public sealed class PredatorAnimationController : MonoBehaviour
     public void ConfigureAttackDuration(float duration)
     {
         attackDurationFallback = Mathf.Max(0.1f, duration);
+    }
+
+    public void ConfigureAttackImpactNormalizedTime(float normalizedTime)
+    {
+        attackImpactNormalizedTime = Mathf.Clamp(normalizedTime, 0.05f, 0.95f);
     }
 
     public void SetMoving(bool moving)
@@ -99,6 +105,28 @@ public sealed class PredatorAnimationController : MonoBehaviour
         return elapsedTime >= attackDurationFallback;
     }
 
+    public bool IsAttackImpactReached(float elapsedTime, ref bool attackStateObserved)
+    {
+        if (animator == null || !hasAttackParameter)
+            return elapsedTime >= attackDurationFallback * attackImpactNormalizedTime;
+
+        bool transitioning = animator.IsInTransition(0);
+        AnimatorStateInfo current = animator.GetCurrentAnimatorStateInfo(0);
+        AnimatorStateInfo next = transitioning
+            ? animator.GetNextAnimatorStateInfo(0)
+            : default;
+        bool currentIsAttack = current.IsName("Attack");
+        bool nextIsAttack = transitioning && next.IsName("Attack");
+        attackStateObserved |= currentIsAttack || nextIsAttack;
+
+        if (currentIsAttack)
+            return current.normalizedTime >= attackImpactNormalizedTime;
+        if (nextIsAttack)
+            return next.normalizedTime >= attackImpactNormalizedTime;
+
+        return elapsedTime >= attackDurationFallback * attackImpactNormalizedTime;
+    }
+
     private void InitializeAnimator()
     {
         hasAttackParameter = false;
@@ -129,6 +157,7 @@ public sealed class PredatorAnimationController : MonoBehaviour
     private void OnValidate()
     {
         attackDurationFallback = Mathf.Max(0.1f, attackDurationFallback);
+        attackImpactNormalizedTime = Mathf.Clamp(attackImpactNormalizedTime, 0.05f, 0.95f);
         locomotionReferenceSpeed = Mathf.Max(0.01f, locomotionReferenceSpeed);
         locomotionPlaybackDamping = Mathf.Max(0f, locomotionPlaybackDamping);
         minimumLocomotionPlayback = Mathf.Max(0.01f, minimumLocomotionPlayback);

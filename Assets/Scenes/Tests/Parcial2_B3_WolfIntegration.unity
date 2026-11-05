@@ -454,6 +454,7 @@ MonoBehaviour:
   navigationGrid: {fileID: 2098697243}
   huntingGroundRegion: {fileID: 2098697246}
   enableGridNavigation: 1
+  fleeSpeedMultiplier: 1.81
   searchRandomSeed: 417
   searchMinimumDistanceMultiplier: 0.75
   searchMaximumDistanceMultiplier: 2
