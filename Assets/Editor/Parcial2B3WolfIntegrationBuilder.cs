@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 public static class Parcial2B3WolfIntegrationBuilder
 {
-    private const string TargetScenePath = "Assets/Scenes/Tests/Parcial2_B3_WolfIntegration.unity";
+    private const string TargetScenePath = "Assets/Scenes/CAUGHT_Final_Parcial2.unity";
     private const string PredatorPrefabPath = "Assets/Actors/Predator.prefab";
     private const string WolfControllerPath =
         "Assets/Animations/Predator/Predator_WolfIntegration.controller";

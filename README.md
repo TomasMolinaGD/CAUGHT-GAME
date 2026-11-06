@@ -88,7 +88,7 @@ Los agentes conservan sus máquinas de estados; el sistema de navegación resuel
 2. Abrir la carpeta `CAUGHT-GAME` desde Unity Hub con **Unity 6000.3.17f1**.
 3. Abrir la escena integrada del Parcial 2:
 
-   `Assets/Scenes/Tests/Parcial2_B3_WolfIntegration.unity`
+   `Assets/Scenes/CAUGHT_Final_Parcial2.unity`
 
 4. Iniciar **Play Mode** y observar el comportamiento autónomo de los agentes.
 5. Para consultar la entrega anterior, revisar la escena original documentada para el Parcial 1:
