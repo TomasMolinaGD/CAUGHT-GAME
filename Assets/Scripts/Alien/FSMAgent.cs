@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
+using CaughtGame.Navigation;
 
 [RequireComponent(typeof(HunterMovement), typeof(HunterPerception), typeof(HunterInterestSpawner))]
 [RequireComponent(typeof(HunterCombat), typeof(HunterAnimationController))]
 [RequireComponent(typeof(AlienVisualGrounding))]
-public class FSMAgent : MonoBehaviour
+public class FSMAgent : MonoBehaviour, ICapturableTarget
 {
     [SerializeField] private List<Transform> waypoints = new List<Transform>();
     [SerializeField, Min(0.1f)] private float speed = 3f;
@@ -16,6 +17,29 @@ public class FSMAgent : MonoBehaviour
     [Header("Gather")]
     [SerializeField, Min(0.1f)] private float collectionDistance = 1.4f;
     [SerializeField, Min(0.1f)] private float collectionDuration = 2f;
+    [SerializeField, Min(1)] private int requiredGathers = 3;
+
+    [Header("Grid Navigation")]
+    [SerializeField] private NavigationGrid navigationGrid;
+    [SerializeField] private HuntingGroundRegion huntingGroundRegion;
+    [SerializeField] private bool enableGridNavigation;
+    [Header("Flee")]
+    [SerializeField, Min(1f), Tooltip("Multiplier on the Hunter's base movement speed while fleeing.")]
+    private float fleeSpeedMultiplier = 2f;
+    [SerializeField, Min(0f)] private float safeZoneWaitTime = 3f;
+    [SerializeField, Min(0f)] private float fleeThreatSafetyMargin = 0.35f;
+    [SerializeField, Min(0.1f)] private float fleeThreatReplanDistance = 1.5f;
+    [SerializeField, Min(0.1f)] private float fleeReplanCooldown = 0.75f;
+    [SerializeField, Tooltip("Log initial Flee route selection and replacement evaluations.")]
+    private bool logFleeRouteDecisions;
+    internal bool LogFleeRouteDecisions => logFleeRouteDecisions;
+    [Header("Death")]
+    [SerializeField, Min(0f)] private float respawnTime = 5f;
+    [Header("Search Exploration")]
+    [SerializeField] private int searchRandomSeed = 417;
+    [SerializeField, Min(0f)] private float searchMinimumDistanceMultiplier = 0.75f;
+    [SerializeField, Min(0.1f)] private float searchMaximumDistanceMultiplier = 2f;
+    [SerializeField, Min(1)] private int searchSelectionAttempts = 24;
 
     private StateMachine stateMachine;
     private HunterMovement movement;
@@ -23,6 +47,11 @@ public class FSMAgent : MonoBehaviour
     private HunterInterestSpawner interestSpawner;
     private HunterCombat combat;
     private HunterAnimationController animationController;
+    private ExitState exitState;
+    private Renderer[] visualRenderers;
+    private HunterNavigationIntent navigationIntent;
+    private HunterNavigationController navigationController;
+    private bool exitRestartDiagnosticReported;
 
     public IReadOnlyList<Transform> Waypoints => waypoints;
     public float WaypointCheckDistance => waypointCheckDistance;
@@ -31,25 +60,65 @@ public class FSMAgent : MonoBehaviour
     public HunterInterestSpawner InterestSpawner => interestSpawner;
     public HunterCombat Combat => combat;
     public HunterAnimationController Animation => animationController;
+    public HunterNavigationIntent NavigationIntent => navigationIntent ?? (navigationIntent = new HunterNavigationIntent());
+    public HunterNavigationController NavigationController => navigationController;
+    public NavigationGrid NavigationGrid => navigationGrid;
+    public HuntingGroundRegion HuntingGroundRegion => huntingGroundRegion;
+    public bool GridNavigationEnabled => enableGridNavigation;
+    public float SafeZoneWaitTime => safeZoneWaitTime;
+    internal float FleeSpeedMultiplier => fleeSpeedMultiplier;
+    public float FleeThreatSafetyMargin => fleeThreatSafetyMargin;
+    public float FleeThreatReplanDistance => fleeThreatReplanDistance;
+    public float FleeReplanCooldown => fleeReplanCooldown;
+    public float RespawnTime => respawnTime;
     public float PursuitSpeedMultiplier => pursuitSpeedMultiplier;
     public float CollectionDistance => collectionDistance;
     public float CollectionDuration => collectionDuration;
+    public int RequiredGathers => requiredGathers;
+    public int CompletedGathers { get; private set; }
+    public bool HasReachedRequiredGathers => CompletedGathers >= requiredGathers;
+    public PoliceState EngagementReturnState => enableGridNavigation ? PoliceState.Search : PoliceState.Patrol;
     public BoidLife CurrentTarget { get; private set; }
     public PoliceState CurrentState => stateMachine?.CurrentStateKey is PoliceState state
         ? state
         : PoliceState.Patrol;
+    public bool IsCaptureAvailable => isActiveAndEnabled && CurrentState != PoliceState.Dead;
 
     private void Awake()
     {
         CacheDependencies();
         ConfigureComponents();
+        ConfigureNavigationController();
+        navigationController.SetEnabled(enableGridNavigation);
         InitializeStateMachine();
+        visualRenderers = GetComponentsInChildren<Renderer>(true);
     }
 
     private void Update()
     {
+        if (CurrentState == PoliceState.Dead)
+        {
+            stateMachine?.Update();
+            return;
+        }
+
         TickAgentSystems();
+        TryEnterFlee();
+        movement?.BeginMovementFrame();
+        navigationController?.Tick();
+        ExecuteNavigationMovement();
         stateMachine?.Update();
+        TryRestartAfterExit();
+    }
+
+    private void OnEnable()
+    {
+        if (stateMachine != null && stateMachine.CurrentState == null)
+        {
+            stateMachine.ChangeState(enableGridNavigation ? PoliceState.Search : PoliceState.Patrol);
+        }
+
+        navigationController?.SetEnabled(enableGridNavigation);
     }
 
     private void CacheDependencies()
@@ -70,10 +139,17 @@ public class FSMAgent : MonoBehaviour
     {
         stateMachine = new StateMachine();
         stateMachine.RegisterState(PoliceState.Patrol, new PatrolState(this, stateMachine));
+        stateMachine.RegisterState(PoliceState.Search, new SearchState(
+            this, stateMachine, huntingGroundRegion, searchRandomSeed,
+            searchMinimumDistanceMultiplier, searchMaximumDistanceMultiplier, searchSelectionAttempts));
         stateMachine.RegisterState(PoliceState.Pursuit, new PursuitState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Attack, new AttackState(this, stateMachine));
         stateMachine.RegisterState(PoliceState.Gather, new GatherState(this, stateMachine));
-        stateMachine.ChangeState(PoliceState.Patrol);
+        stateMachine.RegisterState(PoliceState.Flee, new FleeState(this, stateMachine));
+        stateMachine.RegisterState(PoliceState.Dead, new DeadState(this, stateMachine));
+        exitState = new ExitState(this, stateMachine);
+        stateMachine.RegisterState(PoliceState.Exit, exitState);
+        stateMachine.ChangeState(enableGridNavigation ? PoliceState.Search : PoliceState.Patrol);
     }
 
     private void TickAgentSystems()
@@ -84,10 +160,41 @@ public class FSMAgent : MonoBehaviour
         combat?.Tick(Time.deltaTime);
     }
 
+    private void TryEnterFlee()
+    {
+        if (perception == null || perception.ClosestWolf == null ||
+            Equals(stateMachine?.CurrentStateKey, PoliceState.Flee) ||
+            Equals(stateMachine?.CurrentStateKey, PoliceState.Dead) ||
+            IsInsideNavigationSafeZone(transform.position))
+        {
+            return;
+        }
+
+        stateMachine?.ChangeState(PoliceState.Flee);
+    }
+
+    internal bool IsInsideNavigationSafeZone(Vector3 worldPosition)
+    {
+        return navigationGrid != null &&
+            navigationGrid.TryWorldToGrid(worldPosition, out int row, out int column) &&
+            navigationGrid.TryGetCell(row, column, out NavigationGridCell cell) &&
+            cell.Walkable && cell.Zone == NavigationGridZone.SafeZone;
+    }
+
     private void OnDisable()
     {
         stateMachine?.Stop();
         movement?.Stop();
+        navigationController?.SetEnabled(false);
+        navigationIntent?.CancelAll();
+    }
+
+    public void ConfigureNavigation(NavigationGrid grid, bool enabled)
+    {
+        navigationGrid = grid;
+        enableGridNavigation = enabled;
+        ConfigureNavigationController();
+        navigationController.SetEnabled(enabled);
     }
 
     public bool CanStartAttack()
@@ -110,13 +217,226 @@ public class FSMAgent : MonoBehaviour
         }
     }
 
+    /// <summary>Resets the Hunter's gather progress for a future run or respawn.</summary>
+    public void ResetGatherProgress()
+    {
+        CompletedGathers = 0;
+    }
+
+    /// <summary>Records one successful collection performed by GatherState.</summary>
+    internal void RegisterGatherCompletion()
+    {
+        if (CompletedGathers < requiredGathers)
+        {
+            CompletedGathers++;
+        }
+    }
+
+    public ulong RequestNavigation(Vector3 destination, float stoppingDistance,
+        float speedMultiplier = 1f, NavigationPathResult plannedPath = null) =>
+        NavigationIntent.RequestNavigation(
+            destination, stoppingDistance, speedMultiplier, plannedPath);
+
+    public bool ReplaceNavigation(
+        ulong expectedId,
+        Vector3 destination,
+        float stoppingDistance,
+        float speedMultiplier,
+        out ulong newId,
+        NavigationPathResult plannedPath = null) =>
+        NavigationIntent.ReplaceNavigation(
+            expectedId, destination, stoppingDistance, speedMultiplier, out newId, plannedPath);
+
+    public bool CancelNavigation(ulong expectedId) => NavigationIntent.CancelNavigation(expectedId);
+
+    public bool TryCapture()
+    {
+        return IsCaptureAvailable && stateMachine != null &&
+            stateMachine.ChangeState(PoliceState.Dead);
+    }
+
+    internal void EnterDeadState()
+    {
+        navigationController?.SetEnabled(false);
+        NavigationIntent.CancelAll();
+        SetCurrentTarget(null);
+        perception?.ClearDetections();
+        movement?.BeginMovementFrame();
+        movement?.Stop();
+        animationController?.SetMoving(false);
+        animationController?.SetAttacking(false);
+    }
+
+    internal bool TryCompleteDeathRespawn()
+    {
+        if (enableGridNavigation)
+        {
+            if (navigationGrid == null || movement == null ||
+                !HunterSpawnSelector.TrySelectSpawn(
+                    navigationGrid, movement.GroundHeight, out Vector3 spawnPosition) ||
+                movement.TryStopAndPlace(spawnPosition) != HunterMovement.PlacementResult.Placed)
+            {
+                return false;
+            }
+
+            Physics.SyncTransforms();
+        }
+
+        NavigationIntent.CancelAll();
+        SetCurrentTarget(null);
+        perception?.ClearDetections();
+        movement?.BeginMovementFrame();
+        movement?.Stop();
+        animationController?.SetMoving(false);
+        animationController?.SetAttacking(false);
+        navigationController?.SetEnabled(enableGridNavigation);
+        bool respawned = stateMachine != null && stateMachine.ChangeState(EngagementReturnState);
+        if (respawned)
+        {
+            ResetGatherProgress();
+        }
+
+        return respawned;
+    }
+
+    private void TryRestartAfterExit()
+    {
+        if (!enableGridNavigation || !Equals(stateMachine?.CurrentStateKey, PoliceState.Exit) ||
+            exitState == null || !exitState.TryGetCompletedRequestId(out ulong completedRequestId) ||
+            !NavigationIntent.TryGetCurrent(out HunterNavigationRequest request) ||
+            request.Id != completedRequestId)
+        {
+            if (!Equals(stateMachine?.CurrentStateKey, PoliceState.Exit))
+            {
+                exitRestartDiagnosticReported = false;
+            }
+            return;
+        }
+
+        if (navigationGrid == null || movement == null ||
+            !HunterSpawnSelector.TrySelectSpawn(navigationGrid, movement.GroundHeight, out Vector3 spawnPosition))
+        {
+            ReportExitRestartFailure("No valid Hunter Spawn is available.");
+            return;
+        }
+
+        exitState.PrepareForRestart();
+        navigationController?.SetEnabled(false);
+        NavigationIntent.CancelAll();
+
+        SetVisualsVisible(false);
+        HunterMovement.PlacementResult placement = movement.TryStopAndPlace(spawnPosition);
+        if (placement != HunterMovement.PlacementResult.Placed)
+        {
+            SetVisualsVisible(true);
+            ReportExitRestartFailure("Hunter Spawn placement was rejected.");
+            return;
+        }
+
+        Physics.SyncTransforms();
+
+        SetCurrentTarget(null);
+        ResetGatherProgress();
+        movement.Stop();
+        Animation.SetMoving(false);
+        Animation.SetAttacking(false);
+        perception?.ClearDetections();
+        navigationController?.SetEnabled(true);
+        exitRestartDiagnosticReported = false;
+        SetVisualsVisible(true);
+        if (stateMachine.ChangeState(PoliceState.Search))
+        {
+            navigationController?.RequestRepath();
+        }
+    }
+
+    private void ReportExitRestartFailure(string message)
+    {
+        if (exitRestartDiagnosticReported)
+        {
+            return;
+        }
+
+        exitRestartDiagnosticReported = true;
+        Debug.LogWarning($"Hunter Exit restart deferred: {message}", this);
+    }
+
+    private void SetVisualsVisible(bool visible)
+    {
+        if (visualRenderers == null)
+        {
+            return;
+        }
+
+        foreach (Renderer renderer in visualRenderers)
+        {
+            if (renderer != null)
+            {
+                renderer.enabled = visible;
+            }
+        }
+    }
+
+    private void ConfigureNavigationController()
+    {
+        navigationController = new HunterNavigationController(transform, NavigationIntent, navigationGrid);
+    }
+
+    private void ExecuteNavigationMovement()
+    {
+        if (!enableGridNavigation || navigationController == null || movement == null ||
+            navigationController.Status != HunterNavigationControllerStatus.InProgress ||
+            !NavigationIntent.TryGetCurrent(out HunterNavigationRequest request))
+        {
+            return;
+        }
+
+        ulong requestId = request.Id;
+        ulong routeVersion = navigationController.CurrentRouteVersion;
+        int waypointIndex = navigationController.CurrentWaypointIndex;
+        Vector3 target;
+        bool isWaypoint = navigationController.TryGetNextWaypoint(out target);
+        if (!isWaypoint && !navigationController.TryGetTerminalDestination(
+                requestId, routeVersion, out target))
+        {
+            navigationController.Tick();
+            return;
+        }
+
+        movement.MoveTowardsNavigation(target, request.StoppingDistance, request.SpeedMultiplier);
+
+        if (isWaypoint && IsWithinHorizontalDistance(target, request.StoppingDistance))
+        {
+            navigationController.TryAdvanceWaypoint(requestId, routeVersion, waypointIndex);
+        }
+
+        navigationController.Tick();
+    }
+
+    private bool IsWithinHorizontalDistance(Vector3 target, float stoppingDistance)
+    {
+        Vector3 delta = transform.position - target;
+        delta.y = 0f;
+        return delta.sqrMagnitude <= stoppingDistance * stoppingDistance;
+    }
+
     private void OnValidate()
     {
         speed = Mathf.Max(0.1f, speed);
         turnSpeed = Mathf.Max(0.1f, turnSpeed);
         waypointCheckDistance = Mathf.Max(0.1f, waypointCheckDistance);
         pursuitSpeedMultiplier = Mathf.Max(1f, pursuitSpeedMultiplier);
+        fleeSpeedMultiplier = Mathf.Max(1f, fleeSpeedMultiplier);
         collectionDistance = Mathf.Max(0.1f, collectionDistance);
         collectionDuration = Mathf.Max(0.1f, collectionDuration);
+        requiredGathers = Mathf.Max(1, requiredGathers);
+        safeZoneWaitTime = Mathf.Max(0f, safeZoneWaitTime);
+        fleeThreatSafetyMargin = Mathf.Max(0f, fleeThreatSafetyMargin);
+        fleeThreatReplanDistance = Mathf.Max(0.1f, fleeThreatReplanDistance);
+        fleeReplanCooldown = Mathf.Max(0.1f, fleeReplanCooldown);
+        respawnTime = Mathf.Max(0f, respawnTime);
+        searchMinimumDistanceMultiplier = Mathf.Max(0f, searchMinimumDistanceMultiplier);
+        searchMaximumDistanceMultiplier = Mathf.Max(0.1f, searchMaximumDistanceMultiplier);
+        searchSelectionAttempts = Mathf.Max(1, searchSelectionAttempts);
     }
 }

@@ -5,9 +5,13 @@ using UnityEngine;
 public enum PoliceState
 {
     Patrol,
+    Search,
     Pursuit,
     Attack,
-    Gather
+    Gather,
+    Exit,
+    Flee,
+    Dead
 }
 
 public class StateMachine

@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(FSMAgent), typeof(HunterPerception), typeof(HunterCombat))]
 public sealed class HunterDebugFeedback : MonoBehaviour
 {
-    [SerializeField] private bool visible = true;
+    [SerializeField] private bool visible;
     [SerializeField, Min(240f)] private float panelWidth = 340f;
 
     private FSMAgent agent;
@@ -51,14 +51,25 @@ public sealed class HunterDebugFeedback : MonoBehaviour
 
     private void OnGUI()
     {
-        if (!visible || agent == null)
+        if (agent == null)
         {
             return;
         }
 
         EnsureStyles();
+        DrawCompactHud();
+        if (!visible)
+        {
+            return;
+        }
+
         const float panelHeight = 224f;
-        Rect panelRect = new Rect(16f, 16f, panelWidth, panelHeight);
+        float actualWidth = Mathf.Min(panelWidth, Mathf.Max(240f, Screen.width - 32f));
+        Rect panelRect = new Rect(
+            Mathf.Max(16f, Screen.width - actualWidth - 16f),
+            16f,
+            actualWidth,
+            panelHeight);
         GUI.Box(panelRect, GUIContent.none, panelStyle);
 
         GUILayout.BeginArea(new Rect(
@@ -69,6 +80,7 @@ public sealed class HunterDebugFeedback : MonoBehaviour
         GUILayout.Label("NPC CAZADOR - FSM", titleStyle);
         GUILayout.Label($"Estado: {GetStateLabel(agent.CurrentState)}", accentStyle);
         GUILayout.Label($"Accion: {GetActionLabel(agent.CurrentState)}", labelStyle);
+        GUILayout.Label(GetGatherProgressLabel(), accentStyle);
         GUILayout.Label(GetTargetLabel(), labelStyle);
         GUILayout.Label(
             $"Detectados: {perception.LivingBoidCount} vivos / " +
@@ -87,6 +99,30 @@ public sealed class HunterDebugFeedback : MonoBehaviour
         GUILayout.FlexibleSpace();
         GUILayout.Label("F1: mostrar/ocultar diagnostico", labelStyle);
         GUILayout.EndArea();
+    }
+
+    private void DrawCompactHud()
+    {
+        const float panelWidth = 300f;
+        const float panelHeight = 76f;
+        Rect panelRect = new Rect(16f, 16f, panelWidth, panelHeight);
+        GUI.Box(panelRect, GUIContent.none, panelStyle);
+        GUILayout.BeginArea(new Rect(
+            panelRect.x + 12f,
+            panelRect.y + 8f,
+            panelRect.width - 24f,
+            panelRect.height - 16f));
+        GUILayout.Label($"HUNTER - {GetStateLabel(agent.CurrentState)}", titleStyle);
+        GUILayout.Label(GetGatherProgressLabel(), accentStyle);
+        GUILayout.EndArea();
+    }
+
+    private string GetGatherProgressLabel()
+    {
+        int required = Mathf.Max(0, agent.RequiredGathers);
+        int completed = Mathf.Clamp(agent.CompletedGathers, 0, required);
+        int remaining = required - completed;
+        return $"Boids: {completed}/{required} (faltan {remaining})";
     }
 
     private string GetTargetLabel()

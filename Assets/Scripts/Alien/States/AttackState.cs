@@ -75,7 +75,7 @@ public class AttackState : State
         }
 
         agent.SetCurrentTarget(null);
-        StateMachine.ChangeState(PoliceState.Patrol);
+        StateMachine.ChangeState(agent.EngagementReturnState);
     }
 
     private bool ShouldAbortAttack()
@@ -93,7 +93,7 @@ public class AttackState : State
     private void AbortAttack()
     {
         agent.SetCurrentTarget(null);
-        StateMachine.ChangeState(PoliceState.Patrol);
+        StateMachine.ChangeState(agent.EngagementReturnState);
     }
 
     private bool TryMoveIntoAttackRange(float distance)

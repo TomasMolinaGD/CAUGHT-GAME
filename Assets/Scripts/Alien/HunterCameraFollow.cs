@@ -23,13 +23,11 @@ public sealed class HunterCameraFollow : MonoBehaviour
         gameplayCamera.clearFlags = CameraClearFlags.Skybox;
         gameplayCamera.GetUniversalAdditionalCameraData().renderType = CameraRenderType.Base;
 
-        FindTargetIfNeeded();
         SnapToTarget();
     }
 
     private void LateUpdate()
     {
-        FindTargetIfNeeded();
         if (target == null)
         {
             return;
@@ -44,19 +42,7 @@ public sealed class HunterCameraFollow : MonoBehaviour
         transform.LookAt(target.position + Vector3.up * lookHeight, Vector3.up);
     }
 
-    private void FindTargetIfNeeded()
-    {
-        if (target != null)
-        {
-            return;
-        }
-
-        FSMAgent hunter = FindFirstObjectByType<FSMAgent>();
-        if (hunter != null)
-        {
-            target = hunter.transform;
-        }
-    }
+    public void ConfigureTarget(Transform explicitTarget) => target = explicitTarget;
 
     private void SnapToTarget()
     {

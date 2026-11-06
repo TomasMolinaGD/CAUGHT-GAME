@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CaughtGame.Navigation;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -17,6 +18,8 @@ public sealed class HunterInterestSpawner : MonoBehaviour
     [SerializeField, Min(0.1f)] private float clearanceRadius = 3f;
     [SerializeField, Min(1)] private int placementAttempts = 16;
     [SerializeField] private LayerMask blockedLayers = (1 << 11) | (1 << 12);
+    [SerializeField] private NavigationGrid navigationGrid;
+    [SerializeField] private Transform interestRoot;
 
     private readonly List<GameObject> activeInterests = new List<GameObject>();
     private float spawnTimer;
@@ -110,11 +113,12 @@ public sealed class HunterInterestSpawner : MonoBehaviour
                 spawnHeight,
                 Random.Range(areaCenter.y - areaHalfExtents.y, areaCenter.y + areaHalfExtents.y));
 
-            if (!Physics.CheckSphere(
-                candidate,
-                clearanceRadius,
-                blockedLayers,
-                QueryTriggerInteraction.Ignore))
+            if (IsNavigableCandidate(candidate) &&
+                !Physics.CheckSphere(
+                    candidate,
+                    clearanceRadius,
+                    blockedLayers,
+                    QueryTriggerInteraction.Ignore))
             {
                 spawnPosition = candidate;
                 return true;
@@ -123,6 +127,29 @@ public sealed class HunterInterestSpawner : MonoBehaviour
 
         spawnPosition = default;
         return false;
+    }
+
+    private bool IsNavigableCandidate(Vector3 candidate)
+    {
+        if (navigationGrid == null)
+        {
+            return true;
+        }
+
+        if (!navigationGrid.TryWorldToGrid(transform.position, out int startRow, out int startColumn) ||
+            !navigationGrid.TryWorldToGrid(candidate, out int destinationRow, out int destinationColumn))
+        {
+            return false;
+        }
+
+        NavigationPathResult path = NavigationGridPathfinder.FindPath(
+            navigationGrid,
+            startRow,
+            startColumn,
+            destinationRow,
+            destinationColumn,
+            NavigationAgentType.Hunter);
+        return path.Status == NavigationPathStatus.Success;
     }
 
     private void CleanupDestroyedInterests()
@@ -144,10 +171,9 @@ public sealed class HunterInterestSpawner : MonoBehaviour
         }
 
         runtimeContainer = new GameObject("Runtime Generated Interests").transform;
-        GameObject interestRoot = GameObject.Find("Interest Objects");
         if (interestRoot != null)
         {
-            runtimeContainer.SetParent(interestRoot.transform, false);
+            runtimeContainer.SetParent(interestRoot, false);
         }
     }
 
