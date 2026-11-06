@@ -1,10 +1,9 @@
 # CAUGHT-GAME
 
-**Simulación de inteligencia artificial para videojuegos en Unity 3D**
-
+**Simulación de inteligencia artificial para videojuegos en Unity 3D**  
 **UTN — Desarrollo y Producción de Videojuegos | Parciales 1 y 2**
 
-CAUGHT-GAME es una simulación de agentes autónomos: un cazador alienígena (Hunter) interactúa con un grupo de agentes Astra (Boids), mientras cuatro depredadores (Wolves) patrullan el escenario, perciben al cazador y coordinan su búsqueda. El proyecto reúne *steering behaviours*, máquinas de estados finitos (FSM), percepción y navegación sobre un grafo con A* propio.
+CAUGHT-GAME es una simulación de agentes autónomos: un cazador alienígena (Hunter) interactúa con un grupo de agentes Astra (Boids), mientras cuatro depredadores (Wolves) patrullan el escenario, perciben al cazador y coordinan su búsqueda. El proyecto reúne _steering behaviours_, máquinas de estados finitos (FSM), percepción y navegación sobre un grafo con A\* propio.
 
 > Este repositorio conserva el trabajo de la primera entrega e incorpora las funcionalidades de la segunda. La escena integrada del Parcial 2 es la referencia para demostrar la versión actual.
 
@@ -12,7 +11,7 @@ CAUGHT-GAME es una simulación de agentes autónomos: un cazador alienígena (Hu
 
 - **Unity Editor:** `6000.3.17f1`.
 - Proyecto 3D de Unity; abrir desde Unity Hub usando la carpeta raíz del repositorio.
-- La navegación del Parcial 2 utiliza una implementación propia de **A***, **sin Unity NavMesh**.
+- La navegación del Parcial 2 utiliza una implementación propia de **A\***, **sin Unity NavMesh**.
 
 ## Entregas
 
@@ -36,7 +35,7 @@ CAUGHT-GAME es una simulación de agentes autónomos: un cazador alienígena (Hu
 
 **Navegación**
 
-- Escenario con obstáculos, grid/grafo navegable y búsqueda de rutas mediante **A*** propio.
+- Escenario con obstáculos, grid/grafo navegable y búsqueda de rutas mediante **A\*** propio.
 - Navegación de Hunter y Wolves sin depender de NavMesh.
 - Replanificación de rutas para persecuciones, búsquedas y reinicios; llegada al destino exacto cuando es transitable.
 
@@ -50,7 +49,7 @@ CAUGHT-GAME es una simulación de agentes autónomos: un cazador alienígena (Hu
 **Wolves L1–L4**
 
 - Cuatro depredadores con patrullas independientes y estados de patrulla, persecución, búsqueda y ataque.
-- Detección mediante campo de visión y comprobación de línea de visión (*line of sight*, LOS).
+- Detección mediante campo de visión y comprobación de línea de visión (_line of sight_, LOS).
 - Comunicación de alertas por aullidos: al detectar al Hunter, un Wolf transmite la última posición conocida; los demás pueden dirigirse a investigarla.
 - Interrupción de persecución/búsqueda cuando el Hunter entra a una Safe Zone, con retorno a patrulla.
 - Feedback visual de estados, emisión y recepción de alertas.
@@ -66,14 +65,14 @@ CAUGHT-GAME es una simulación de agentes autónomos: un cazador alienígena (Hu
 
 ## Arquitectura general
 
-| Subsistema | Componentes representativos | Responsabilidad |
-| --- | --- | --- |
-| Astra / Boids | `BoidAgent`, `BoidSensor`, `SteeringBehaviour` y comportamientos derivados | Percepción local, flocking y steering |
-| Hunter | `FSMAgent`, `HunterMovement`, `HunterPerception`, `HunterCombat` | Estados, movimiento, detección y combate |
-| Navegación | `GraphNavigationAgent`, controlador de navegación del Hunter, grafo y A* | Cálculo y seguimiento de rutas |
-| Wolves | `PredatorFSM`, `PredatorPerception` | Patrulla, detección, persecución y búsqueda |
-| Comunicación | `PredatorAlertSystem`, `PredatorAlertBootstrap` | Distribución de alertas entre Wolves |
-| Feedback | `HunterDebugFeedback`, `PredatorDebugFeedback` | Información en pantalla para la demostración |
+| Subsistema    | Componentes representativos                                                | Responsabilidad                              |
+| ------------- | -------------------------------------------------------------------------- | -------------------------------------------- |
+| Astra / Boids | `BoidAgent`, `BoidSensor`, `SteeringBehaviour` y comportamientos derivados | Percepción local, flocking y steering        |
+| Hunter        | `FSMAgent`, `HunterMovement`, `HunterPerception`, `HunterCombat`           | Estados, movimiento, detección y combate     |
+| Navegación    | `GraphNavigationAgent`, controlador de navegación del Hunter, grafo y A\*  | Cálculo y seguimiento de rutas               |
+| Wolves        | `PredatorFSM`, `PredatorPerception`                                        | Patrulla, detección, persecución y búsqueda  |
+| Comunicación  | `PredatorAlertSystem`, `PredatorAlertBootstrap`                            | Distribución de alertas entre Wolves         |
+| Feedback      | `HunterDebugFeedback`, `PredatorDebugFeedback`                             | Información en pantalla para la demostración |
 
 Los agentes conservan sus máquinas de estados; el sistema de navegación resuelve rutas y los componentes de percepción informan sobre objetivos detectados. El sistema de alertas comunica la **última posición conocida**, no un seguimiento omnisciente del Hunter.
 
@@ -88,7 +87,7 @@ Los agentes conservan sus máquinas de estados; el sistema de navegación resuel
 2. Abrir la carpeta `CAUGHT-GAME` desde Unity Hub con **Unity 6000.3.17f1**.
 3. Abrir la escena integrada del Parcial 2:
 
-   `Assets/Scenes/CAUGHT_Final_Parcial2.unity`
+   `Assets/Scenes/Tests/Parcial2_B3_WolfIntegration.unity`
 
 4. Iniciar **Play Mode** y observar el comportamiento autónomo de los agentes.
 5. Para consultar la entrega anterior, revisar la escena original documentada para el Parcial 1:
@@ -118,15 +117,21 @@ Desarrolló la base del cazador alienígena, su FSM, movimiento, percepción, co
 
 ### Lucas González — Astras y flocking (Parcial 1)
 
-Desarrolló los agentes Astra, sensores, *steering behaviours*, ciclo de vida, interacción, animación y visualización. Entre sus componentes: `BoidAgent`, `BoidSensor`, `SteeringBehaviour`, `SeparationBehaviour`, `EmergencySeparationBehaviour`, `AlignmentBehaviour`, `CohesionBehaviour`, `EvadeBehaviour`, `WanderBehaviour`, `ArriveBehaviour`, `ObstacleAvoidanceBehaviour`, `PlayAreaContainmentBehaviour`, `InterestAvoidanceBehaviour`, `InterestSpacingBehaviour`, `BoidInteraction`, `BoidInterest`, `InterestLife`, `BoidLife`, `BoidActivity`, `BoidHitReaction`, `BoidRespawn`, `BoidRespawnArea`, `BoidAnimation`, `BoidGizmos` y `BoidThreat`.
+Desarrolló los agentes Astra, sensores, _steering behaviours_, ciclo de vida, interacción, animación y visualización. Entre sus componentes: `BoidAgent`, `BoidSensor`, `SteeringBehaviour`, `SeparationBehaviour`, `EmergencySeparationBehaviour`, `AlignmentBehaviour`, `CohesionBehaviour`, `EvadeBehaviour`, `WanderBehaviour`, `ArriveBehaviour`, `ObstacleAvoidanceBehaviour`, `PlayAreaContainmentBehaviour`, `InterestAvoidanceBehaviour`, `InterestSpacingBehaviour`, `BoidInteraction`, `BoidInterest`, `InterestLife`, `BoidLife`, `BoidActivity`, `BoidHitReaction`, `BoidRespawn`, `BoidRespawnArea`, `BoidAnimation`, `BoidGizmos` y `BoidThreat`.
 
 ### Integración del Parcial 1
 
-La integración, pruebas y ajustes finales se realizaron de manera conjunta, incluyendo sesiones de *pair programming*. El historial de commits por sí solo no representa necesariamente las contribuciones individuales.
+La integración, pruebas y ajustes finales se realizaron de manera conjunta, incluyendo sesiones de _pair programming_. El historial de commits por sí solo no representa necesariamente las contribuciones individuales.
 
-### Parcial 2 — Contribuciones del equipo
+### Parcial 2 — Distribución de responsabilidades
 
-**Pendiente de confirmar con los integrantes antes de publicar:** distribución precisa de responsabilidades en navegación, integración del mapa, Wolves, Hunter Flee, comunicación, pruebas y presentación. No se atribuyen estos trabajos basándose únicamente en los autores de los commits.
+**Tomás Molina — Predator / Wolves.** Responsable exclusivo del desarrollo del subsistema Predator: los cuatro Wolves, su lógica de estados, patrullaje, percepción y comportamientos de búsqueda y persecución. El comportamiento de estos agentes se integró posteriormente con el resto de los sistemas del escenario.
+
+**Lucas González — Resto de sistemas del Parcial 2.** Responsable de los demás desarrollos de esta entrega, incluyendo navegación mediante grafo y A\* propio, adaptación del Hunter al escenario integrado, estados de búsqueda, recolección, huida, salida y reinicio, así como configuración y presentación de la escena final.
+
+**Integración conjunta mediante pair programming.** Una vez desarrollados los subsistemas individuales, ambos integrantes trabajaron conjuntamente para integrarlos en la escena que contenía el grafo de navegación. Las sesiones de pair programming permitieron coordinar modificaciones, evitar conflictos por edición simultánea de los mismos archivos y verificar la interacción entre Hunter, Wolves, Astras, navegación y zonas funcionales. Los ajustes y pruebas de integración fueron compartidos.
+
+Esta distribución distingue la responsabilidad principal de desarrollo del trabajo colaborativo de integración; el autor de un commit no determina por sí solo la autoría individual de cada decisión técnica.
 
 ## Repositorio
 
