@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 public sealed class PredatorPerceptionB3IntegrationTests
 {
     private const string IntegrationScenePath =
-        "Assets/Scenes/Tests/Parcial2_B3_WolfIntegration.unity";
+        "Assets/Scenes/CAUGHT_Final_Parcial2.unity";
     private const int ObstacleLayer = 12;
     private readonly List<GameObject> objects = new List<GameObject>();
 

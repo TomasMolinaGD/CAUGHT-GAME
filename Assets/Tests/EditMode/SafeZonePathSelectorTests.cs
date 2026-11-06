@@ -189,7 +189,7 @@ public sealed class SafeZonePathSelectorTests
     [Test]
     public void B3LoggedFleeChoosesSameNearestCellButLeavesAwayFromL1()
     {
-        const string path = "Assets/Scenes/Tests/Parcial2_B3_WolfIntegration.unity";
+        const string path = "Assets/Scenes/CAUGHT_Final_Parcial2.unity";
         Scene scene = SceneManager.GetSceneByPath(path);
         bool opened = !scene.isLoaded;
         if (opened) scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
